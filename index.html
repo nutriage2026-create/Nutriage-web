@@ -993,23 +993,47 @@ function gasLoading(show, msg){
   else { el.style.display='none'; }
 }
 
-/** GET al GAS — todos los requests usan GET para evitar bloqueo CORS */
-async function gasGet(params){
-  try {
-    var qs = Object.entries(params).map(function(e){
-      return encodeURIComponent(e[0])+'='+encodeURIComponent(
-        typeof e[1]==='object' ? JSON.stringify(e[1]) : e[1]
+/** Llama al GAS usando una etiqueta script (JSONP-style) — funciona sin restricciones CORS */
+function gasCall(params){
+  return new Promise(function(resolve){
+    var cbName = '_gasCb_'+Date.now();
+    var timeout = setTimeout(function(){
+      resolve({ok:false, error:'Timeout — GAS no respondió'});
+      try{ delete window[cbName]; }catch(e){}
+      var el=document.getElementById(cbName); if(el) el.remove();
+    }, 25000);
+
+    window[cbName] = function(data){
+      clearTimeout(timeout);
+      resolve(data);
+      try{ delete window[cbName]; }catch(e){}
+      var el=document.getElementById(cbName); if(el) el.remove();
+    };
+
+    var qs = Object.entries(params).map(function(kv){
+      return encodeURIComponent(kv[0])+'='+encodeURIComponent(
+        typeof kv[1]==='object' ? JSON.stringify(kv[1]) : String(kv[1])
       );
     }).join('&');
-    var res = await fetch(GAS_URL+'?'+qs, { method:'GET', redirect:'follow' });
-    return await res.json();
-  } catch(e){ console.error('gasGet error:',e); return { ok:false, error:String(e) }; }
+
+    var s = document.createElement('script');
+    s.id  = cbName;
+    s.src = GAS_URL+'?callback='+cbName+'&'+qs;
+    s.onerror = function(){
+      clearTimeout(timeout);
+      resolve({ok:false, error:'Error de red al conectar con GAS'});
+      try{ delete window[cbName]; }catch(e){}
+      s.remove();
+    };
+    document.head.appendChild(s);
+  });
 }
 
-/** POST al GAS — también usa GET con parámetros (solución CORS GitHub Pages) */
-async function gasPost(body){
-  return gasGet(body);
-}
+/** GET al GAS usando JSONP (sin bloqueo CORS) */
+async function gasGet(params){ return gasCall(params); }
+
+/** POST al GAS — también usa JSONP */
+async function gasPost(body){ return gasCall(body); }
 
 // ─── DISPONIBILIDAD — carga desde GAS, fallback a local ───
 async function initAvail(){
