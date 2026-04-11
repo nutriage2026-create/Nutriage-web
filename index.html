@@ -993,25 +993,22 @@ function gasLoading(show, msg){
   else { el.style.display='none'; }
 }
 
-/** GET al GAS → retorna JSON. Siempre sigue redirects de Google. */
+/** GET al GAS — todos los requests usan GET para evitar bloqueo CORS */
 async function gasGet(params){
   try {
-    var qs = Object.entries(params).map(function(e){ return encodeURIComponent(e[0])+'='+encodeURIComponent(e[1]); }).join('&');
+    var qs = Object.entries(params).map(function(e){
+      return encodeURIComponent(e[0])+'='+encodeURIComponent(
+        typeof e[1]==='object' ? JSON.stringify(e[1]) : e[1]
+      );
+    }).join('&');
     var res = await fetch(GAS_URL+'?'+qs, { method:'GET', redirect:'follow' });
     return await res.json();
-  } catch(e){ return { ok:false, error:String(e) }; }
+  } catch(e){ console.error('gasGet error:',e); return { ok:false, error:String(e) }; }
 }
 
-/** POST al GAS → retorna JSON */
+/** POST al GAS — también usa GET con parámetros (solución CORS GitHub Pages) */
 async function gasPost(body){
-  try {
-    var res = await fetch(GAS_URL, {
-      method:'POST', redirect:'follow',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(body)
-    });
-    return await res.json();
-  } catch(e){ return { ok:false, error:String(e) }; }
+  return gasGet(body);
 }
 
 // ─── DISPONIBILIDAD — carga desde GAS, fallback a local ───
@@ -1184,9 +1181,10 @@ function handleUpload(input){
 // ─── FINALIZAR — Envía todo al GAS y guarda en Google Sheets ───
 async function finalizarReserva(){
   var btnFin = document.getElementById('btn-finalizar');
-  if(btnFin) btnFin.disabled = true;   // evitar doble envío
+  if(btnFin) btnFin.disabled = true;
   gasLoading(true, 'Guardando reserva en Google Sheets...');
   try {
+    // ── Payload principal (sin comprobante — va por separado) ──
     var payload = {
       action:'registerPatient',
       date:selDate, time:selTime,
@@ -1206,17 +1204,30 @@ async function finalizarReserva(){
       verduras:formData.verduras||'', dulces:formData.dulces||'',
       lacteos:formData.lacteos||'', registro24:formData.registro24||''
     };
-    // Adjuntar comprobante en base64 si existe
-    if(uploadedDataURL){
-      payload.comprobanteBase64 = uploadedDataURL;
-      payload.comprobanteNombre = uploadedName||'comprobante.jpg';
-      payload.comprobanteMime   = uploadedDataURL.split(';')[0].replace('data:','')||'image/jpeg';
-    }
-    var result = await gasPost(payload);
-    if(!result.ok) throw new Error(result.error||'Error del servidor');
-    // ── Ticket real generado por GAS/Sheets ──
+
+    var result = await gasGet(payload);
+    if(!result.ok) throw new Error(result.error||'Error del servidor GAS');
+
     var ticketNum = result.ticket || generarTicket(selDate);
-    // Guardar backup en localStorage
+
+    // ── Subir comprobante por separado si existe ──
+    if(uploadedDataURL && ticketNum){
+      gasLoading(true, 'Subiendo comprobante a Drive...');
+      try {
+        // Comprimir/recortar base64 si es muy grande — enviar como chunks no aplica en GET
+        // Usamos un segundo GET con solo el comprobante
+        var compResult = await gasGet({
+          action   : 'uploadComprobante',
+          ticket   : ticketNum,
+          nombreArchivo : uploadedName||('comprobante_'+ticketNum+'.jpg'),
+          mimeType : uploadedDataURL.split(';')[0].replace('data:','')||'image/jpeg',
+          comprobanteBase64: uploadedDataURL
+        });
+        if(!compResult.ok) console.warn('Comprobante warning:', compResult.error);
+      } catch(ec){ console.warn('Upload comprobante error:', ec); }
+    }
+
+    // ── Guardar backup local ──
     var db = getDB();
     var p = {
       id:Date.now(), ticket:ticketNum, date:selDate, time:selTime,
@@ -1229,6 +1240,7 @@ async function finalizarReserva(){
     if(db.availability[selDate]) db.availability[selDate]=db.availability[selDate].filter(function(t){return t!==selTime;});
     saveDB(db);
     gasLoading(false);
+
     // ── Actualizar UI ──
     document.getElementById('final-date').textContent=fmtDate(selDate)+' a las '+selTime+' hrs';
     var tf=document.getElementById('final-ticket'); if(tf) tf.textContent=ticketNum;
@@ -1243,10 +1255,11 @@ async function finalizarReserva(){
     for(var i=1;i<=4;i++){var sb=document.getElementById('sb'+i);if(sb)sb.className='sw sw-done';}
     goStep(5);
     _adminSynced=false; renderAdmin();
+
   } catch(err){
     gasLoading(false);
     console.error('finalizarReserva error:', err);
-    // ── Fallback: guardar solo en local si GAS falló ──
+    // ── Fallback local ──
     var db2=getDB();
     var ticketLocal=generarTicket(selDate);
     var p2={id:Date.now(),ticket:ticketLocal,date:selDate,time:selTime,
@@ -1254,7 +1267,7 @@ async function finalizarReserva(){
       consultations:1,status:'Activo',nutricionista:'Fernanda Ugarte',
       comprobante:uploadedDataURL||null,comprobanteNombre:uploadedName||null,...formData};
     db2.patients.push(p2); saveDB(db2);
-    alert('⚠️ Reserva guardada localmente. Ticket: '+ticketLocal+'\nHubo un problema al conectar con el servidor. Contáctanos para confirmar.');
+    alert('⚠️ Reserva guardada localmente. Ticket: '+ticketLocal+'\nError: '+err.message+'\nContacta a Fernanda para confirmar.');
     document.getElementById('final-date').textContent=fmtDate(selDate)+' a las '+selTime+' hrs';
     var tf2=document.getElementById('final-ticket'); if(tf2) tf2.textContent=ticketLocal;
     if(btnFin) btnFin.disabled=false;
