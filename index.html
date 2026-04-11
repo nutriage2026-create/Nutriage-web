@@ -686,7 +686,7 @@ input,select,textarea,button{font-size:16px!important} /* prevent iOS zoom */
         </div>
         <div style="margin-top:.8rem;padding:.85rem;background:var(--p6);border:1px solid var(--p4);border-radius:var(--r);font-size:.79rem;color:var(--g2);max-width:400px;margin-left:auto;margin-right:auto;line-height:1.55">
           Para unirte a la videollamada, usa la pestaña <strong style="color:var(--p2)">"Ya tengo ticket"</strong> con tu código.<br>
-          Dudas: <strong style="color:var(--p2)">nutriage2026@gmail.com</strong>
+          Dudas: <strong style="color:var(--p2)"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="18766d6c6a71797f7d2a282a2e587f75797174367b7775">[email&#160;protected]</a></strong>
         </div>
         <!-- BOTÓN WHATSAPP PACIENTE → FERNANDA -->
         <div style="margin-top:1.2rem;max-width:400px;margin-left:auto;margin-right:auto;background:var(--s5);border:1px solid var(--s4);border-radius:var(--r);padding:1rem 1.1rem;text-align:center">
@@ -866,7 +866,7 @@ input,select,textarea,button{font-size:16px!important} /* prevent iOS zoom */
         <div class="sc"><div class="sc-l">Ingresos anuales est.</div><div class="sc-v green">$6.2M</div><div class="sc-s">CLP proyección</div></div>
       </div>
       <div class="tw">
-        <div class="tw-head"><h3>Pacientes registrados</h3><div style="display:flex;align-items:center;gap:.7rem;flex-wrap:wrap"><span class="badge bp" id="admin-count">0 pacientes</span><button class="btn-excel" onclick="exportarExcel()">?? Descargar Excel</button></div></div>
+        <div class="tw-head"><h3>Pacientes registrados</h3><div style="display:flex;align-items:center;gap:.7rem;flex-wrap:wrap"><span class="badge bp" id="admin-count">0 pacientes</span><button class="btn-excel" onclick="exportarExcel()">📥 Descargar CSV</button><button class="btn-excel" onclick="sincronizarDesdeGAS()" style="background:var(--p2)">🔄 Sincronizar</button></div></div>
         <div class="tw-scroll">
           <table class="dt">
             <thead><tr><th>Ticket</th><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Fecha</th><th>Hora</th><th>Motivo</th><th>Comprobante</th><th>WA</th><th>Detalle</th></tr></thead>
@@ -968,23 +968,78 @@ input,select,textarea,button{font-size:16px!important} /* prevent iOS zoom */
   </button>
 </nav>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ─── BASE DE DATOS LOCAL ───
 const DB_KEY = 'nutriageV3';
 function getDB(){ try{ return JSON.parse(localStorage.getItem(DB_KEY))||{patients:[],availability:{}}; }catch(e){ return {patients:[],availability:{}}; } }
 function saveDB(db){ localStorage.setItem(DB_KEY,JSON.stringify(db)); }
 
-// ─── DISPONIBILIDAD INICIAL ───
-function initAvail(){
-  const db=getDB();
-  const today=new Date();
-  const times=['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'];
-  for(let i=1;i<=60;i++){
-    const d=new Date(today); d.setDate(today.getDate()+i);
-    const dow=d.getDay();
-    if(dow>=1&&dow<=5){ const k=dk(d); if(!db.availability[k]) db.availability[k]=times; }
+// ═══════════════════════════════════════════════════════════
+//  GOOGLE APPS SCRIPT — INTEGRACIÓN EN TIEMPO REAL
+// ═══════════════════════════════════════════════════════════
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxfxPZT4nWCmoIR7h_KIr8pPGp3cMCRQctIZY-bySNK_2i3vVWBH93T5V4gcJ3jxEfi9A/exec';
+
+/** Spinner de carga con mensaje visible para el usuario */
+function gasLoading(show, msg){
+  var el = document.getElementById('gas-loading-banner');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'gas-loading-banner';
+    el.style.cssText = 'position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#3d2459;color:#fff;padding:.5rem 1.4rem;border-radius:20px;font-size:.8rem;font-weight:700;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.35);display:none;gap:.6rem;align-items:center;white-space:nowrap';
+    el.innerHTML = '<span style="display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0"></span><span id="gas-loading-txt"></span>';
+    document.body.appendChild(el);
+  }
+  if(show){ el.style.display='flex'; document.getElementById('gas-loading-txt').textContent = msg||'Sincronizando...'; }
+  else { el.style.display='none'; }
+}
+
+/** GET al GAS → retorna JSON. Siempre sigue redirects de Google. */
+async function gasGet(params){
+  try {
+    var qs = Object.entries(params).map(function(e){ return encodeURIComponent(e[0])+'='+encodeURIComponent(e[1]); }).join('&');
+    var res = await fetch(GAS_URL+'?'+qs, { method:'GET', redirect:'follow' });
+    return await res.json();
+  } catch(e){ return { ok:false, error:String(e) }; }
+}
+
+/** POST al GAS → retorna JSON */
+async function gasPost(body){
+  try {
+    var res = await fetch(GAS_URL, {
+      method:'POST', redirect:'follow',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    });
+    return await res.json();
+  } catch(e){ return { ok:false, error:String(e) }; }
+}
+
+// ─── DISPONIBILIDAD — carga desde GAS, fallback a local ───
+async function initAvail(){
+  gasLoading(true, 'Cargando disponibilidad...');
+  try {
+    var data = await gasGet({ action:'getAvailability' });
+    if(data.ok && data.availability && Object.keys(data.availability).length > 0){
+      var db = getDB();
+      db.availability = data.availability;   // GAS es la fuente de verdad
+      saveDB(db);
+      gasLoading(false);
+      renderCal();
+      return;
+    }
+  } catch(e){ console.warn('initAvail GAS falló, usando fallback local:', e); }
+  // Fallback: generar disponibilidad local básica
+  var db = getDB();
+  var today = new Date();
+  var times = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'];
+  for(var i=1;i<=60;i++){
+    var d=new Date(today); d.setDate(today.getDate()+i);
+    var dow=d.getDay();
+    if(dow>=1&&dow<=5){ var k=dk(d); if(!db.availability[k]) db.availability[k]=times; }
   }
   saveDB(db);
+  gasLoading(false);
+  renderCal();
 }
 
 function dk(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
@@ -1126,38 +1181,85 @@ function handleUpload(input){
   }
 }
 
-// ─── FINALIZAR ───
-function finalizarReserva(){
-  const db=getDB();
-  const p={
-    id:Date.now(),
-    date:selDate,time:selTime,
-    dateFormatted:fmtDate(selDate),
-    registeredAt:new Date().toISOString(),
-    consultations:1,status:'Activo',
-    nutricionista:'Fernanda Ugarte',
-    comprobante:uploadedDataURL||null,
-    comprobanteNombre:uploadedName||null,
-    ...formData
-  };
-  var ticketNum=generarTicket(selDate);
-  p.ticket=ticketNum;
-  db.patients.push(p);
-  saveDB(db);
-  document.getElementById('final-date').textContent=fmtDate(selDate)+' a las '+selTime+' hrs';
-  var tf=document.getElementById('final-ticket'); if(tf) tf.textContent=ticketNum;
-  window._lastPatientSeed=String(p.telefono||p.id).replace(/[^0-9]/g,'');
-  window._lastPatientNombre=p.nombre;
-  var banner=document.getElementById('video-patient-banner');
-  if(banner){ banner.style.display=(selDate===dk(new Date()))?'flex':'none'; }
-  // WhatsApp link dinámico
-  var waBtn=document.getElementById('wa-paciente-btn');
-  if(waBtn){ waBtn.href=waLinkPaciente(p.nombre||'Paciente', fmtDate(selDate), selTime, ticketNum); }
-  var waBadge=document.getElementById('wa-notificado-badge');
-  if(waBadge) waBadge.style.display='none';
-  for(let i=1;i<=4;i++){ const sb=document.getElementById('sb'+i); if(sb) sb.className='sw sw-done'; }
-  goStep(5);
-  renderAdmin();
+// ─── FINALIZAR — Envía todo al GAS y guarda en Google Sheets ───
+async function finalizarReserva(){
+  var btnFin = document.getElementById('btn-finalizar');
+  if(btnFin) btnFin.disabled = true;   // evitar doble envío
+  gasLoading(true, 'Guardando reserva en Google Sheets...');
+  try {
+    var payload = {
+      action:'registerPatient',
+      date:selDate, time:selTime,
+      nombre:formData.nombre||'', email:formData.email||'', telefono:formData.telefono||'',
+      edad:formData.edad||'', rut:formData.rut||'', ocupacion:formData.ocupacion||'',
+      peso:formData.peso||'', talla:formData.talla||'', motivo:formData.motivo||'',
+      enfermedad:formData.enfermedad||'', lesion:formData.lesion||'',
+      familiar:formData.familiar||'', cirugia:formData.cirugia||'',
+      convivencia:formData.convivencia||'', actividad:formData.actividad||'',
+      horario:formData.horario||'', sueno:formData.sueno||'',
+      nodislike:formData.nodislike||'', almuerzo:formData.almuerzo||'',
+      horcomida:formData.horcomida||'', alergias:formData.alergias||'',
+      suplemento:formData.suplemento||'', alcohol:formData.alcohol||'',
+      tabaco:formData.tabaco||'', gastro:formData.gastro||'',
+      cereales:formData.cereales||'', legumbres:formData.legumbres||'',
+      pescado:formData.pescado||'', fruta:formData.fruta||'',
+      verduras:formData.verduras||'', dulces:formData.dulces||'',
+      lacteos:formData.lacteos||'', registro24:formData.registro24||''
+    };
+    // Adjuntar comprobante en base64 si existe
+    if(uploadedDataURL){
+      payload.comprobanteBase64 = uploadedDataURL;
+      payload.comprobanteNombre = uploadedName||'comprobante.jpg';
+      payload.comprobanteMime   = uploadedDataURL.split(';')[0].replace('data:','')||'image/jpeg';
+    }
+    var result = await gasPost(payload);
+    if(!result.ok) throw new Error(result.error||'Error del servidor');
+    // ── Ticket real generado por GAS/Sheets ──
+    var ticketNum = result.ticket || generarTicket(selDate);
+    // Guardar backup en localStorage
+    var db = getDB();
+    var p = {
+      id:Date.now(), ticket:ticketNum, date:selDate, time:selTime,
+      dateFormatted:fmtDate(selDate), registeredAt:new Date().toISOString(),
+      consultations:1, status:'Activo', nutricionista:'Fernanda Ugarte',
+      comprobante:uploadedDataURL||null, comprobanteNombre:uploadedName||null,
+      ...formData
+    };
+    db.patients.push(p);
+    if(db.availability[selDate]) db.availability[selDate]=db.availability[selDate].filter(function(t){return t!==selTime;});
+    saveDB(db);
+    gasLoading(false);
+    // ── Actualizar UI ──
+    document.getElementById('final-date').textContent=fmtDate(selDate)+' a las '+selTime+' hrs';
+    var tf=document.getElementById('final-ticket'); if(tf) tf.textContent=ticketNum;
+    window._lastPatientSeed=String(p.telefono||p.id).replace(/[^0-9]/g,'');
+    window._lastPatientNombre=p.nombre;
+    var banner=document.getElementById('video-patient-banner');
+    if(banner) banner.style.display=(selDate===dk(new Date()))?'flex':'none';
+    var waBtn=document.getElementById('wa-paciente-btn');
+    if(waBtn) waBtn.href=waLinkPaciente(p.nombre||'Paciente',fmtDate(selDate),selTime,ticketNum);
+    var waBadge=document.getElementById('wa-notificado-badge');
+    if(waBadge) waBadge.style.display='none';
+    for(var i=1;i<=4;i++){var sb=document.getElementById('sb'+i);if(sb)sb.className='sw sw-done';}
+    goStep(5);
+    _adminSynced=false; renderAdmin();
+  } catch(err){
+    gasLoading(false);
+    console.error('finalizarReserva error:', err);
+    // ── Fallback: guardar solo en local si GAS falló ──
+    var db2=getDB();
+    var ticketLocal=generarTicket(selDate);
+    var p2={id:Date.now(),ticket:ticketLocal,date:selDate,time:selTime,
+      dateFormatted:fmtDate(selDate),registeredAt:new Date().toISOString(),
+      consultations:1,status:'Activo',nutricionista:'Fernanda Ugarte',
+      comprobante:uploadedDataURL||null,comprobanteNombre:uploadedName||null,...formData};
+    db2.patients.push(p2); saveDB(db2);
+    alert('⚠️ Reserva guardada localmente. Ticket: '+ticketLocal+'\nHubo un problema al conectar con el servidor. Contáctanos para confirmar.');
+    document.getElementById('final-date').textContent=fmtDate(selDate)+' a las '+selTime+' hrs';
+    var tf2=document.getElementById('final-ticket'); if(tf2) tf2.textContent=ticketLocal;
+    if(btnFin) btnFin.disabled=false;
+    goStep(5); renderAdmin();
+  }
 }
 
 // ─── LOGIN ───
@@ -1296,51 +1398,65 @@ function editNutriDay(k){
   document.getElementById('nutri-time-config').style.display='block';
 }
 
-function saveNutriTimes(){
+async function saveNutriTimes(){
   if(!nutriSelDate) return;
-  const db=getDB();
-  db.availability[nutriSelDate]=Array.from(document.querySelectorAll('#nutri-time-toggle .tt.on')).map(el=>el.textContent.trim());
-  saveDB(db);
+  var times=Array.from(document.querySelectorAll('#nutri-time-toggle .tt.on')).map(function(el){return el.textContent.trim();});
+  var dateGuardada=nutriSelDate;
+  // Actualizar local inmediatamente (UX rápida)
+  var db=getDB(); db.availability[dateGuardada]=times; saveDB(db);
   renderNutriCal(); renderCal();
   document.getElementById('nutri-time-config').style.display='none';
   nutriSelDate=null;
+  // Sincronizar con GAS en segundo plano
+  gasLoading(true,'Guardando horarios en Google Sheets...');
+  var r=await gasPost({action:'saveNutriTimes',date:dateGuardada,times:times});
+  gasLoading(false);
+  if(!r.ok) console.warn('saveNutriTimes GAS error:',r.error);
 }
 function nutriCalNav(dir){ nutriCalDate.setMonth(nutriCalDate.getMonth()+dir); renderNutriCal(); }
 
-// ─── RENDER ADMIN ───
-function renderAdmin(){
-  const db=getDB();
-  const todayKey=dk(new Date());
-  const todayP=db.patients.filter(p=>p.date===todayKey);
-  const withComp=db.patients.filter(p=>p.comprobante).length;
+// ─── RENDER ADMIN — Sincroniza desde GAS al abrir ───
+var _adminSynced=false;
+async function renderAdmin(){
+  var db=getDB();
+  if(!_adminSynced){
+    _adminSynced=true;
+    gasLoading(true,'Sincronizando con Google Sheets...');
+    var r=await gasGet({action:'sincronizarTodo'});
+    if(r.ok){
+      if(r.patients&&r.patients.length>0) db.patients=r.patients;
+      if(r.availability&&Object.keys(r.availability).length>0) db.availability=r.availability;
+      saveDB(db);
+    }
+    gasLoading(false);
+  }
+  _renderAdminUI(db);
+}
 
-  const stEl=document.getElementById('st-total'); if(stEl) stEl.textContent=db.patients.length;
-  const shEl=document.getElementById('st-hoy'); if(shEl) shEl.textContent=todayP.length;
-  const siEl=document.getElementById('st-ingresos'); if(siEl) siEl.textContent=fmtMoney(todayP.length*15000);
-  const sfEl=document.getElementById('st-forms'); if(sfEl) sfEl.textContent=withComp;
-  const acEl=document.getElementById('admin-count'); if(acEl) acEl.textContent=db.patients.length+' pacientes';
-  const s_h_s=document.getElementById('stat-hoy-s'); if(s_h_s) s_h_s.textContent=todayP.length;
-  const s_h_i=document.getElementById('stat-hoy-i'); if(s_h_i) s_h_i.textContent=fmtMoney(todayP.length*15000);
-  const s_h_n=document.getElementById('stat-hoy-n'); if(s_h_n) s_h_n.textContent=todayP.length;
+function sincronizarDesdeGAS(){ _adminSynced=false; renderAdmin(); }
 
-  const tbody=document.getElementById('admin-table');
+function _renderAdminUI(db){
+  var todayKey=dk(new Date());
+  var todayP=db.patients.filter(function(p){return p.date===todayKey;});
+  var withComp=db.patients.filter(function(p){return p.comprobante;}).length;
+  var stEl=document.getElementById('st-total');    if(stEl) stEl.textContent=db.patients.length;
+  var shEl=document.getElementById('st-hoy');      if(shEl) shEl.textContent=todayP.length;
+  var siEl=document.getElementById('st-ingresos'); if(siEl) siEl.textContent=fmtMoney(todayP.length*15000);
+  var sfEl=document.getElementById('st-forms');    if(sfEl) sfEl.textContent=withComp;
+  var acEl=document.getElementById('admin-count'); if(acEl) acEl.textContent=db.patients.length+' pacientes';
+  var s_h_s=document.getElementById('stat-hoy-s'); if(s_h_s) s_h_s.textContent=todayP.length;
+  var s_h_i=document.getElementById('stat-hoy-i'); if(s_h_i) s_h_i.textContent=fmtMoney(todayP.length*15000);
+  var s_h_n=document.getElementById('stat-hoy-n'); if(s_h_n) s_h_n.textContent=todayP.length;
+  var tbody=document.getElementById('admin-table');
   if(!tbody) return;
-  if(!db.patients.length){ tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--g3);padding:1.5rem">No hay pacientes registrados aún</td></tr>'; return; }
-  tbody.innerHTML=db.patients.map(p=>`
-    <tr>
-      <td>${p.ticket?'<span class="ticket-badge">'+p.ticket+'</span>':'<span style="color:var(--g4);font-size:.72rem">—</span>'}</td>
-      <td><strong>${p.nombre}</strong></td>
-      <td>${p.email}</td>
-      <td>${p.telefono}</td>
-      <td>${p.dateFormatted}</td>
-      <td>${p.time} hrs</td>
-      <td>${p.motivo||'—'}</td>
-      <td>${p.comprobante?'<span class="badge bg">✓ Adjunto</span>':'<span class="badge br">Pendiente</span>'}</td>
-      <td>${p.waNotificado?'<span class="badge bg" title="Paciente envió WhatsApp">📲 Notificó</span>':'<span style="color:var(--g4);font-size:.72rem">—</span>'}</td>
-      <td><button class="det-btn" onclick="openModal(${p.id})">Ver ficha</button></td>
-    </tr>`).join('');
-  // Gráficos admin
-  setTimeout(function(){ renderAdminPieChart(); buildBarSvg('admin-bar-svg',adminChartDays,null); },50);
+  if(!db.patients.length){tbody.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--g3);padding:1.5rem">No hay pacientes registrados aún</td></tr>';return;}
+  tbody.innerHTML=db.patients.map(function(p){
+    var ticket=p.ticket?'<span class="ticket-badge">'+p.ticket+'</span>':'<span style="color:var(--g4);font-size:.72rem">—</span>';
+    var comp=p.comprobante?'<span class="badge bg">✓ Adjunto</span>':'<span class="badge br">Pendiente</span>';
+    var wa=(p.waNotificado&&p.waNotificado!=='No')?'<span class="badge bg">📲 Notificó</span>':'<span style="color:var(--g4);font-size:.72rem">—</span>';
+    return '<tr><td>'+ticket+'</td><td><strong>'+(p.nombre||'—')+'</strong></td><td>'+(p.email||'—')+'</td><td>'+(p.telefono||'—')+'</td><td>'+(p.dateFormatted||p.date||'—')+'</td><td>'+(p.time||'—')+' hrs</td><td>'+(p.motivo||'—')+'</td><td>'+comp+'</td><td>'+wa+'</td><td><button class="det-btn" onclick="openModal(\''+p.id+'\')">Ver ficha</button></td></tr>';
+  }).join('');
+  setTimeout(function(){renderAdminPieChart();buildBarSvg('admin-bar-svg',adminChartDays,null);},50);
 }
 
 function openModal(id){
@@ -1601,30 +1717,37 @@ function waLinkNutri(nombre, hora, telefono, jitsiSeed){
   return 'https://wa.me/'+tel+'?text='+encodeURIComponent(texto);
 }
 
-function clickWaP(){
+async function clickWaP(){
   var db=getDB();
   var t=document.getElementById('final-ticket').textContent;
   var p=db.patients.find(function(x){return x.ticket===t;});
   if(p&&!p.waNotificado){p.waNotificado=true;saveDB(db);}
-  setTimeout(function(){
-    var b=document.getElementById('wa-notificado-badge');
-    if(b) b.style.display='block';
-  },800);
+  setTimeout(function(){var b=document.getElementById('wa-notificado-badge');if(b)b.style.display='block';},800);
+  if(t){gasPost({action:'markWaNotificado',ticket:t}).catch(function(){});}
 }
 
-function loginConTicket(){
+async function loginConTicket(){
   var val=(document.getElementById('ticket-main-inp').value||'').trim().toUpperCase();
   var errEl=document.getElementById('ticket-main-err');
   if(!val){errEl.style.display='block';errEl.textContent='Ingresa tu número de ticket para continuar.';return;}
-  var db=getDB();
-  var p=db.patients.find(function(x){return x.ticket===val;});
+  gasLoading(true,'Buscando tu reserva...');
+  var p=null;
+  // 1. Buscar en GAS (fuente de verdad)
+  var r=await gasGet({action:'getPatientByTicket',ticket:val});
+  if(r.ok&&r.found){
+    p={ticket:r.ticket,nombre:r.nombre,telefono:r.telefono,
+       date:r.fecha,dateFormatted:r.dateFormatted,time:r.time};
+  }
+  // 2. Fallback local
+  if(!p){var db=getDB();p=db.patients.find(function(x){return x.ticket===val;})||null;}
+  gasLoading(false);
   if(!p){errEl.style.display='block';errEl.textContent='❌ Ticket no encontrado. Verifica el código.';return;}
   errEl.style.display='none';
-  window._lastPatientSeed=String(p.telefono||p.id).replace(/[^0-9]/g,'');
+  window._lastPatientSeed=String(p.telefono||'').replace(/[^0-9]/g,'');
   window._lastPatientNombre=p.nombre;
   document.getElementById('ticket-result').style.display='block';
   document.getElementById('ticket-result-num').textContent=p.ticket;
-  document.getElementById('ticket-result-date').textContent=p.dateFormatted+' · '+p.time+' hrs';
+  document.getElementById('ticket-result-date').textContent=(p.dateFormatted||fmtDate(p.date))+' · '+p.time+' hrs';
   var hoyEl=document.getElementById('ticket-result-hoy');
   var proxEl=document.getElementById('ticket-result-prox');
   if(p.date===dk(new Date())){hoyEl.style.display='flex';proxEl.style.display='none';}
@@ -1711,11 +1834,10 @@ function cerrarLlamada(){
   if(cont) Array.from(cont.querySelectorAll('iframe')).forEach(function(f){f.remove();});
 }
 
-// ─── INICIALIZACIÓN ───
-document.addEventListener('DOMContentLoaded',function(){
+// ─── INICIO — Carga disponibilidad desde GAS al abrir la página ───
+document.addEventListener('DOMContentLoaded', function(){
   initAvail();
   renderCal();
-  renderAdmin();
 });
 </script>
 </body>
