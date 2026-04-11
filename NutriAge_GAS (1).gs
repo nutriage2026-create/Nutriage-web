@@ -10,9 +10,9 @@
 //  CONFIGURACIÓN GLOBAL  (editar sólo esta sección)
 // ─────────────────────────────────────────────────────────────
 var CONFIG = {
-  SPREADSHEET_ID    : "PEGAR_ID_DE_TU_GOOGLE_SHEET_AQUI",   // ← OBLIGATORIO
-  NUTRI_EMAIL       : "fernanda@tucorreo.cl",                // ← OBLIGATORIO
-  NUTRI_WA          : "56912345678",                         // ← sin + ni espacios
+  SPREADSHEET_ID    : "1FkuqP-MSeFkvDSAjFfCehtWXmireMwVQ",   // ← OBLIGATORIO
+  NUTRI_EMAIL       : "nutriage2026@gmail.com",                // ← OBLIGATORIO
+  NUTRI_WA          : "56971246200",                         // ← sin + ni espacios
   PRECIO_CONSULTA   : 15000,                                 // CLP
   TICKET_PREFIX     : "NA",
   DURACION_SLOT_MIN : 45,
@@ -33,17 +33,18 @@ var CONFIG = {
 // ─────────────────────────────────────────────────────────────
 //  CORS · respuesta estándar OPTIONS
 // ─────────────────────────────────────────────────────────────
+// NOTA: Google Apps Script maneja CORS automáticamente cuando está
+// publicado como "Cualquier persona". No se necesita setHeader.
 function setCORSHeaders_(output) {
-  output.setHeader("Access-Control-Allow-Origin",  CONFIG.CORS_ORIGIN);
-  output.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  output.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  // ContentService.TextOutput no soporta setHeader en GAS.
+  // El CORS lo gestiona Google automáticamente al publicar como Web App.
   return output;
 }
 
 function doOptions() {
-  var output = ContentService.createTextOutput("");
-  output.setMimeType(ContentService.MimeType.TEXT);
-  return setCORSHeaders_(output);
+  return ContentService
+    .createTextOutput(JSON.stringify({ok:true}))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -63,12 +64,11 @@ function getSheet_(name) {
   return sh;
 }
 
-/** Respuesta JSON con CORS */
+/** Respuesta JSON */
 function jsonResponse_(data) {
-  var output = ContentService
+  return ContentService
     .createTextOutput(JSON.stringify(data))
     .setMimeType(ContentService.MimeType.JSON);
-  return setCORSHeaders_(output);
 }
 
 /** Respuesta de error JSON */
