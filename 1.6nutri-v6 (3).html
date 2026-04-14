@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NutriAge · Fernanda Ugarte</title>
+<script src="https://meet.jit.si/external_api.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --p1:#3d2459;--p2:#6b4a9a;--p3:#a47cc5;--p4:#d4bbec;--p5:#f0e8fa;--p6:#faf6ff;
+  --s1:#2d5e34;--s2:#4a8c54;--s3:#7ab882;--s4:#b8d9bc;--s5:#edf6ee;
+  --a1:#7a4f1a;--a2:#c47c2a;--a3:#e8a84a;--a5:#fdf5e0;
+  --g1:#2a1a3e;--g2:#5a4a6e;--g3:#9882b0;--g4:#e8e0f0;--g5:#f8f5fc;
+  --wh:#fff;--cr:#faf7f2;--r:12px;--rl:18px;
+  --nav-h:54px;--bot-h:64px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:'Nunito',sans-serif;background:var(--cr);color:var(--g1);min-height:100vh;padding-bottom:env(safe-area-inset-bottom)}
+
+/* ── MOBILE OVERRIDES ── */
+input,select,textarea,button{font-size:16px!important} /* prevent iOS zoom */
+@media(max-width:600px){
+  .wizard{padding:1.2rem 1rem}
+  .card-body{padding:1rem}
+  .frow{grid-template-columns:1fr!important}
+  .step-bar{gap:0}
+  .sw{padding:.4rem .7rem;font-size:.72rem}
+  .sw-sep{width:14px}
+  .modal{max-height:95vh;border-radius:var(--rl) var(--rl) 0 0;margin-top:auto}
+  .modal-overlay{align-items:flex-end;padding:0}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .g2c{grid-template-columns:1fr!important}
+  .tw-scroll{-webkit-overflow-scrolling:touch}
+  .nutri-body,.admin-body{padding:1rem}
+  .btn{padding:.75rem 1.1rem;font-size:.85rem!important}
+}
+
+/* NAV TOP */
+.nav{background:var(--p1);position:sticky;top:0;z-index:200;box-shadow:0 2px 20px rgba(61,36,89,.45);height:var(--nav-h)}
+.nav-inner{max-width:1200px;margin:0 auto;display:flex;align-items:center;height:100%}
+.nav-logo{padding:.85rem 1.2rem;display:flex;align-items:center;gap:.5rem;flex-shrink:0}
+.nav-logo-c{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--p3),var(--s3));display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:11px;font-weight:600;color:#fff}
+.nav-logo-t{font-size:.85rem;font-weight:700;color:#fff;letter-spacing:.4px}
+.nav-tabs{display:none} /* hidden on mobile — use bottom nav */
+@media(min-width:601px){
+  .nav-tabs{display:flex;flex:1;overflow-x:auto}
+  .ntab{padding:.85rem 1.2rem;font-size:.8rem;font-weight:600;color:rgba(255,255,255,.5);cursor:pointer;border:none;background:none;font-family:'Nunito',sans-serif;border-bottom:3px solid transparent;white-space:nowrap;transition:all .2s}
+  .ntab:hover{color:rgba(255,255,255,.85)}
+  .ntab.on{color:#fff;border-bottom-color:var(--p3)}
+  .bot-nav{display:none}
+}
+
+/* BOTTOM NAV (mobile only) */
+.bot-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--p1);z-index:200;box-shadow:0 -2px 20px rgba(61,36,89,.4);height:var(--bot-h);padding-bottom:env(safe-area-inset-bottom)}
+.bot-tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;border:none;background:none;color:rgba(255,255,255,.45);font-family:'Nunito',sans-serif;font-size:.62rem;font-weight:700;letter-spacing:.3px;padding:.5rem;transition:all .2s;-webkit-tap-highlight-color:transparent}
+.bot-tab.on{color:#fff}
+.bot-tab .ico{font-size:1.25rem;line-height:1}
+.bot-tab .lbl{font-size:.6rem}
+@media(max-width:600px){body{padding-bottom:calc(var(--bot-h) + env(safe-area-inset-bottom))}}
+
+
+.view{display:none;min-height:calc(100vh - var(--nav-h))}
+.view.on{display:block}
+/* touch friendly tap */
+.rec-head,.pr-head,.appt-item{min-height:48px}
+
+/* GENERALES */
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.75rem 1.4rem;border-radius:30px;font-family:'Nunito',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;border:none;transition:all .2s}
+.btn-p{background:var(--p2);color:#fff;box-shadow:0 4px 16px rgba(107,74,154,.3)}
+.btn-p:hover{background:var(--p1);transform:translateY(-1px)}
+.btn-p:disabled{background:var(--g4);color:var(--g3);box-shadow:none;transform:none;cursor:not-allowed}
+.btn-s{background:var(--s2);color:#fff}
+.btn-s:hover{background:var(--s1)}
+.btn-ghost{background:var(--g5);color:var(--g2);border:1px solid var(--g4)}
+.badge{display:inline-block;font-size:.72rem;font-weight:700;padding:2px 9px;border-radius:12px}
+.bp{background:var(--p5);color:var(--p2)}.bg{background:var(--s5);color:var(--s1)}.ba{background:var(--a5);color:var(--a1)}.br{background:#fdecea;color:#c0392b}
+.card{background:var(--wh);border:1px solid var(--g4);border-radius:var(--rl);overflow:hidden}
+.card-head{padding:1rem 1.3rem;display:flex;align-items:center;gap:.75rem;border-bottom:1px solid var(--g4)}
+.card-head h3{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600}
+.card-body{padding:1.3rem}
+.inp{width:100%;padding:.8rem 1rem;border:1.5px solid var(--g4);border-radius:var(--r);font-family:'Nunito',sans-serif;font-size:.9rem;color:var(--g1);background:var(--wh);outline:none;transition:border .2s}
+.inp:focus{border-color:var(--p2)}
+.sel{width:100%;padding:.8rem 1rem;border:1.5px solid var(--g4);border-radius:var(--r);font-family:'Nunito',sans-serif;font-size:.9rem;color:var(--g1);background:var(--wh);outline:none;appearance:none;cursor:pointer}
+.sel:focus{border-color:var(--p2)}
+.ta{width:100%;padding:.8rem 1rem;border:1.5px solid var(--g4);border-radius:var(--r);font-family:'Nunito',sans-serif;font-size:.88rem;color:var(--g1);background:var(--wh);outline:none;resize:vertical;min-height:72px;line-height:1.55;transition:border .2s}
+.ta:focus{border-color:var(--p2)}
+.err{color:#c0392b;font-size:.8rem;margin-top:.4rem;display:none}
+.login-wrap{max-width:360px;margin:0 auto;padding:4rem 1.5rem;text-align:center}
+.login-wrap h2{font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--p1);margin-bottom:.4rem}
+.login-wrap p{font-size:.85rem;color:var(--g2);margin-bottom:1.4rem}
+.linp{width:100%;padding:.8rem 1rem;border:1px solid var(--p4);border-radius:var(--r);font-family:'Nunito',sans-serif;font-size:.92rem;color:var(--g1);background:var(--wh);outline:none;margin-bottom:.7rem}
+.linp:focus{border-color:var(--p2)}
+
+/* STEP BAR */
+.step-bar{display:flex;align-items:center;gap:0;margin-bottom:2rem;overflow-x:auto}
+.sw{display:flex;align-items:center;gap:.4rem;padding:.45rem 1rem;border-radius:20px;font-size:.78rem;font-weight:700;white-space:nowrap;flex-shrink:0}
+.sw-done{background:var(--s5);color:var(--s1)}
+.sw-on{background:var(--p2);color:#fff}
+.sw-off{background:var(--g4);color:var(--g3)}
+.sw-sep{width:24px;height:2px;background:var(--g4);flex-shrink:0}
+.sw-num{width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:10px}
+.step-panel{display:none}
+.step-panel.on{display:block}
+.wizard{max-width:800px;margin:0 auto;padding:2rem 1.5rem}
+
+/* FORM FIELDS */
+.fgroup{margin-bottom:1.1rem}
+.flabel{display:block;font-size:.8rem;font-weight:700;color:var(--g2);margin-bottom:.35rem}
+.flabel span{color:#c0392b;margin-left:2px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+@media(max-width:520px){.frow{grid-template-columns:1fr}}
+.fsect{margin:1.4rem 0 .8rem;padding-bottom:.4rem;border-bottom:2px solid var(--p5);font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--p2)}
+.fhint{font-size:.78rem;color:var(--g3);margin-top:.25rem;line-height:1.45}
+.freq-example{background:var(--p6);border-left:3px solid var(--p3);border-radius:0 8px 8px 0;padding:.75rem 1rem;font-size:.8rem;color:var(--g2);line-height:1.55;margin-bottom:.5rem}
+
+/* CALENDARIO */
+.cal-wrap{user-select:none}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.cal-head h4{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--p1)}
+.cal-nav{background:none;border:1px solid var(--g4);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;color:var(--g2)}
+.cal-nav:hover{background:var(--p5)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-dow{text-align:center;font-size:.7rem;font-weight:700;color:var(--g3);padding:.3rem 0}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:.85rem;cursor:default;transition:all .15s}
+.cal-day.avail{background:var(--s5);color:var(--s1);cursor:pointer;font-weight:700}
+.cal-day.avail:hover{background:var(--s4)}
+.cal-day.sel{background:var(--p2);color:#fff;font-weight:700}
+.cal-day.past,.cal-day.blocked{color:var(--g4)}
+.cal-legend{display:flex;gap:1rem;margin-top:.8rem;flex-wrap:wrap}
+.cal-legend-item{display:flex;align-items:center;gap:.35rem;font-size:.75rem;color:var(--g2)}
+.cal-legend-dot{width:10px;height:10px;border-radius:3px}
+.time-slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:.5rem;margin-top:1rem}
+.ts{padding:.55rem .5rem;border-radius:8px;border:1.5px solid var(--g4);text-align:center;font-size:.83rem;font-weight:700;cursor:pointer;color:var(--g2);transition:all .15s}
+.ts:hover{border-color:var(--p3);color:var(--p2)}
+.ts.on{border-color:var(--p2);background:var(--p5);color:var(--p2)}
+.ts.taken{background:var(--g5);color:var(--g4);cursor:not-allowed}
+
+/* TRANSFER */
+.tr-row{display:flex;justify-content:space-between;align-items:center;padding:.6rem 0;border-bottom:1px solid var(--s5);gap:1rem}
+.tr-row:last-of-type{border-bottom:none}
+.tr-l{font-size:.72rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--g3);flex-shrink:0}
+.tr-v{font-size:.9rem;color:var(--g1);font-weight:600;text-align:right}
+.tr-v.big{color:var(--p1);font-size:1rem}
+.tr-v.price{color:var(--s1);font-size:1.15rem;font-weight:700}
+.quote{padding:.9rem 1.1rem;background:var(--p6);border-left:3px solid var(--p3);border-radius:0 8px 8px 0;font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1rem;color:var(--p2);margin-bottom:1rem}
+.upload-zone{margin-top:1rem;padding:1.2rem;border:2px dashed var(--s4);border-radius:var(--r);text-align:center;cursor:pointer;background:var(--s5);transition:all .2s}
+.upload-zone:hover{border-color:var(--s2);background:var(--s4)}
+.upload-zone input{display:none}
+.upload-conf{display:none;margin-top:.8rem;padding:.7rem 1rem;background:var(--s5);border-radius:8px;font-size:.83rem;color:var(--s1);font-weight:700}
+
+/* PANEL NUTRI */
+.nutri-body{max-width:1100px;margin:0 auto;padding:1.5rem}
+.g2c{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+@media(max-width:700px){.g2c{grid-template-columns:1fr}}
+.appt-item{display:flex;align-items:center;gap:.85rem;padding:.65rem 0;border-bottom:1px solid var(--g5)}
+.appt-item:last-child{border-bottom:none}
+.appt-av{width:34px;height:34px;border-radius:50%;background:var(--p5);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;color:var(--p2);flex-shrink:0}
+.appt-name{font-weight:700;font-size:.88rem}
+.appt-meta{font-size:.75rem;color:var(--g2);margin-top:1px}
+.appt-time{margin-left:auto;text-align:right;flex-shrink:0}
+.appt-time .t{font-weight:700;font-size:.85rem;color:var(--p1)}
+.appt-time .d{font-size:.72rem;color:var(--g3)}
+.notif{background:var(--a5);border:1px solid var(--a3);border-radius:var(--r);padding:.75rem 1.1rem;display:flex;align-items:center;gap:.75rem;margin-bottom:1.2rem;font-size:.85rem;color:var(--a1)}
+.notif.hide{display:none}
+.pulse{width:9px;height:9px;border-radius:50%;background:var(--a2);flex-shrink:0;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.rec{padding:.75rem 0;border-bottom:1px solid var(--g5)}
+.rec:last-child{border-bottom:none}
+.rec-head{display:flex;align-items:center;justify-content:space-between;cursor:pointer;gap:.5rem}
+.rec-name{font-weight:700;font-size:.88rem}
+.rec-sub{font-size:.75rem;color:var(--g2);margin-top:1px}
+.rec-arr{font-size:.7rem;color:var(--g3);transition:transform .2s;flex-shrink:0}
+.rec-body{display:none;margin-top:.75rem;background:var(--g5);border-radius:8px;padding:.85rem;font-size:.82rem;color:var(--g2);line-height:1.65}
+.rec-body.open{display:block}
+.rf{margin-bottom:.45rem}
+.rf strong{color:var(--g1);font-weight:700}
+.comprobante-img{max-width:100%;border-radius:8px;margin-top:.5rem;border:1px solid var(--g4)}
+
+/* NUTRI CAL */
+.nutri-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.nutri-cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:.8rem;cursor:pointer;border:1.5px solid transparent;transition:all .15s;position:relative}
+.nutri-cal-day.empty,.nutri-cal-day.past{cursor:default;color:var(--g4)}
+.nutri-cal-day.open{background:var(--s5);color:var(--s1);border-color:var(--s4)}
+.nutri-cal-day.closed{background:var(--g5);color:var(--g3)}
+.nutri-cal-day.has-appt{background:var(--p5);color:var(--p2);border-color:var(--p4)}
+.nutri-cal-day .dot{position:absolute;bottom:2px;right:2px;width:5px;height:5px;border-radius:50%;background:var(--p2)}
+.tt{padding:.4rem .85rem;border-radius:20px;border:1.5px solid var(--g4);font-size:.78rem;font-weight:700;cursor:pointer;color:var(--g2);transition:all .15s;background:var(--wh)}
+.tt.on{border-color:var(--s2);background:var(--s5);color:var(--s1)}
+
+/* ADMIN */
+.admin-body{max-width:1200px;margin:0 auto;padding:1.5rem}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.9rem;margin-bottom:1.4rem}
+.sc{background:var(--wh);border:1px solid var(--g4);border-radius:var(--rl);padding:1rem 1.1rem}
+.sc-l{font-size:.68rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--g3);margin-bottom:.25rem}
+.sc-v{font-size:1.55rem;font-weight:700;color:var(--p1);line-height:1}
+.sc-s{font-size:.72rem;color:var(--g3);margin-top:.25rem}
+.sc-v.green{color:var(--s1)}
+.tw{background:var(--wh);border:1px solid var(--g4);border-radius:var(--rl);overflow:hidden;margin-bottom:1.4rem}
+.tw-head{padding:.85rem 1.2rem;border-bottom:1px solid var(--g4);display:flex;align-items:center;justify-content:space-between}
+.tw-head h3{font-size:.92rem;font-weight:700}
+.tw-scroll{overflow-x:auto}
+.dt{width:100%;border-collapse:collapse;font-size:.8rem}
+.dt th{background:var(--g5);padding:.65rem 1rem;text-align:left;font-size:.68rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--g2);border-bottom:1px solid var(--g4);white-space:nowrap}
+.dt td{padding:.7rem 1rem;border-bottom:1px solid var(--g5);vertical-align:middle;white-space:nowrap}
+.dt tr:last-child td{border-bottom:none}
+.dt tr:hover td{background:var(--p6)}
+.iv{color:var(--s1);font-weight:700}
+.det-btn{font-size:.75rem;padding:.3rem .75rem;border-radius:10px;background:var(--p5);color:var(--p2);border:none;cursor:pointer;font-weight:700;font-family:'Nunito',sans-serif}
+.det-btn:hover{background:var(--p4)}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(61,36,89,.55);z-index:500;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.open{display:flex}
+.modal{background:var(--wh);border-radius:var(--rl);max-width:600px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(61,36,89,.25)}
+.modal-head{padding:1.2rem 1.4rem;border-bottom:1px solid var(--g4);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--wh);z-index:1}
+.modal-head h3{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:var(--p1)}
+.modal-close{background:none;border:none;font-size:1.4rem;cursor:pointer;color:var(--g3)}
+.modal-body{padding:1.3rem}
+.mf{margin-bottom:.8rem;font-size:.85rem}
+.mf strong{font-weight:700;color:var(--g3);display:block;font-size:.7rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.mf span{color:var(--g1)}
+.msect{margin:1rem 0 .5rem;font-family:'Cormorant Garamond',serif;font-size:1rem;font-weight:600;color:var(--p2);border-bottom:1px solid var(--p5);padding-bottom:.3rem}
+
+/* ── CHARTS ── */
+.chart-wrap{background:var(--wh);border:1px solid var(--g4);border-radius:var(--rl);overflow:hidden;margin-bottom:1.4rem}
+.chart-head{padding:.85rem 1.2rem;border-bottom:1px solid var(--g4);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
+.chart-head h3{font-size:.92rem;font-weight:700}
+.chart-body{padding:1.3rem}
+.bar-chart-area{overflow-x:auto;padding-bottom:.5rem}
+.bar-chart-svg{display:block;min-width:320px}
+.pie-chart-area{display:flex;align-items:center;gap:2rem;flex-wrap:wrap;justify-content:center;padding:.5rem 0}
+.pie-legend{display:flex;flex-direction:column;gap:.55rem;min-width:160px}
+.pie-legend-item{display:flex;align-items:center;gap:.55rem;font-size:.8rem;color:var(--g2)}
+.pie-legend-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+.pie-legend-name{font-weight:700;color:var(--g1)}
+.pie-legend-pct{font-size:.75rem;color:var(--g3);margin-left:auto;font-weight:700}
+.nutri-stats-tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1rem}
+.nst{padding:.4rem .9rem;border-radius:20px;font-size:.78rem;font-weight:700;cursor:pointer;border:1.5px solid var(--g4);background:var(--wh);color:var(--g2);transition:all .15s;font-family:'Nunito',sans-serif}
+.nst.on{border-color:var(--p2);background:var(--p5);color:var(--p2)}
+.stat-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:.75rem;margin-bottom:1.2rem}
+.ss-card{background:var(--p6);border:1px solid var(--p5);border-radius:var(--r);padding:.75rem .9rem}
+.ss-card .sl{font-size:.65rem;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--g3);margin-bottom:.2rem}
+.ss-card .sv{font-size:1.2rem;font-weight:700;color:var(--p1)}
+.ss-card .sv.green{color:var(--s1)}
+
+/* JITSI VIDEO MODAL */
+.video-overlay{display:none;position:fixed;inset:0;z-index:9999;background:#0d0d1a;flex-direction:column}
+.video-overlay.open{display:flex}
+.video-header{background:linear-gradient(135deg,#3d2459,#1a0d2e);padding:.75rem 1.2rem;display:flex;align-items:center;gap:.85rem;flex-shrink:0;box-shadow:0 2px 16px rgba(0,0,0,.4)}
+.video-header-logo{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#a47cc5,#7ab882);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:12px;font-weight:600;color:#fff;flex-shrink:0}
+.video-header-info{flex:1;min-width:0}
+.video-header-title{font-size:.88rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.video-header-sub{font-size:.7rem;color:rgba(255,255,255,.5);margin-top:1px}
+.video-status{display:flex;align-items:center;gap:.4rem;font-size:.72rem;font-weight:700;color:#4ade80;flex-shrink:0}
+.video-status-dot{width:7px;height:7px;border-radius:50%;background:#4ade80;animation:pulse 1.5s infinite}
+.video-end-btn{background:linear-gradient(135deg,#e53e3e,#c53030);color:#fff;border:none;border-radius:20px;padding:.45rem 1.1rem;font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.35rem;flex-shrink:0}
+#jitsi-container{flex:1;background:#0d0d1a;position:relative;overflow:hidden}
+#jitsi-container iframe{position:absolute!important;top:0!important;left:0!important;width:100%!important;height:100%!important;border:none!important}
+.video-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;color:rgba(255,255,255,.6);font-size:.88rem;background:#0d0d1a;z-index:5}
+.video-spinner{width:40px;height:40px;border:3px solid rgba(164,124,197,.3);border-top-color:#a47cc5;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.appt-video-btn{font-size:.75rem;padding:.35rem .85rem;border-radius:20px;background:linear-gradient(135deg,#059669,#047857);color:#fff;border:none;cursor:pointer;font-weight:700;font-family:'Nunito',sans-serif;display:inline-flex;align-items:center;gap:.3rem;white-space:nowrap}
+.btn-video-join{display:inline-flex;align-items:center;gap:.45rem;padding:.65rem 1.3rem;border-radius:30px;background:linear-gradient(135deg,#4a8c54,#2d5e34);color:#fff;border:none;font-family:'Nunito',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-logo">
+      <div class="nav-logo-c">NA</div>
+      <span class="nav-logo-t">NutriAge</span>
+    </div>
+    <div class="nav-tabs">
+      <button class="ntab on" onclick="showV('patient',this)">Para Pacientes</button>
+      <button class="ntab" onclick="showV('nutri',this)">Nutricionista</button>
+      <button class="ntab" onclick="showV('admin',this)">Administrador</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════ VISTA PACIENTE ═══════════ -->
+<div class="view on" id="view-patient">
+  <div style="background:var(--p6);padding:2.5rem 1.5rem 2rem;text-align:center;position:relative;overflow:hidden;border-bottom:1px solid var(--p4)">
+    <div style="position:absolute;top:-80px;right:-80px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,#c9a8e8,transparent 70%);opacity:.2;pointer-events:none"></div>
+    <div style="width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,var(--p2),var(--s2));display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:#fff;margin:0 auto .8rem;box-shadow:0 4px 20px rgba(107,74,154,.3)">FU</div>
+    <h1 style="font-family:'Cormorant Garamond',serif;font-size:clamp(1.6rem,4vw,2.4rem);color:var(--p1);line-height:1.15">Bienvenido/a con <em style="font-style:italic;color:var(--p2)">Fernanda Ugarte</em></h1>
+    <p style="margin-top:.5rem;color:var(--g2);font-size:.88rem;max-width:460px;margin-left:auto;margin-right:auto;line-height:1.6">Nutricionista clínica. Completa los 4 pasos para reservar tu consulta.</p>
+    <div class="step-bar" style="justify-content:center;margin-top:1.3rem;margin-bottom:0">
+      <div class="sw sw-on" id="sb1"><div class="sw-num">1</div>Agendar</div>
+      <div class="sw-sep"></div>
+      <div class="sw sw-off" id="sb2"><div class="sw-num">2</div>Formulario</div>
+      <div class="sw-sep"></div>
+      <div class="sw sw-off" id="sb3"><div class="sw-num">3</div>Confirmar</div>
+      <div class="sw-sep"></div>
+      <div class="sw sw-off" id="sb4"><div class="sw-num">4</div>Pago</div>
+    </div>
+  </div>
+
+  <div class="wizard">
+
+    <!-- PASO 1: CALENDARIO -->
+    <div class="step-panel on" id="sp1">
+      <p style="font-size:.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--p3);margin-bottom:.35rem">Paso 1 de 4</p>
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.65rem;font-weight:600;color:var(--p1);margin-bottom:1rem">Elige tu fecha y hora</h2>
+      <div class="card">
+        <div class="card-head" style="background:var(--p2)">
+          <span style="font-size:1.2rem">📅</span>
+          <div><h3 style="color:#fff">Calendario de disponibilidad</h3><p style="font-size:.75rem;color:rgba(255,255,255,.7);margin-top:1px">Selecciona un día disponible y luego tu horario</p></div>
+        </div>
+        <div class="card-body">
+          <div class="cal-wrap">
+            <div class="cal-head">
+              <button class="cal-nav" onclick="calNav(-1)">‹</button>
+              <h4 id="cal-title"></h4>
+              <button class="cal-nav" onclick="calNav(1)">›</button>
+            </div>
+            <div class="cal-grid">
+              <div class="cal-dow">Lu</div><div class="cal-dow">Ma</div><div class="cal-dow">Mi</div>
+              <div class="cal-dow">Ju</div><div class="cal-dow">Vi</div><div class="cal-dow">Sá</div><div class="cal-dow">Do</div>
+            </div>
+            <div class="cal-grid" id="cal-days"></div>
+            <div class="cal-legend">
+              <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--s4)"></div>Disponible</div>
+              <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--p4)"></div>Seleccionado</div>
+              <div class="cal-legend-item"><div class="cal-legend-dot" style="background:var(--g4)"></div>No disponible</div>
+            </div>
+          </div>
+          <div id="slots-wrap" style="display:none;margin-top:1.2rem;padding-top:1.2rem;border-top:1px solid var(--g4)">
+            <p style="font-size:.82rem;font-weight:700;color:var(--g2);margin-bottom:.6rem">Horarios disponibles para <span id="slots-date" style="color:var(--p2)"></span></p>
+            <div class="time-slots" id="time-slots"></div>
+          </div>
+          <div style="margin-top:1.5rem;display:flex;justify-content:flex-end">
+            <button class="btn btn-p" id="btn-step1" onclick="goStep(2)" disabled>Continuar con el formulario →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 2: FORMULARIO PROPIO -->
+    <div class="step-panel" id="sp2">
+      <p style="font-size:.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--p3);margin-bottom:.35rem">Paso 2 de 4</p>
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.65rem;font-weight:600;color:var(--p1);margin-bottom:1rem">Registro Paciente</h2>
+      <div class="card">
+        <div class="card-head" style="background:var(--p2)">
+          <span style="font-size:1.2rem">🌱</span>
+          <div><h3 style="color:#fff">Registro Paciente — Fernanda Ugarte</h3><p style="font-size:.75rem;color:rgba(255,255,255,.7)">Esta entrevista aportará información para realizar una pauta de alimentación personalizada y enfocada en el cumplimiento de los objetivos</p></div>
+        </div>
+        <div class="card-body">
+          <form id="patient-form" onsubmit="return false">
+
+            <!-- Datos personales -->
+            <div class="fsect">Datos personales</div>
+            <div class="frow">
+              <div class="fgroup"><label class="flabel">Nombre completo<span>*</span></label><input class="inp" type="text" id="f-nombre" required placeholder="Tu nombre completo"></div>
+              <div class="fgroup"><label class="flabel">Email<span>*</span></label><input class="inp" type="email" id="f-email" required placeholder="correo@ejemplo.com"></div>
+            </div>
+            <div class="frow">
+              <div class="fgroup"><label class="flabel">Teléfono<span>*</span></label><input class="inp" type="tel" id="f-telefono" required placeholder="+56 9 XXXX XXXX"></div>
+              <div class="fgroup"><label class="flabel">Edad</label><input class="inp" type="number" id="f-edad" placeholder="Ej: 28" min="1" max="120"></div>
+            </div>
+            <div class="frow">
+              <div class="fgroup"><label class="flabel">Ocupación<span>*</span></label><input class="inp" type="text" id="f-ocupacion" required placeholder="Ej: Estudiante, profesora..."></div>
+              <div class="fgroup"><label class="flabel">Peso (kg)<span>*</span></label><input class="inp" type="number" id="f-peso" required placeholder="Ej: 65" step="0.1"></div>
+            </div>
+            <div class="fgroup" style="max-width:300px">
+              <label class="flabel">Talla (metros y centímetros)<span>*</span></label>
+              <input class="inp" type="text" id="f-talla" required placeholder="Ej: 1.68">
+            </div>
+            <div class="fgroup">
+              <label class="flabel">Motivo de consulta<span>*</span></label>
+              <select class="sel" id="f-motivo" required>
+                <option value="">Selecciona una opción</option>
+                <option>Bajar de peso</option>
+                <option>Subir de peso / masa muscular</option>
+                <option>Mejorar hábitos alimentarios</option>
+                <option>Control de enfermedad crónica</option>
+                <option>Salud general y bienestar</option>
+                <option>Plan de alimentación deportiva</option>
+                <option>Otro</option>
+              </select>
+            </div>
+
+            <!-- Historial médico -->
+            <div class="fsect">Historial médico</div>
+            <div class="fgroup">
+              <label class="flabel">¿Presenta alguna enfermedad diagnosticada? Si es así, ¿Cuál es?<span>*</span></label>
+              <textarea class="ta" id="f-enfermedad" placeholder="Ej: Diabetes tipo 2, hipotiroidismo... o No, ninguna"></textarea>
+            </div>
+            <div class="fgroup">
+              <label class="flabel">¿Ha tenido una lesión en el último tiempo? Si es así, ¿Cuál fue?<span>*</span></label>
+              <textarea class="ta" id="f-lesion" placeholder="Ej: Lesión de rodilla hace 3 meses... o No"></textarea>
+            </div>
+            <div class="fgroup">
+              <label class="flabel">¿Algún familiar cercano que tenga una enfermedad relevante que mencionar? Ej: diabetes, hipertensión, colesterol alto, etc.<span>*</span></label>
+              <textarea class="ta" id="f-familiar" placeholder="Ej: Mi madre tiene diabetes tipo 2... o Ninguna"></textarea>
+            </div>
+            <div class="fgroup">
+              <label class="flabel">¿Se ha realizado una intervención quirúrgica? Si es así, ¿Cuál fue?<span>*</span></label>
+              <textarea class="ta" id="f-cirugia" placeholder="Ej: Apendicitis hace 2 años... o No"></textarea>
+            </div>
+
+            <!-- Estilo de vida -->
+            <div class="fsect">Estilo de vida</div>
+            <div class="fgroup">
+              <label class="flabel">¿Con quién vive usted? ¿Quién prepara la comida?<span>*</span></label>
+              <textarea class="ta" id="f-convivencia" placeholder="Ej: Vivo con mis padres, mi mamá prepara la comida"></textarea>
+            </div>
+            <div class="fgroup">
+              <label class="flabel">¿Realiza actividad física? Si es así, ¿Con qué frecuencia a la semana y cuánta duración tiene su actividad en cada entrenamiento?<span>*</span></label>
+              <textarea class="ta" id="f-actividad" placeholder="Ej: Sí, voy al gym 3 veces por semana, 1 hora cada vez... o No realizo actividad física"></textarea>
+            </div>
+            <div class="fgroup">
+              <label class="flabel">¿Cuál es su horario laboral y/o universitario?<span>*</span></label>
+              <textarea class="ta" id="f-horario" placeholder="Ej: Trabajo de 8:00 a 17:00 hrs de lunes a viernes"></textarea>
+            </div>
+            <div class="fgroup">
+              <label class="flabel">¿A qué hora se duerme y despierta generalmente?<span>*</span></label>
+              <textarea class="ta" id="f-sueno" placeholder="Ej: Me duermo a las 23:00 y me despierto a las 7:00"></textarea>
+            </div>
+
+            <!-- Hábitos alimentarios -->
+            <div class="fsect">Hábitos alimentarios</div>
+            <div class="fgroup">
+              <label class="flabel">¿Qué alimentos no le gustan?<span>*</span></label>
+              <textarea class="ta" id="f-nodislike" placeholder="Ej: No me gustan las acelgas ni el hígado"></textarea>
+            </div>
+            <div class="fgroup">
+              <label class="flabel">¿Qué alimentos come frecuentemente como almuerzo?<span>*</span></label>
+              <textarea class="ta" id="f-almuerzo" placeholder="Ej: Generalmente como arroz con pollo y ensalada"></textarea>
+            </div>
+            <div class="fgroup">
+              <label class="flabel">¿Tiene horarios de comida fijos? Si es así, ¿Cuáles son?<span>*</span></label>
+              <textarea class="ta" id="f-horcomida" placeholder="Ej: Desayuno 8:00, almuerzo 13:00, cena 20:00"></textarea>
+            </div>
+            <div class="fgroup">
+              <label class="flabel">¿Tiene alergias o intolerancias alimentarias? Ej: gluten, lactosa, soya, maní<span>*</span></label>
+              <textarea class="ta" id="f-alergias" placeholder="Ej: Intolerancia a la lactosa... o Ninguna"></textarea>
+            </div>
+            <div class="fgroup">
+              <label class="flabel">¿Toma algún tipo de suplemento? Si es así, ¿Cómo se llama y cuál es el motivo?<span>*</span></label>
+              <textarea class="ta" id="f-suplemento" placeholder="Ej: Tomo vitamina D por deficiencia... o No tomo suplementos"></textarea>
+            </div>
+
+            <!-- Consumo -->
+            <div class="fsect">Consumo de sustancias</div>
+            <div class="fgroup">
+              <label class="flabel">¿Bebe alcohol? Si es así, ¿Con qué frecuencia lo hace y cuánta cantidad toma por vez?<span>*</span></label>
+              <textarea class="ta" id="f-alcohol" placeholder="Ej: Sí, los fines de semana, 2-3 cervezas... o No bebo alcohol"></textarea>
+            </div>
+            <div class="fgroup">
+              <label class="flabel">¿Fuma cigarro o algún tipo de droga? Si es así, ¿Con qué frecuencia lo hace y cuánta cantidad fuma por vez?<span>*</span></label>
+              <textarea class="ta" id="f-tabaco" placeholder="Ej: Fumo 5 cigarros diarios... o No fumo"></textarea>
+            </div>
+
+            <!-- Digestión -->
+            <div class="fsect">Digestión y síntomas</div>
+            <div class="fgroup">
+              <label class="flabel">¿Presenta algún síntoma gastrointestinal? Ej: Constipación, diarrea, distensión abdominal, etc. Si es así, ¿Le ocurre por comer algún alimento en especial?<span>*</span></label>
+              <textarea class="ta" id="f-gastro" placeholder="Ej: Constipación frecuente, especialmente al comer queso... o No presento síntomas"></textarea>
+            </div>
+
+            <!-- Frecuencia de consumo -->
+            <div class="fsect">Frecuencia de consumo semanal</div>
+            <div class="frow">
+              <div class="fgroup">
+                <label class="flabel">¿Cuántas veces come cereales a la semana? (arroz, fideos, papa, choclo, etc.)<span>*</span></label>
+                <select class="sel" id="f-cereales" required>
+                  <option value="">Selecciona</option>
+                  <option>Nunca</option><option>1 vez</option><option>2 veces</option><option>3 veces</option>
+                  <option>4 veces</option><option>5 veces</option><option>6 veces</option><option>Todos los días</option>
+                </select>
+              </div>
+              <div class="fgroup">
+                <label class="flabel">¿Cuántas veces come legumbres a la semana o mes? (porotos, lentejas, garbanzos, etc.)<span>*</span></label>
+                <textarea class="ta" id="f-legumbres" style="min-height:44px" placeholder="Ej: 2 veces por semana"></textarea>
+              </div>
+            </div>
+            <div class="frow">
+              <div class="fgroup">
+                <label class="flabel">¿Cuántas veces come pescado a la semana o mes? (atún, jurel, salmón, merluza, etc.)<span>*</span></label>
+                <textarea class="ta" id="f-pescado" style="min-height:44px" placeholder="Ej: 1 vez por semana"></textarea>
+              </div>
+              <div class="fgroup">
+                <label class="flabel">¿Cuántas veces come fruta al día? (Manzana, plátano, pera, naranja, etc.)<span>*</span></label>
+                <textarea class="ta" id="f-fruta" style="min-height:44px" placeholder="Ej: 2 veces al día"></textarea>
+              </div>
+            </div>
+            <div class="frow">
+              <div class="fgroup">
+                <label class="flabel">¿Cuántas veces come verduras al día? (Lechuga, tomate, acelga, zanahoria, etc.)<span>*</span></label>
+                <textarea class="ta" id="f-verduras" style="min-height:44px" placeholder="Ej: 1 vez al día en almuerzo"></textarea>
+              </div>
+              <div class="fgroup">
+                <label class="flabel">¿Cuántas veces come dulces a la semana? (Queques, chocolate, Kuchen, helado, etc.)<span>*</span></label>
+                <select class="sel" id="f-dulces" required>
+                  <option value="">Selecciona</option>
+                  <option>Nunca</option><option>1 vez</option><option>2 veces</option><option>3 veces</option>
+                  <option>4 veces</option><option>5 veces</option><option>6 veces</option><option>Todos los días</option>
+                </select>
+              </div>
+            </div>
+            <div class="fgroup">
+              <label class="flabel">¿Cuántas veces come lácteos al día? (leche, queso, yogurt, quesillo, queso fresco, bebidas vegetales, etc.)<span>*</span></label>
+              <textarea class="ta" id="f-lacteos" style="min-height:44px" placeholder="Ej: 2 veces al día, yogurt en desayuno y queso en cena"></textarea>
+            </div>
+
+            <!-- Registro 24h -->
+            <div class="fsect">Registro alimentario 24 horas</div>
+            <div class="freq-example">
+              <strong>¿Cómo completar este registro?</strong><br>
+              Consiste en nombrar todos los alimentos sólidos y líquidos que consumiste el día de ayer desde que te levantaste hasta que te acostaste, con sus respectivas cantidades en ml, taza o gramos (como te acomode más a ti) y agregar los horarios en los que consumiste dichos alimentos.<br><br>
+              <strong>Ej:</strong> Lo primero que comí fue a las 9 de la mañana: 1 yogurt con media taza de avena. Luego a las 11:30 comí medio pan marraqueta con media palta.
+            </div>
+            <div class="fgroup">
+              <label class="flabel">Tu registro de las últimas 24 horas<span>*</span></label>
+              <textarea class="ta" id="f-registro24" required placeholder="Describe todo lo que comiste y bebiste ayer, con horarios y cantidades..." style="min-height:140px"></textarea>
+            </div>
+
+            <div style="background:var(--s5);border-radius:var(--r);padding:.9rem 1rem;font-size:.82rem;color:var(--s1);line-height:1.55;margin-bottom:1.2rem">
+              🌿 Tu información es confidencial y será utilizada únicamente por Fernanda Ugarte para elaborar tu plan de alimentación personalizado.
+            </div>
+
+            <div id="form-error" style="display:none;background:#fdecea;border:1px solid #f1a9a9;border-radius:8px;padding:.8rem 1rem;font-size:.83rem;color:#c0392b;margin-bottom:1rem">
+              Por favor completa todos los campos obligatorios (*) antes de continuar.
+            </div>
+
+            <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:.8rem">
+              <button class="btn btn-ghost" onclick="goStep(1)">← Volver</button>
+              <button class="btn btn-p" onclick="submitForm()">Formulario completado →</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 3: CONFIRMAR -->
+    <div class="step-panel" id="sp3">
+      <p style="font-size:.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--p3);margin-bottom:.35rem">Paso 3 de 4</p>
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.65rem;font-weight:600;color:var(--p1);margin-bottom:1rem">Confirma tu reserva</h2>
+      <div class="card">
+        <div class="card-head" style="background:var(--s2)">
+          <span style="font-size:1.2rem">✅</span>
+          <div><h3 style="color:#fff">Resumen de tu consulta</h3><p style="font-size:.75rem;color:rgba(255,255,255,.7)">Revisa y confirma tu información antes de continuar</p></div>
+        </div>
+        <div class="card-body">
+          <div style="background:var(--p6);border-radius:var(--r);padding:1.1rem;margin-bottom:1.2rem">
+            <div style="display:flex;gap:.7rem;align-items:flex-start;margin-bottom:.8rem">
+              <span style="font-size:1.3rem">📅</span>
+              <div>
+                <div style="font-size:.7rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--g3)">Fecha y hora agendada</div>
+                <div style="font-size:1.05rem;font-weight:700;color:var(--p1);margin-top:2px" id="confirm-datetime">—</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:.7rem;align-items:flex-start;margin-bottom:.8rem">
+              <span style="font-size:1.3rem">👤</span>
+              <div>
+                <div style="font-size:.7rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--g3)">Paciente</div>
+                <div style="font-size:1rem;font-weight:700;color:var(--p1);margin-top:2px" id="confirm-nombre">—</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:.7rem;align-items:flex-start">
+              <span style="font-size:1.3rem">👩‍⚕️</span>
+              <div>
+                <div style="font-size:.7rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--g3)">Nutricionista</div>
+                <div style="font-size:1rem;font-weight:700;color:var(--p1);margin-top:2px">Fernanda Ugarte</div>
+              </div>
+            </div>
+          </div>
+          <div style="background:var(--s5);border-radius:var(--r);padding:.9rem;font-size:.85rem;color:var(--s1);line-height:1.6;margin-bottom:1.2rem">
+            🌿 Al confirmar, tu registro quedará guardado en el sistema y procederás al pago para completar tu reserva.
+          </div>
+          <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:.8rem">
+            <button class="btn btn-ghost" onclick="goStep(2)">← Volver</button>
+            <button class="btn btn-p" onclick="confirmAndSave()">Confirmar y continuar al pago →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 4: PAGO -->
+    <div class="step-panel" id="sp4">
+      <p style="font-size:.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--p3);margin-bottom:.35rem">Paso 4 de 4 — ¡Último paso!</p>
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.65rem;font-weight:600;color:var(--p1);margin-bottom:1rem">Realiza tu transferencia</h2>
+      <div class="card" style="border-color:#c5e0c7">
+        <div class="card-head" style="background:var(--s2)">
+          <span style="font-size:1.2rem">🏦</span>
+          <div><h3 style="color:#fff">Datos de transferencia</h3><p style="font-size:.75rem;color:rgba(255,255,255,.7)">Muchas gracias por completar el formulario, para terminar tu registro realiza la transferencia a los siguientes datos</p></div>
+        </div>
+        <div class="card-body">
+          <div class="quote">"Tu salud es lo primero"</div>
+          <div class="tr-row"><span class="tr-l">Titular</span><span class="tr-v">FERNANDA UGARTE</span></div>
+          <div class="tr-row"><span class="tr-l">RUT</span><span class="tr-v">20.726.694-9</span></div>
+          <div class="tr-row"><span class="tr-l">Banco</span><span class="tr-v">BANCO ESTADO</span></div>
+          <div class="tr-row"><span class="tr-l">Tipo de cuenta</span><span class="tr-v">Cuenta RUT / Vista</span></div>
+          <div class="tr-row"><span class="tr-l">Valor consulta</span><span class="tr-v price">$15.000 CLP</span></div>
+          <div class="tr-row"><span class="tr-l">Envía comprobante a</span><span class="tr-v big"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="cca2b9b8bea5adaba9fefcfefa8caba1ada5a0e2afa3a1">[email&#160;protected]</a></span></div>
+          <div style="background:#fff8e1;border:1px solid #ffe082;border-radius:8px;padding:.8rem .95rem;font-size:.82rem;color:#6d4c00;line-height:1.55;margin-top:1rem;display:flex;gap:.5rem">
+            <span>⚠️</span><span>Adjunta el comprobante aquí abajo. Sin comprobante la hora <strong>no queda reservada</strong>.</span>
+          </div>
+          <label class="upload-zone" id="upload-zone">
+            <input type="file" accept="image/*,.pdf" onchange="handleUpload(this)">
+            <div style="font-size:1.8rem">📎</div>
+            <p style="font-size:.85rem;color:var(--s1);font-weight:600;margin-top:.3rem">Haz clic para adjuntar tu comprobante</p>
+            <p style="font-size:.75rem;color:var(--s2);margin-top:.2rem">JPG, PNG o PDF</p>
+          </label>
+          <div class="upload-conf" id="upload-conf"></div>
+          <div style="margin-top:1.5rem">
+            <button class="btn btn-s" id="btn-finalizar" onclick="finalizarReserva()" style="width:100%;justify-content:center" disabled>Finalizar mi reserva ✓</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXITO -->
+    <div class="step-panel" id="sp5">
+      <div style="text-align:center;padding:3rem 1rem">
+        <div style="font-size:3.5rem;margin-bottom:.8rem">&#127807;</div>
+        <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:var(--p1);margin-bottom:.6rem">Tu reserva esta confirmada!</h3>
+        <p style="color:var(--g2);font-size:.9rem;line-height:1.7">Fernanda Ugarte revisara tu informacion antes de la consulta.<br>Te esperamos el <strong id="final-date"></strong>.</p>
+        <div id="video-patient-banner" style="display:none;margin:1.2rem auto;max-width:480px;background:linear-gradient(135deg,#3d2459,#2d5e34);border-radius:14px;padding:1.1rem 1.3rem;align-items:center;gap:1rem;flex-wrap:wrap;text-align:left">
+          <span style="font-size:1.8rem">&#127909;</span>
+          <div style="flex:1;min-width:0"><div style="font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:600;color:#fff">Tu consulta es hoy - Sala lista</div><div style="font-size:.76rem;color:rgba(255,255,255,.7);margin-top:.2rem">Haz clic para unirte a la videollamada</div></div>
+          <button class="btn-video-join" onclick="unirseComoP()">&#127909; Unirme</button>
+        </div>
+        <div style="margin-top:1.2rem;padding:1rem;background:var(--p6);border-radius:var(--r);font-size:.83rem;color:var(--g2);max-width:420px;margin-left:auto;margin-right:auto;line-height:1.6">
+          El dia de tu consulta aparecera el boton para unirte a la videollamada.<br>
+          Dudas: <strong style="color:var(--p2)">nutriage2026@gmail.com</strong>
+        </div>
+      </div>
+    </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════ VISTA NUTRICIONISTA ═══════════ -->
+<div class="view" id="view-nutri">
+  <div id="nl" class="login-wrap">
+    <div style="font-size:2.2rem;margin-bottom:.7rem">🌿</div>
+    <h2>Panel Nutricionista</h2>
+    <p>Ingresa tu contraseña para acceder</p>
+    <input class="linp" type="password" id="np" placeholder="Contraseña" onkeydown="if(event.key==='Enter')loginN()">
+    <button class="btn btn-p" style="width:100%;justify-content:center" onclick="loginN()">Ingresar</button>
+    <div class="err" id="ne">Contraseña incorrecta</div>
+    <p style="font-size:.72rem;color:var(--g3);margin-top:1rem">Contraseña: <strong>fernanda2026</strong></p>
+  </div>
+  <div id="nd" style="display:none">
+    <div class="nutri-body">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:.8rem">
+        <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;color:var(--p1)">Bienvenida, Fernanda 🌿</h2>
+        <button onclick="logoutN()" style="font-size:.78rem;color:var(--g3);background:none;border:none;cursor:pointer">Cerrar sesión</button>
+      </div>
+      <div class="notif" id="notif-box">
+        <div class="pulse"></div>
+        <div><strong>Consulta en 15 minutos</strong> — Revisa los registros antes de conectarte<br><span style="font-size:.78rem">Tienes nuevos formularios pendientes de revisar</span></div>
+        <button onclick="this.parentElement.classList.add('hide')" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--a1);font-size:1.1rem">×</button>
+      </div>
+      <div class="g2c">
+        <!-- Citas del día -->
+        <div class="card">
+          <div class="card-head"><h3>📅 Citas de hoy</h3><span class="badge bp" id="appt-count">0 consultas</span></div>
+          <div class="card-body" id="appt-list"></div>
+        </div>
+        <!-- Configurar disponibilidad -->
+        <div class="card">
+          <div class="card-head"><h3>⚙️ Mi disponibilidad</h3><span class="badge bg">Editar horarios</span></div>
+          <div class="card-body">
+            <p style="font-size:.82rem;color:var(--g2);margin-bottom:.8rem">Haz clic en los días para configurar tus horarios disponibles.</p>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+              <button class="cal-nav" onclick="nutriCalNav(-1)">‹</button>
+              <h4 id="nutri-cal-title" style="font-family:'Cormorant Garamond',serif;font-size:1rem;color:var(--p1)"></h4>
+              <button class="cal-nav" onclick="nutriCalNav(1)">›</button>
+            </div>
+            <div class="nutri-cal-grid">
+              <div class="cal-dow">Lu</div><div class="cal-dow">Ma</div><div class="cal-dow">Mi</div>
+              <div class="cal-dow">Ju</div><div class="cal-dow">Vi</div><div class="cal-dow">Sá</div><div class="cal-dow">Do</div>
+            </div>
+            <div class="nutri-cal-grid" id="nutri-cal"></div>
+            <div id="nutri-time-config" style="display:none;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--g4)">
+              <p style="font-size:.8rem;font-weight:700;color:var(--g2);margin-bottom:.5rem">Horarios para <span id="nutri-sel-date" style="color:var(--p2)"></span></p>
+              <div style="display:flex;flex-wrap:wrap;gap:.4rem" id="nutri-time-toggle"></div>
+              <button class="btn btn-s" style="margin-top:.8rem;font-size:.8rem;padding:.55rem 1rem" onclick="saveNutriTimes()">Guardar horarios ✓</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Registros de pacientes -->
+      <div class="card" style="margin-top:1.2rem">
+        <div class="card-head"><h3>📋 Registros de alimentación y comprobantes</h3><span class="badge bg" id="rec-count">0 registros</span></div>
+        <div class="card-body" id="records-list"></div>
+      </div>
+
+      <!-- Estadísticas nutricionista -->
+      <div style="margin-top:1.8rem">
+        <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--p1);margin-bottom:1rem">📊 Mis Estadísticas de Ingresos</h3>
+        <div class="stat-summary">
+          <div class="ss-card"><div class="sl">Hoy</div><div class="sv green" id="ns-hoy">$0</div></div>
+          <div class="ss-card"><div class="sl">Esta semana</div><div class="sv green" id="ns-semana">$0</div></div>
+          <div class="ss-card"><div class="sl">Este mes</div><div class="sv green" id="ns-mes">$0</div></div>
+          <div class="ss-card"><div class="sl">Consultas semana</div><div class="sv" id="ns-consultas">0</div></div>
+        </div>
+        <div class="chart-wrap">
+          <div class="chart-head">
+            <h3>💰 Ingresos semanales — últimos 7 días</h3>
+            <div class="nutri-stats-tabs">
+              <button class="nst on" onclick="switchNutriChart('week',this)">7 días</button>
+              <button class="nst" onclick="switchNutriChart('month',this)">30 días</button>
+            </div>
+          </div>
+          <div class="chart-body">
+            <div class="bar-chart-area">
+              <svg id="nutri-bar-svg" class="bar-chart-svg" viewBox="0 0 620 200" xmlns="http://www.w3.org/2000/svg"></svg>
+            </div>
+            <p style="font-size:.72rem;color:var(--g3);margin-top:.5rem;text-align:center">Cada consulta = $15.000 CLP · Datos basados en citas registradas</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ VISTA ADMINISTRADOR ═══════════ -->
+<div class="view" id="view-admin">
+  <div id="al" class="login-wrap">
+    <div style="font-size:2.2rem;margin-bottom:.7rem">⚙️</div>
+    <h2>Panel Administrador</h2>
+    <p>Acceso exclusivo al creador del software</p>
+    <input class="linp" type="password" id="ap" placeholder="Contraseña admin" onkeydown="if(event.key==='Enter')loginA()">
+    <button class="btn btn-p" style="width:100%;justify-content:center" onclick="loginA()">Ingresar</button>
+    <div class="err" id="ae">Contraseña incorrecta</div>
+    <p style="font-size:.72rem;color:var(--g3);margin-top:1rem">Contraseña: <strong>admin2026</strong></p>
+  </div>
+  <div id="ad" style="display:none">
+    <div class="admin-body">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:.8rem">
+        <div>
+          <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;color:var(--p1)">Panel Administrador — NutriAge</h2>
+          <p style="font-size:.82rem;color:var(--g2);margin-top:.2rem">Vista global del sistema · Todos los datos en tiempo real</p>
+        </div>
+        <button onclick="logoutA()" style="font-size:.78rem;color:var(--g3);background:none;border:none;cursor:pointer">Cerrar sesión</button>
+      </div>
+      <div class="stats-row">
+        <div class="sc"><div class="sc-l">Pacientes totales</div><div class="sc-v" id="st-total">0</div><div class="sc-s">Registrados</div></div>
+        <div class="sc"><div class="sc-l">Consultas hoy</div><div class="sc-v" id="st-hoy">0</div><div class="sc-s">Agendadas</div></div>
+        <div class="sc"><div class="sc-l">Ingresos esperados hoy</div><div class="sc-v green" id="st-ingresos">$0</div><div class="sc-s">CLP · $15.000 c/u</div></div>
+        <div class="sc"><div class="sc-l">Formularios recibidos</div><div class="sc-v" id="st-forms">0</div><div class="sc-s">Con comprobante</div></div>
+        <div class="sc"><div class="sc-l">Nutricionistas</div><div class="sc-v">1</div><div class="sc-s">Fernanda Ugarte</div></div>
+        <div class="sc"><div class="sc-l">Ingresos anuales est.</div><div class="sc-v green">$6.2M</div><div class="sc-s">CLP proyección</div></div>
+      </div>
+      <div class="tw">
+        <div class="tw-head"><h3>Pacientes registrados</h3><span class="badge bp" id="admin-count">0 pacientes</span></div>
+        <div class="tw-scroll">
+          <table class="dt">
+            <thead><tr><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Fecha</th><th>Hora</th><th>Motivo</th><th>Comprobante</th><th>Detalle</th></tr></thead>
+            <tbody id="admin-table"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="tw">
+        <div class="tw-head"><h3>Estadísticas — Fernanda Ugarte</h3></div>
+        <div class="tw-scroll">
+          <table class="dt">
+            <thead><tr><th>Período</th><th>Sesiones</th><th>Ingresos CLP</th><th>Pacientes nuevos</th></tr></thead>
+            <tbody>
+              <tr><td>Hoy</td><td id="stat-hoy-s">0</td><td class="iv" id="stat-hoy-i">$0</td><td id="stat-hoy-n">0</td></tr>
+              <tr><td>Esta semana</td><td>11</td><td class="iv">$165.000</td><td>3</td></tr>
+              <tr><td>Este mes</td><td>28</td><td class="iv">$420.000</td><td>7</td></tr>
+              <tr><td>Este año</td><td>94</td><td class="iv">$1.410.000</td><td>12</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Gráfico torta: % pacientes por nutricionista -->
+      <div class="chart-wrap">
+        <div class="chart-head">
+          <h3>🥧 Distribución de pacientes por nutricionista</h3>
+          <span class="badge bp" id="pie-total-label">0 pacientes totales</span>
+        </div>
+        <div class="chart-body">
+          <div class="pie-chart-area">
+            <svg id="admin-pie-svg" viewBox="0 0 160 160" width="160" height="160" xmlns="http://www.w3.org/2000/svg"></svg>
+            <div class="pie-legend" id="admin-pie-legend"></div>
+          </div>
+          <p style="font-size:.72rem;color:var(--g3);margin-top:.75rem;text-align:center">Porcentaje calculado sobre el total de pacientes registrados en el sistema</p>
+        </div>
+      </div>
+
+      <!-- Gráfico de barras: ingresos semanales admin (invisible para nutricionista) -->
+      <div class="chart-wrap">
+        <div class="chart-head">
+          <h3>📈 Ingresos por nutricionista — últimos 7 días</h3>
+          <div class="nutri-stats-tabs">
+            <button class="nst on" onclick="switchAdminChart('week',this)">7 días</button>
+            <button class="nst" onclick="switchAdminChart('month',this)">30 días</button>
+          </div>
+        </div>
+        <div class="chart-body">
+          <div class="bar-chart-area">
+            <svg id="admin-bar-svg" class="bar-chart-svg" viewBox="0 0 620 200" xmlns="http://www.w3.org/2000/svg"></svg>
+          </div>
+          <p style="font-size:.72rem;color:var(--g3);margin-top:.5rem;text-align:center">Ingresos reales generados por citas confirmadas en el sistema · $15.000 por consulta</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETALLE -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modal-title">Ficha completa del paciente</h3>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- MODAL VIDEOLLAMADA JITSI -->
+<div id="modal-video" class="video-overlay">
+  <div class="video-header">
+    <div class="video-header-logo">NA</div>
+    <div class="video-header-info">
+      <div class="video-header-title" id="video-paciente-nombre">Consulta en curso</div>
+      <div class="video-header-sub">NutriAge · Sala privada · meet.jit.si</div>
+    </div>
+    <div class="video-status"><div class="video-status-dot"></div><span id="video-status-txt">Conectando...</span></div>
+    <button class="video-end-btn" onclick="cerrarLlamada()">Finalizar llamada</button>
+  </div>
+  <div id="jitsi-container">
+    <div class="video-loading" id="video-loading">
+      <div class="video-spinner"></div>
+      <span>Preparando tu sala segura...</span>
+      <span style="font-size:.73rem;color:rgba(255,255,255,.35)">Esto puede tomar unos segundos</span>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV (mobile) -->
+<nav class="bot-nav">
+  <button class="bot-tab on" id="bot-patient" onclick="showV('patient',this,'bot-patient')">
+    <span class="ico">🌱</span><span class="lbl">Paciente</span>
+  </button>
+  <button class="bot-tab" id="bot-nutri" onclick="showV('nutri',this,'bot-nutri')">
+    <span class="ico">👩‍⚕️</span><span class="lbl">Nutricionista</span>
+  </button>
+  <button class="bot-tab" id="bot-admin" onclick="showV('admin',this,'bot-admin')">
+    <span class="ico">⚙️</span><span class="lbl">Admin</span>
+  </button>
+</nav>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ─── BASE DE DATOS LOCAL ───
+const DB_KEY = 'nutriageV3';
+function getDB(){ try{ return JSON.parse(localStorage.getItem(DB_KEY))||{patients:[],availability:{}}; }catch(e){ return {patients:[],availability:{}}; } }
+function saveDB(db){ localStorage.setItem(DB_KEY,JSON.stringify(db)); }
+
+// ─── DISPONIBILIDAD INICIAL ───
+function initAvail(){
+  const db=getDB();
+  const today=new Date();
+  const times=['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'];
+  for(let i=1;i<=60;i++){
+    const d=new Date(today); d.setDate(today.getDate()+i);
+    const dow=d.getDay();
+    if(dow>=1&&dow<=5){ const k=dk(d); if(!db.availability[k]) db.availability[k]=times; }
+  }
+  saveDB(db);
+}
+
+function dk(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function fmtDate(k){
+  const [y,m,d]=k.split('-');
+  const days=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  const months=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+  const dt=new Date(Number(y),Number(m)-1,Number(d));
+  return `${days[dt.getDay()]} ${d} de ${months[Number(m)-1]} de ${y}`;
+}
+function fmtMoney(n){ return '$'+Number(n).toLocaleString('es-CL'); }
+function initials(name){ return name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase(); }
+
+// ─── ESTADO WIZARD ───
+let selDate=null,selTime=null,formData=null,uploadedDataURL=null,uploadedName=null;
+
+// ─── NAVEGACIÓN ───
+function showV(name,btn,botId){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.bot-tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('view-'+name).classList.add('on');
+  if(btn) btn.classList.add('on');
+  const botMap={patient:'bot-patient',nutri:'bot-nutri',admin:'bot-admin'};
+  const botEl=document.getElementById(botId||botMap[name]);
+  if(botEl) botEl.classList.add('on');
+  const desktopMap={patient:0,nutri:1,admin:2};
+  const tabs=document.querySelectorAll('.ntab');
+  if(tabs[desktopMap[name]]) tabs[desktopMap[name]].classList.add('on');
+  if(name==='admin') renderAdmin();
+  if(name==='nutri'){ renderNutriRecords(); renderNutriAppts(); setTimeout(function(){renderNutriStats();},80); }
+}
+
+function goStep(n){
+  for(let i=1;i<=5;i++){
+    document.getElementById('sp'+i).classList.remove('on');
+    const sb=document.getElementById('sb'+i);
+    if(sb) sb.className='sw '+(i<n?'sw-done':i===n?'sw-on':'sw-off');
+  }
+  document.getElementById('sp'+n).classList.add('on');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ─── CALENDARIO PACIENTE ───
+let calDate=new Date(); calDate.setDate(1);
+const MONTHS=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+function isTaken(key,time){ return getDB().patients.some(p=>p.date===key&&p.time===time); }
+
+function renderCal(){
+  const db=getDB();
+  const y=calDate.getFullYear(),m=calDate.getMonth();
+  document.getElementById('cal-title').textContent=MONTHS[m]+' '+y;
+  const first=(new Date(y,m,1).getDay()+6)%7;
+  const days=new Date(y,m+1,0).getDate();
+  const today=new Date(); today.setHours(0,0,0,0);
+  const grid=document.getElementById('cal-days');
+  grid.innerHTML='';
+  for(let i=0;i<first;i++){const el=document.createElement('div');el.className='cal-day';grid.appendChild(el);}
+  for(let d=1;d<=days;d++){
+    const dd=new Date(y,m,d); dd.setHours(0,0,0,0);
+    const k=dk(dd);
+    const avail=db.availability[k]||[];
+    const allTaken=avail.length>0&&avail.every(t=>isTaken(k,t));
+    const el=document.createElement('div');
+    el.textContent=d;
+    if(dd<today){ el.className='cal-day past'; }
+    else if(avail.length>0&&!allTaken){ el.className='cal-day avail'+(k===selDate?' sel':''); el.onclick=()=>selectDay(k); }
+    else{ el.className='cal-day blocked'; }
+    grid.appendChild(el);
+  }
+}
+
+function selectDay(k){
+  selDate=k; selTime=null;
+  document.getElementById('btn-step1').disabled=true;
+  renderCal();
+  const db=getDB();
+  const avail=(db.availability[k]||[]).filter(t=>!isTaken(k,t));
+  const wrap=document.getElementById('slots-wrap');
+  const sl=document.getElementById('time-slots');
+  document.getElementById('slots-date').textContent=fmtDate(k);
+  sl.innerHTML='';
+  avail.forEach(t=>{
+    const el=document.createElement('div');
+    el.className='ts'; el.textContent=t;
+    el.onclick=()=>{ document.querySelectorAll('.ts').forEach(x=>x.classList.remove('on')); el.classList.add('on'); selTime=t; document.getElementById('btn-step1').disabled=false; };
+    sl.appendChild(el);
+  });
+  if(!avail.length){ sl.innerHTML='<p style="color:var(--g3);font-size:.85rem;padding:.5rem 0">No hay horarios disponibles para este día.</p>'; }
+  wrap.style.display='block';
+}
+
+function calNav(dir){ calDate.setMonth(calDate.getMonth()+dir); renderCal(); }
+
+// ─── FORMULARIO ───
+function submitForm(){
+  const req=['f-nombre','f-email','f-telefono','f-ocupacion','f-peso','f-talla','f-motivo','f-registro24'];
+  let ok=true;
+  req.forEach(id=>{ const el=document.getElementById(id); if(!el.value.trim()){ el.style.borderColor='#c0392b'; ok=false; } else{ el.style.borderColor=''; } });
+  if(!ok){ document.getElementById('form-error').style.display='block'; return; }
+  document.getElementById('form-error').style.display='none';
+  formData={
+    nombre:v('f-nombre'),email:v('f-email'),telefono:v('f-telefono'),edad:v('f-edad'),
+    ocupacion:v('f-ocupacion'),peso:v('f-peso')+' kg',talla:v('f-talla')+' m',
+    motivo:v('f-motivo'),enfermedad:v('f-enfermedad'),lesion:v('f-lesion'),
+    familiar:v('f-familiar'),cirugia:v('f-cirugia'),convivencia:v('f-convivencia'),
+    actividad:v('f-actividad'),horario:v('f-horario'),sueno:v('f-sueno'),
+    nodislike:v('f-nodislike'),almuerzo:v('f-almuerzo'),horcomida:v('f-horcomida'),
+    alergias:v('f-alergias'),suplemento:v('f-suplemento'),alcohol:v('f-alcohol'),
+    tabaco:v('f-tabaco'),gastro:v('f-gastro'),cereales:v('f-cereales'),
+    legumbres:v('f-legumbres'),pescado:v('f-pescado'),fruta:v('f-fruta'),
+    verduras:v('f-verduras'),dulces:v('f-dulces'),lacteos:v('f-lacteos'),
+    registro24:v('f-registro24')
+  };
+  document.getElementById('confirm-datetime').textContent=fmtDate(selDate)+' · '+selTime+' hrs';
+  document.getElementById('confirm-nombre').textContent=formData.nombre;
+  goStep(3);
+}
+
+function v(id){ const el=document.getElementById(id); return el?el.value.trim():''; }
+
+// ─── CONFIRMAR Y GUARDAR ───
+function confirmAndSave(){ goStep(4); }
+
+// ─── UPLOAD ───
+function handleUpload(input){
+  if(input.files&&input.files[0]){
+    uploadedName=input.files[0].name;
+    const reader=new FileReader();
+    reader.onload=function(e){
+      uploadedDataURL=e.target.result;
+      const conf=document.getElementById('upload-conf');
+      conf.style.display='block';
+      conf.innerHTML='✓ Comprobante adjuntado: <strong>'+uploadedName+'</strong>';
+      document.getElementById('btn-finalizar').disabled=false;
+    };
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+// ─── FINALIZAR ───
+function finalizarReserva(){
+  const db=getDB();
+  const p={
+    id:Date.now(),
+    date:selDate,time:selTime,
+    dateFormatted:fmtDate(selDate),
+    registeredAt:new Date().toISOString(),
+    consultations:1,status:'Activo',
+    nutricionista:'Fernanda Ugarte',
+    comprobante:uploadedDataURL||null,
+    comprobanteNombre:uploadedName||null,
+    ...formData
+  };
+  db.patients.push(p);
+  saveDB(db);
+  document.getElementById('final-date').textContent=fmtDate(selDate)+' a las '+selTime+' hrs';
+  window._lastPatientSeed=String(p.telefono||p.id).replace(/[^0-9]/g,'');
+  window._lastPatientNombre=p.nombre;
+  var banner=document.getElementById('video-patient-banner');
+  if(banner){ banner.style.display=(selDate===dk(new Date()))?'flex':'none'; }
+  for(let i=1;i<=4;i++){ const sb=document.getElementById('sb'+i); if(sb) sb.className='sw sw-done'; }
+  goStep(5);
+  renderAdmin();
+}
+
+// ─── LOGIN ───
+function loginN(){
+  if(document.getElementById('np').value==='fernanda2026'){
+    document.getElementById('nl').style.display='none';
+    document.getElementById('nd').style.display='block';
+    document.getElementById('ne').style.display='none';
+    renderNutriRecords(); renderNutriAppts(); renderNutriCal();
+    setTimeout(function(){ renderNutriStats(); },80);
+  } else document.getElementById('ne').style.display='block';
+}
+function logoutN(){ document.getElementById('nl').style.display='block'; document.getElementById('nd').style.display='none'; document.getElementById('np').value=''; }
+function loginA(){
+  if(document.getElementById('ap').value==='admin2026'){
+    document.getElementById('al').style.display='none';
+    document.getElementById('ad').style.display='block';
+    document.getElementById('ae').style.display='none';
+    renderAdmin();
+  } else document.getElementById('ae').style.display='block';
+}
+function logoutA(){ document.getElementById('al').style.display='block'; document.getElementById('ad').style.display='none'; document.getElementById('ap').value=''; }
+
+// ─── RENDER NUTRICIONISTA ───
+function renderNutriAppts(){
+  const db=getDB();
+  const todayKey=dk(new Date());
+  const todayAppts=db.patients.filter(p=>p.date===todayKey);
+  document.getElementById('appt-count').textContent=todayAppts.length+' consulta'+(todayAppts.length!==1?'s':'');
+  const list=document.getElementById('appt-list');
+  if(!list) return;
+  if(!todayAppts.length){ list.innerHTML='<p style="color:var(--g3);font-size:.85rem;text-align:center;padding:1rem">No hay consultas agendadas para hoy</p>'; return; }
+  list.innerHTML=todayAppts.sort((a,b)=>a.time.localeCompare(b.time)).map(function(p){
+    var seed=String(p.telefono||p.id).replace(/[^0-9]/g,'');
+    var nom=(p.nombre||'Paciente').replace(/'/g,'');
+    return '<div class="appt-item">'+
+      '<div class="appt-av">'+initials(p.nombre||'PA')+'</div>'+
+      '<div style="flex:1;min-width:0"><div class="appt-name">'+p.nombre+'</div>'+
+      '<div class="appt-meta">'+(p.motivo||'Consulta')+' · #'+p.consultations+'</div></div>'+
+      '<div class="appt-time" style="display:flex;flex-direction:column;align-items:flex-end;gap:.3rem">'+
+        '<div><span class="t">'+p.time+'</span> <span class="d">Hoy</span></div>'+
+        '<button class="appt-video-btn" onclick="iniciarLlamada(\''+seed+'\',\''+nom+'\')">Sala Virtual</button>'+
+      '</div></div>';
+  }).join('');
+}
+
+function renderNutriRecords(){
+  const db=getDB();
+  const list=document.getElementById('records-list');
+  if(!list) return;
+  const count=document.getElementById('rec-count');
+  if(!db.patients.length){ list.innerHTML='<p style="color:var(--g3);font-size:.85rem;text-align:center;padding:1rem">No hay registros aún</p>'; if(count) count.textContent='0 registros'; return; }
+  if(count) count.textContent=db.patients.length+' registro'+(db.patients.length!==1?'s':'');
+  list.innerHTML=db.patients.map(p=>`
+    <div class="rec">
+      <div class="rec-head" onclick="toggleRec(this)">
+        <div style="flex:1;min-width:0">
+          <div class="rec-name">${p.nombre} <span class="badge bg" style="font-size:.65rem">${p.status}</span></div>
+          <div class="rec-sub">${p.dateFormatted} · ${p.time} hrs</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <button class="det-btn" onclick="event.stopPropagation();openModal(${p.id})">Ficha completa</button>
+          <div class="rec-arr">▼</div>
+        </div>
+      </div>
+      <div class="rec-body">
+        <div class="rf"><strong>Email:</strong> ${p.email||'—'}</div>
+        <div class="rf"><strong>Teléfono:</strong> ${p.telefono||'—'}</div>
+        <div class="rf"><strong>Edad:</strong> ${p.edad||'—'} &nbsp;|&nbsp; <strong>Peso:</strong> ${p.peso||'—'} &nbsp;|&nbsp; <strong>Talla:</strong> ${p.talla||'—'}</div>
+        <div class="rf"><strong>Motivo:</strong> ${p.motivo||'—'}</div>
+        <div class="rf"><strong>Enfermedades:</strong> ${p.enfermedad||'—'}</div>
+        <div class="rf"><strong>Alergias:</strong> ${p.alergias||'—'}</div>
+        <div class="rf"><strong>Actividad física:</strong> ${p.actividad||'—'}</div>
+        <div class="rf"><strong>Registro 24h:</strong><br><span style="white-space:pre-line">${p.registro24||'—'}</span></div>
+        <div class="rf" style="margin-top:.6rem;padding-top:.6rem;border-top:1px solid var(--g4)"><strong>Comprobante de pago ($15.000):</strong></div>
+        ${p.comprobante?`<img src="${p.comprobante}" class="comprobante-img" alt="comprobante"><br><span style="font-size:.75rem;color:var(--g3)">${p.comprobanteNombre}</span>`:'<span style="font-size:.82rem;color:var(--g3)">No adjuntado aún</span>'}
+        <div style="margin-top:.8rem">
+          <button class="btn btn-p" style="width:100%;justify-content:center;font-size:.82rem!important" onclick="openModal(${p.id})">Ver ficha clínica completa →</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function toggleRec(el){
+  const body=el.nextElementSibling;
+  const arr=el.querySelector('.rec-arr');
+  body.classList.toggle('open');
+  arr.style.transform=body.classList.contains('open')?'rotate(180deg)':'';
+}
+
+// ─── CALENDARIO NUTRICIONISTA ───
+let nutriCalDate=new Date(); nutriCalDate.setDate(1);
+let nutriSelDate=null;
+const ALL_TIMES=['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'];
+
+function renderNutriCal(){
+  const db=getDB();
+  const y=nutriCalDate.getFullYear(),m=nutriCalDate.getMonth();
+  document.getElementById('nutri-cal-title').textContent=MONTHS[m]+' '+y;
+  const first=(new Date(y,m,1).getDay()+6)%7;
+  const days=new Date(y,m+1,0).getDate();
+  const today=new Date(); today.setHours(0,0,0,0);
+  const grid=document.getElementById('nutri-cal');
+  grid.innerHTML='';
+  for(let i=0;i<first;i++){const el=document.createElement('div');el.className='nutri-cal-day empty';grid.appendChild(el);}
+  for(let d=1;d<=days;d++){
+    const dd=new Date(y,m,d); dd.setHours(0,0,0,0);
+    const k=dk(dd);
+    const avail=db.availability[k]||[];
+    const hasAppt=db.patients.some(p=>p.date===k);
+    const el=document.createElement('div');
+    el.textContent=d;
+    if(dd<today){ el.className='nutri-cal-day past'; }
+    else if(hasAppt){ el.className='nutri-cal-day has-appt'; const dot=document.createElement('div'); dot.className='dot'; el.appendChild(dot); el.onclick=()=>editNutriDay(k); }
+    else if(avail.length>0){ el.className='nutri-cal-day open'; el.onclick=()=>editNutriDay(k); }
+    else{ el.className='nutri-cal-day closed'; el.onclick=()=>editNutriDay(k); }
+    grid.appendChild(el);
+  }
+}
+
+function editNutriDay(k){
+  nutriSelDate=k;
+  const db=getDB();
+  const avail=db.availability[k]||[];
+  document.getElementById('nutri-sel-date').textContent=fmtDate(k);
+  const toggle=document.getElementById('nutri-time-toggle');
+  toggle.innerHTML=ALL_TIMES.map(t=>`<div class="tt${avail.includes(t)?' on':''}" onclick="this.classList.toggle('on')">${t}</div>`).join('');
+  document.getElementById('nutri-time-config').style.display='block';
+}
+
+function saveNutriTimes(){
+  if(!nutriSelDate) return;
+  const db=getDB();
+  db.availability[nutriSelDate]=Array.from(document.querySelectorAll('#nutri-time-toggle .tt.on')).map(el=>el.textContent.trim());
+  saveDB(db);
+  renderNutriCal(); renderCal();
+  document.getElementById('nutri-time-config').style.display='none';
+  nutriSelDate=null;
+}
+function nutriCalNav(dir){ nutriCalDate.setMonth(nutriCalDate.getMonth()+dir); renderNutriCal(); }
+
+// ─── RENDER ADMIN ───
+function renderAdmin(){
+  const db=getDB();
+  const todayKey=dk(new Date());
+  const todayP=db.patients.filter(p=>p.date===todayKey);
+  const withComp=db.patients.filter(p=>p.comprobante).length;
+
+  const stEl=document.getElementById('st-total'); if(stEl) stEl.textContent=db.patients.length;
+  const shEl=document.getElementById('st-hoy'); if(shEl) shEl.textContent=todayP.length;
+  const siEl=document.getElementById('st-ingresos'); if(siEl) siEl.textContent=fmtMoney(todayP.length*15000);
+  const sfEl=document.getElementById('st-forms'); if(sfEl) sfEl.textContent=withComp;
+  const acEl=document.getElementById('admin-count'); if(acEl) acEl.textContent=db.patients.length+' pacientes';
+  const s_h_s=document.getElementById('stat-hoy-s'); if(s_h_s) s_h_s.textContent=todayP.length;
+  const s_h_i=document.getElementById('stat-hoy-i'); if(s_h_i) s_h_i.textContent=fmtMoney(todayP.length*15000);
+  const s_h_n=document.getElementById('stat-hoy-n'); if(s_h_n) s_h_n.textContent=todayP.length;
+
+  const tbody=document.getElementById('admin-table');
+  if(!tbody) return;
+  if(!db.patients.length){ tbody.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--g3);padding:1.5rem">No hay pacientes registrados aún</td></tr>'; return; }
+  tbody.innerHTML=db.patients.map(p=>`
+    <tr>
+      <td><strong>${p.nombre}</strong></td>
+      <td>${p.email}</td>
+      <td>${p.telefono}</td>
+      <td>${p.dateFormatted}</td>
+      <td>${p.time} hrs</td>
+      <td>${p.motivo||'—'}</td>
+      <td>${p.comprobante?'<span class="badge bg">✓ Adjunto</span>':'<span class="badge br">Pendiente</span>'}</td>
+      <td><button class="det-btn" onclick="openModal(${p.id})">Ver ficha</button></td>
+    </tr>`).join('');
+  // Gráficos admin
+  setTimeout(function(){ renderAdminPieChart(); buildBarSvg('admin-bar-svg',adminChartDays,null); },50);
+}
+
+function openModal(id){
+  const db=getDB();
+  const p=db.patients.find(x=>x.id===id);
+  if(!p) return;
+  const fields=(label,val)=>`<div class="mf"><strong>${label}</strong><span>${val||'—'}</span></div>`;
+  document.getElementById('modal-title').textContent=p.nombre+' — Ficha completa';
+  document.getElementById('modal-body').innerHTML=`
+    <div class="msect">Datos personales</div>
+    ${fields('Email',p.email)}${fields('Teléfono',p.telefono)}${fields('Edad',p.edad)}
+    ${fields('Ocupación',p.ocupacion)}${fields('Peso',p.peso)}${fields('Talla',p.talla)}
+    <div class="msect">Consulta</div>
+    ${fields('Fecha',p.dateFormatted+' · '+p.time+' hrs')}${fields('Motivo',p.motivo)}${fields('Nutricionista',p.nutricionista)}
+    <div class="msect">Historial médico</div>
+    ${fields('Enfermedades',p.enfermedad)}${fields('Lesiones',p.lesion)}${fields('Antecedentes familiares',p.familiar)}${fields('Cirugías',p.cirugia)}
+    <div class="msect">Estilo de vida</div>
+    ${fields('Convivencia / quién cocina',p.convivencia)}${fields('Actividad física',p.actividad)}${fields('Horario laboral',p.horario)}${fields('Horario de sueño',p.sueno)}
+    <div class="msect">Hábitos alimentarios</div>
+    ${fields('Alimentos que no le gustan',p.nodislike)}${fields('Almuerzo frecuente',p.almuerzo)}${fields('Horarios de comida',p.horcomida)}${fields('Alergias / intolerancias',p.alergias)}${fields('Suplementos',p.suplemento)}${fields('Alcohol',p.alcohol)}${fields('Tabaco / drogas',p.tabaco)}${fields('Síntomas gastrointestinales',p.gastro)}
+    <div class="msect">Frecuencia de consumo</div>
+    ${fields('Cereales',p.cereales)}${fields('Legumbres',p.legumbres)}${fields('Pescado',p.pescado)}${fields('Fruta',p.fruta)}${fields('Verduras',p.verduras)}${fields('Dulces',p.dulces)}${fields('Lácteos',p.lacteos)}
+    <div class="msect">Registro 24 horas</div>
+    <div class="mf"><strong>Alimentación</strong><span style="white-space:pre-line">${p.registro24||'—'}</span></div>
+    <div class="msect">Pago — $15.000 CLP</div>
+    ${p.comprobante?`<img src="${p.comprobante}" style="max-width:100%;border-radius:8px;border:1px solid var(--g4)" alt="comprobante"><br><span style="font-size:.75rem;color:var(--g3)">${p.comprobanteNombre}</span>`:'<span style="font-size:.82rem;color:var(--g3)">Comprobante no adjuntado aún</span>'}
+    `;
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(){
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+document.getElementById('modal').addEventListener('click',function(e){ if(e.target===this) closeModal(); });
+
+// ─── CHART HELPERS ───
+function getDayRange(days){
+  const result=[];
+  const today=new Date(); today.setHours(0,0,0,0);
+  for(let i=days-1;i>=0;i--){
+    const d=new Date(today); d.setDate(today.getDate()-i);
+    result.push(dk(d));
+  }
+  return result;
+}
+const DIAS_CORTOS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+function labelFromKey(k){
+  const parts=k.split('-');
+  const dt=new Date(Number(parts[0]),Number(parts[1])-1,Number(parts[2]));
+  return DIAS_CORTOS[dt.getDay()]+' '+parts[2];
+}
+
+// ─── GRÁFICO BARRAS ───
+function buildBarSvg(svgId, days, nutri){
+  const db=getDB();
+  const range=getDayRange(days);
+  const PRECIO=15000;
+  const data=range.map(k=>({
+    label:labelFromKey(k),
+    count: nutri
+      ? db.patients.filter(p=>p.date===k && p.nutricionista===nutri).length
+      : db.patients.filter(p=>p.date===k).length
+  }));
+  const maxCount=Math.max.apply(null,data.map(function(d){return d.count;}).concat([1]));
+  const svgEl=document.getElementById(svgId);
+  if(!svgEl) return;
+  const W=620,H=200,padL=64,padR=14,padT=18,padB=42;
+  const chartW=W-padL-padR,chartH=H-padT-padB;
+  const barW=Math.min(38,Math.floor(chartW/data.length*0.55));
+  const gap=(chartW-barW*data.length)/(data.length+1);
+  const COLORS=['#6b4a9a','#4a8c54','#c47c2a','#e8a84a','#a47cc5','#7ab882','#3d2459'];
+  var svg='';
+  var ySteps=4;
+  for(var i=0;i<=ySteps;i++){
+    var v=Math.round(maxCount*i/ySteps);
+    var y=padT+chartH-(i/ySteps)*chartH;
+    svg+='<line x1="'+padL+'" x2="'+(W-padR)+'" y1="'+y+'" y2="'+y+'" stroke="#e8e0f0" stroke-width="1"/>';
+    svg+='<text x="'+(padL-6)+'" y="'+(y+4)+'" text-anchor="end" font-size="10" fill="#9882b0">'+fmtMoney(v*PRECIO).replace('$','')+'</text>';
+  }
+  data.forEach(function(d,i){
+    var x=padL+gap+(barW+gap)*i;
+    var barH=d.count>0?Math.max(6,(d.count/maxCount)*chartH):0;
+    var y=padT+chartH-barH;
+    var color=COLORS[i%COLORS.length];
+    if(d.count>0){
+      svg+='<rect x="'+x+'" y="'+y+'" width="'+barW+'" height="'+barH+'" rx="5" fill="'+color+'" opacity="0.88"/>';
+      svg+='<text x="'+(x+barW/2)+'" y="'+(y-5)+'" text-anchor="middle" font-size="10" fill="'+color+'" font-weight="700">'+fmtMoney(d.count*PRECIO)+'</text>';
+    } else {
+      svg+='<rect x="'+x+'" y="'+(padT+chartH-4)+'" width="'+barW+'" height="4" rx="2" fill="#e8e0f0"/>';
+    }
+    svg+='<text x="'+(x+barW/2)+'" y="'+(H-padB+16)+'" text-anchor="middle" font-size="10" fill="#5a4a6e">'+d.label+'</text>';
+    if(d.count>0) svg+='<text x="'+(x+barW/2)+'" y="'+(H-padB+28)+'" text-anchor="middle" font-size="9" fill="#9882b0">'+d.count+' cita'+(d.count!==1?'s':'')+'</text>';
+  });
+  svg+='<line x1="'+padL+'" x2="'+padL+'" y1="'+padT+'" y2="'+(padT+chartH)+'" stroke="#d4bbec" stroke-width="1.5"/>';
+  svg+='<line x1="'+padL+'" x2="'+(W-padR)+'" y1="'+(padT+chartH)+'" y2="'+(padT+chartH)+'" stroke="#d4bbec" stroke-width="1.5"/>';
+  svgEl.innerHTML=svg;
+}
+
+var nutriChartDays=7;
+var adminChartDays=7;
+
+function renderNutriStats(){
+  var db=getDB();
+  var today=dk(new Date());
+  var weekRange=getDayRange(7);
+  var monthRange=getDayRange(30);
+  var todayCount=db.patients.filter(function(p){return p.date===today&&p.nutricionista==='Fernanda Ugarte';}).length;
+  var weekCount=db.patients.filter(function(p){return weekRange.indexOf(p.date)>=0&&p.nutricionista==='Fernanda Ugarte';}).length;
+  var monthCount=db.patients.filter(function(p){return monthRange.indexOf(p.date)>=0&&p.nutricionista==='Fernanda Ugarte';}).length;
+  function el(id){return document.getElementById(id);}
+  if(el('ns-hoy')) el('ns-hoy').textContent=fmtMoney(todayCount*15000);
+  if(el('ns-semana')) el('ns-semana').textContent=fmtMoney(weekCount*15000);
+  if(el('ns-mes')) el('ns-mes').textContent=fmtMoney(monthCount*15000);
+  if(el('ns-consultas')) el('ns-consultas').textContent=weekCount;
+  buildBarSvg('nutri-bar-svg',nutriChartDays,'Fernanda Ugarte');
+}
+
+function switchNutriChart(period,btn){
+  var tabs=document.querySelectorAll('#nutri-bar-svg').length>0?btn.closest('.chart-wrap').querySelectorAll('.nst'):[];
+  if(btn && btn.closest){ btn.closest('.chart-wrap').querySelectorAll('.nst').forEach(function(b){b.classList.remove('on');}); btn.classList.add('on'); }
+  nutriChartDays=period==='week'?7:30;
+  buildBarSvg('nutri-bar-svg',nutriChartDays,'Fernanda Ugarte');
+}
+
+// ─── GRÁFICO TORTA ADMIN ───
+function renderAdminPieChart(){
+  var db=getDB();
+  var total=db.patients.length;
+  var piEl=document.getElementById('pie-total-label');
+  if(piEl) piEl.textContent=total+' paciente'+(total!==1?'s':'')+' totales';
+  var map={};
+  db.patients.forEach(function(p){ var n=p.nutricionista||'Sin asignar'; map[n]=(map[n]||0)+1; });
+  if(!total){ map['Sin pacientes aún']=1; total=1; }
+  var names=Object.keys(map);
+  var counts=names.map(function(n){return map[n];});
+  var COLORS=['#6b4a9a','#4a8c54','#c47c2a','#e8a84a','#a47cc5','#7ab882','#3d2459'];
+  var svgEl=document.getElementById('admin-pie-svg');
+  var legendEl=document.getElementById('admin-pie-legend');
+  if(!svgEl||!legendEl) return;
+  var cx=80,cy=80,r=70,ri=35;
+  var startAngle=-Math.PI/2;
+  var svgPaths='';
+  var legendHTML='';
+  names.forEach(function(name,i){
+    var pct=counts[i]/total;
+    var angle=pct*2*Math.PI;
+    var endAngle=startAngle+angle;
+    var x1=cx+r*Math.cos(startAngle),y1=cy+r*Math.sin(startAngle);
+    var x2=cx+r*Math.cos(endAngle),y2=cy+r*Math.sin(endAngle);
+    var xi1=cx+ri*Math.cos(startAngle),yi1=cy+ri*Math.sin(startAngle);
+    var xi2=cx+ri*Math.cos(endAngle),yi2=cy+ri*Math.sin(endAngle);
+    var large=angle>Math.PI?1:0;
+    var color=COLORS[i%COLORS.length];
+    svgPaths+='<path d="M'+xi1+','+yi1+' L'+x1+','+y1+' A'+r+','+r+' 0 '+large+',1 '+x2+','+y2+' L'+xi2+','+yi2+' A'+ri+','+ri+' 0 '+large+',0 '+xi1+','+yi1+' Z" fill="'+color+'" opacity="0.9" stroke="#fff" stroke-width="2"/>';
+    var midA=startAngle+angle/2;
+    if(pct>0.06){
+      var lx=cx+(r+ri)/2*Math.cos(midA);
+      var ly=cy+(r+ri)/2*Math.sin(midA);
+      svgPaths+='<text x="'+lx+'" y="'+(ly+4)+'" text-anchor="middle" font-size="10" fill="#fff" font-weight="700">'+Math.round(pct*100)+'%</text>';
+    }
+    legendHTML+='<div class="pie-legend-item"><div class="pie-legend-dot" style="background:'+color+'"></div><div><div class="pie-legend-name">'+name+'</div><div style="font-size:.72rem;color:var(--g3)">'+counts[i]+' paciente'+(counts[i]!==1?'s':'')+'</div></div><span class="pie-legend-pct">'+Math.round(pct*100)+'%</span></div>';
+    startAngle=endAngle;
+  });
+  svgPaths+='<circle cx="'+cx+'" cy="'+cy+'" r="'+ri+'" fill="white"/>';
+  svgPaths+='<text x="'+cx+'" y="'+(cy-6)+'" text-anchor="middle" font-size="11" fill="#3d2459" font-weight="700">'+(db.patients.length)+'</text>';
+  svgPaths+='<text x="'+cx+'" y="'+(cy+8)+'" text-anchor="middle" font-size="9" fill="#9882b0">pacientes</text>';
+  svgEl.innerHTML=svgPaths;
+  legendEl.innerHTML=legendHTML;
+}
+
+function switchAdminChart(period,btn){
+  if(btn && btn.closest){ btn.closest('.chart-wrap').querySelectorAll('.nst').forEach(function(b){b.classList.remove('on');}); btn.classList.add('on'); }
+  adminChartDays=period==='week'?7:30;
+  buildBarSvg('admin-bar-svg',adminChartDays,null);
+}
+
+
+// JITSI MEET
+var jitsiAPI=null;
+function _roomName(seed){ return 'NutriAge_'+String(seed).replace(/[^0-9a-zA-Z]/g,''); }
+
+function iniciarLlamada(seed,nombrePaciente){
+  var el=function(id){return document.getElementById(id);};
+  el('video-paciente-nombre').textContent='Consulta - '+nombrePaciente;
+  el('video-status-txt').textContent='Conectando...';
+  el('video-loading').style.display='flex';
+  el('modal-video').classList.add('open');
+  document.body.style.overflow='hidden';
+  if(jitsiAPI){try{jitsiAPI.dispose();}catch(e){}jitsiAPI=null;}
+  Array.from(el('jitsi-container').querySelectorAll('iframe')).forEach(function(f){f.remove();});
+  if(typeof JitsiMeetExternalAPI==='undefined'){
+    el('video-loading').innerHTML='<span style="color:#fc8181;text-align:center;padding:1rem">Error: Jitsi no cargo.<br><small>Abre el archivo desde un servidor web.<br>Usa VS Code Live Server o sube a Netlify/GitHub Pages.</small></span><button onclick="cerrarLlamada()" style="margin-top:1rem;padding:.5rem 1.2rem;background:#6b4a9a;color:#fff;border:none;border-radius:20px;cursor:pointer;font-weight:700;font-family:Nunito,sans-serif">Cerrar</button>';
+    return;
+  }
+  try{
+    jitsiAPI=new JitsiMeetExternalAPI('meet.jit.si',{
+      roomName:_roomName(seed),width:'100%',height:'100%',
+      parentNode:el('jitsi-container'),
+      userInfo:{displayName:'Nutr. Fernanda Ugarte'},
+      configOverwrite:{prejoinConfig:{enabled:false},prejoinPageEnabled:false,startWithAudioMuted:false,startWithVideoMuted:false,enableWelcomePage:false,disableDeepLinking:true,defaultLanguage:'es',requireDisplayName:false,enableClosePage:false},
+      interfaceConfigOverwrite:{TOOLBAR_BUTTONS:['microphone','camera','desktop','chat','tileview','participants-pane','hangup'],SHOW_JITSI_WATERMARK:false,SHOW_WATERMARK_FOR_GUESTS:false,DEFAULT_BACKGROUND:'#0d0d1a',DISABLE_JOIN_LEAVE_NOTIFICATIONS:true,HIDE_INVITE_MORE_HEADER:true}
+    });
+    setTimeout(function(){el('video-loading').style.display='none';},3500);
+    jitsiAPI.addEventListener('videoConferenceJoined',function(){el('video-loading').style.display='none';el('video-status-txt').textContent='En llamada';});
+    jitsiAPI.addEventListener('videoConferenceLeft',cerrarLlamada);
+    jitsiAPI.addEventListener('readyToClose',cerrarLlamada);
+  }catch(err){
+    el('video-loading').innerHTML='<span style="color:#fc8181">Error: '+err.message+'</span><button onclick="cerrarLlamada()" style="margin-top:1rem;padding:.5rem 1.2rem;background:#6b4a9a;color:#fff;border:none;border-radius:20px;cursor:pointer;font-weight:700;font-family:Nunito,sans-serif">Cerrar</button>';
+  }
+}
+
+function unirseComoP(){
+  var seed=window._lastPatientSeed,nombre=window._lastPatientNombre||'Paciente';
+  if(!seed){var db=getDB(),hoy=db.patients.filter(function(p){return p.date===dk(new Date());});if(!hoy.length){alert('No hay cita para hoy.');return;}var pp=hoy[hoy.length-1];seed=String(pp.telefono||pp.id).replace(/[^0-9]/g,'');nombre=pp.nombre;}
+  var el=function(id){return document.getElementById(id);};
+  el('video-paciente-nombre').textContent='Mi consulta con Fernanda';
+  el('video-status-txt').textContent='Conectando...';
+  el('video-loading').style.display='flex';
+  el('modal-video').classList.add('open');
+  document.body.style.overflow='hidden';
+  if(jitsiAPI){try{jitsiAPI.dispose();}catch(e){}jitsiAPI=null;}
+  Array.from(el('jitsi-container').querySelectorAll('iframe')).forEach(function(f){f.remove();});
+  if(typeof JitsiMeetExternalAPI==='undefined'){el('video-loading').innerHTML='<span style="color:#fc8181">Jitsi no disponible. Abre desde servidor web.</span><button onclick="cerrarLlamada()" style="margin-top:1rem;padding:.5rem 1.2rem;background:#6b4a9a;color:#fff;border:none;border-radius:20px;cursor:pointer;font-weight:700;font-family:Nunito,sans-serif">Cerrar</button>';return;}
+  try{
+    jitsiAPI=new JitsiMeetExternalAPI('meet.jit.si',{
+      roomName:_roomName(seed),width:'100%',height:'100%',
+      parentNode:el('jitsi-container'),
+      userInfo:{displayName:nombre},
+      configOverwrite:{prejoinConfig:{enabled:false},prejoinPageEnabled:false,startWithAudioMuted:true,startWithVideoMuted:false,enableWelcomePage:false,disableDeepLinking:true,defaultLanguage:'es',requireDisplayName:false,enableClosePage:false},
+      interfaceConfigOverwrite:{TOOLBAR_BUTTONS:['microphone','camera','chat','hangup'],SHOW_JITSI_WATERMARK:false,SHOW_WATERMARK_FOR_GUESTS:false,DEFAULT_BACKGROUND:'#0d0d1a',DISABLE_JOIN_LEAVE_NOTIFICATIONS:true}
+    });
+    setTimeout(function(){el('video-loading').style.display='none';},3500);
+    jitsiAPI.addEventListener('videoConferenceJoined',function(){el('video-loading').style.display='none';el('video-status-txt').textContent='En llamada';});
+    jitsiAPI.addEventListener('videoConferenceLeft',cerrarLlamada);
+    jitsiAPI.addEventListener('readyToClose',cerrarLlamada);
+  }catch(err){el('video-loading').innerHTML='<span style="color:#fc8181">'+err.message+'</span><button onclick="cerrarLlamada()" style="margin-top:1rem;padding:.5rem 1.2rem;background:#6b4a9a;color:#fff;border:none;border-radius:20px;cursor:pointer;font-weight:700;font-family:Nunito,sans-serif">Cerrar</button>';}
+}
+
+function cerrarLlamada(){
+  if(jitsiAPI){try{jitsiAPI.dispose();}catch(e){}jitsiAPI=null;}
+  document.getElementById('modal-video').classList.remove('open');
+  document.body.style.overflow='';
+  var ld=document.getElementById('video-loading');
+  ld.style.display='flex';
+  ld.innerHTML='<div class="video-spinner"></div><span>Preparando tu sala segura...</span><span style="font-size:.73rem;color:rgba(255,255,255,.35)">Esto puede tomar unos segundos</span>';
+}
+
+// ─── INIT ───
+initAvail(); renderCal(); renderNutriCal();
+
+</script>
+</body>
+</html>
