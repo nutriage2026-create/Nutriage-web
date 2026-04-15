@@ -1,4 +1,5 @@
 from flask import Flask, jsonify
+from flask_cors import CORS
 from app.config import settings
 from app.routers.availability  import bp as availability_bp
 from app.routers.leads         import bp as leads_bp
@@ -7,6 +8,7 @@ from app.routers.analysis      import bp as analysis_bp
 from app.routers.webhooks      import bp as webhooks_bp
 
 app = Flask(__name__)
+CORS(app)
 
 app.register_blueprint(availability_bp)
 app.register_blueprint(leads_bp)

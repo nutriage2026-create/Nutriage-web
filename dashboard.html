@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NutriAge · Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --p1:#3d2459;--p2:#6b4a9a;--p3:#a47cc5;--p4:#d4bbec;--p5:#f0e8fa;--p6:#faf6ff;
+  --s1:#2d5e34;--s2:#4a8c54;--s3:#7ab882;--s4:#b8d9bc;--s5:#edf6ee;
+  --a1:#7a4f1a;--a2:#c47c2a;--a3:#e8a84a;--a5:#fdf5e0;
+  --g1:#0f172a;--g2:#334155;--g3:#64748b;--g4:#e2e8f0;--g5:#f8fafc;
+  --wh:#fff;--cr:#faf7f2;--r:8px;--rl:12px;
+  --sidebar-w:240px;
+  --hot:#ef4444;--warm:#f59e0b;--cold:#3b82f6;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Nunito',sans-serif;background:var(--g5);color:var(--g1);min-height:100vh}
+
+/* ── LOGIN ── */
+#login-screen{position:fixed;inset:0;background:var(--p1);display:flex;align-items:center;justify-content:center;z-index:1000}
+.login-box{background:var(--wh);border-radius:16px;padding:2.5rem;width:100%;max-width:380px;box-shadow:0 24px 64px rgba(0,0,0,.25)}
+.login-logo{display:flex;align-items:center;gap:.75rem;margin-bottom:2rem;justify-content:center}
+.login-logo-circle{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--p2),var(--s2));display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:16px}
+.login-logo-text{font-family:'Cormorant Garamond',serif;font-size:1.6rem;color:var(--p1);font-weight:600}
+.login-box h2{font-size:1.1rem;font-weight:700;margin-bottom:.3rem;color:var(--g1)}
+.login-box p{font-size:.82rem;color:var(--g3);margin-bottom:1.5rem}
+.login-inp{width:100%;padding:.7rem 1rem;border:1.5px solid var(--g4);border-radius:var(--r);font-family:'Nunito',sans-serif;font-size:.9rem;color:var(--g1);outline:none;transition:border .2s;margin-bottom:.75rem}
+.login-inp:focus{border-color:var(--p2)}
+.login-btn{width:100%;padding:.8rem;background:var(--p2);color:#fff;border:none;border-radius:var(--r);font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:background .2s}
+.login-btn:hover{background:var(--p1)}
+.login-err{color:#ef4444;font-size:.78rem;margin-top:.5rem;display:none}
+
+/* ── LAYOUT ── */
+#dashboard{display:none;min-height:100vh;flex-direction:row}
+#dashboard.on{display:flex}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar-w);background:var(--p1);color:#fff;display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;z-index:100;overflow-y:auto}
+.sb-logo{padding:1.4rem 1.2rem;display:flex;align-items:center;gap:.6rem;border-bottom:1px solid rgba(255,255,255,.1)}
+.sb-logo-c{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--p3),var(--s3));display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:600;color:#fff;flex-shrink:0}
+.sb-logo-t{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:#fff}
+.sb-section{padding:.75rem .8rem .25rem;font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:rgba(255,255,255,.35);margin-top:.5rem}
+.sb-item{display:flex;align-items:center;gap:.65rem;padding:.65rem .9rem;margin:.1rem .5rem;border-radius:var(--r);cursor:pointer;font-size:.82rem;font-weight:600;color:rgba(255,255,255,.6);transition:all .2s;border:none;background:none;width:calc(100% - 1rem);text-align:left;font-family:'Nunito',sans-serif}
+.sb-item:hover{background:rgba(255,255,255,.08);color:rgba(255,255,255,.9)}
+.sb-item.on{background:rgba(255,255,255,.15);color:#fff}
+.sb-item .ico{font-size:1rem;width:18px;text-align:center}
+.sb-badge{margin-left:auto;background:var(--s2);color:#fff;font-size:.62rem;font-weight:800;padding:1px 7px;border-radius:20px;min-width:20px;text-align:center}
+.sb-footer{margin-top:auto;padding:1rem;border-top:1px solid rgba(255,255,255,.1)}
+.sb-user{display:flex;align-items:center;gap:.6rem;padding:.5rem .4rem;border-radius:var(--r)}
+.sb-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--p3),var(--s3));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.8rem;flex-shrink:0}
+.sb-uname{font-size:.78rem;font-weight:700;color:#fff}
+.sb-urole{font-size:.66rem;color:rgba(255,255,255,.45)}
+.sb-logout{display:flex;align-items:center;gap:.4rem;padding:.45rem .6rem;border-radius:var(--r);font-size:.75rem;color:rgba(255,255,255,.45);cursor:pointer;transition:color .2s;background:none;border:none;font-family:'Nunito',sans-serif;margin-top:.25rem;width:100%}
+.sb-logout:hover{color:rgba(255,255,255,.8)}
+
+/* ── MAIN ── */
+.main{margin-left:var(--sidebar-w);flex:1;min-height:100vh;display:flex;flex-direction:column}
+.topbar{background:var(--wh);border-bottom:1px solid var(--g4);padding:.9rem 1.8rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.topbar-title{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:600;color:var(--p1)}
+.topbar-subtitle{font-size:.75rem;color:var(--g3);margin-top:.1rem}
+.topbar-right{display:flex;align-items:center;gap:.75rem}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block;margin-right:.25rem}
+.status-text{font-size:.72rem;color:var(--g3);font-weight:600}
+.refresh-btn{display:flex;align-items:center;gap:.4rem;padding:.45rem .9rem;border:1.5px solid var(--g4);border-radius:var(--r);background:var(--wh);font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:700;color:var(--g2);cursor:pointer;transition:all .2s}
+.refresh-btn:hover{border-color:var(--p3);color:var(--p2)}
+
+/* ── CONTENT ── */
+.content{padding:1.5rem 1.8rem;flex:1}
+.section{display:none}
+.section.on{display:block}
+.section-header{margin-bottom:1.25rem}
+.section-header h2{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;color:var(--p1)}
+.section-header p{font-size:.8rem;color:var(--g3);margin-top:.2rem}
+
+/* ── KPI CARDS ── */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem}
+.kpi-card{background:var(--wh);border:1px solid var(--g4);border-radius:var(--rl);padding:1.2rem 1.4rem;position:relative;overflow:hidden}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.kpi-card.purple::before{background:linear-gradient(90deg,var(--p2),var(--p3))}
+.kpi-card.green::before{background:linear-gradient(90deg,var(--s1),var(--s3))}
+.kpi-card.amber::before{background:linear-gradient(90deg,#d97706,#f59e0b)}
+.kpi-card.red::before{background:linear-gradient(90deg,#dc2626,#ef4444)}
+.kpi-label{font-size:.72rem;font-weight:700;color:var(--g3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.6rem}
+.kpi-value{font-size:2rem;font-weight:800;color:var(--g1);line-height:1;font-family:'Cormorant Garamond',serif}
+.kpi-sub{font-size:.72rem;color:var(--g3);margin-top:.4rem;display:flex;align-items:center;gap:.25rem}
+.kpi-change{font-size:.72rem;font-weight:700;padding:1px 6px;border-radius:4px}
+.kpi-change.up{background:#dcfce7;color:#16a34a}
+.kpi-change.down{background:#fee2e2;color:#dc2626}
+.kpi-ico{position:absolute;right:1.2rem;top:50%;transform:translateY(-50%);font-size:2rem;opacity:.08}
+
+/* ── GRID 2 cols ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+.grid-3{display:grid;grid-template-columns:2fr 1fr;gap:1rem;margin-bottom:1.5rem}
+
+/* ── CARD ── */
+.card{background:var(--wh);border:1px solid var(--g4);border-radius:var(--rl);overflow:hidden}
+.card-head{padding:.9rem 1.2rem;border-bottom:1px solid var(--g4);display:flex;align-items:center;justify-content:space-between}
+.card-head h3{font-size:.88rem;font-weight:800;color:var(--g1);display:flex;align-items:center;gap:.45rem}
+.card-head .ico{font-size:1rem}
+.card-body{padding:1.2rem}
+.card-body.np{padding:0}
+
+/* ── TABLE ── */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{font-size:.68rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.5px;padding:.7rem 1rem;text-align:left;border-bottom:2px solid var(--g4);background:var(--g5)}
+td{padding:.75rem 1rem;font-size:.8rem;border-bottom:1px solid var(--g4);color:var(--g2)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--g5)}
+.td-name{font-weight:700;color:var(--g1)}
+
+/* ── BADGES ── */
+.badge{display:inline-flex;align-items:center;gap:.25rem;padding:2px 9px;border-radius:20px;font-size:.68rem;font-weight:700;white-space:nowrap}
+.badge-hot{background:#fee2e2;color:#dc2626}
+.badge-warm{background:#fef3c7;color:#d97706}
+.badge-cold{background:#dbeafe;color:#1d4ed8}
+.badge-pendiente{background:#f1f5f9;color:#64748b}
+.badge-proceso{background:#fef3c7;color:#d97706}
+.badge-agendada{background:#dcfce7;color:#16a34a}
+.badge-contestado{background:#ffedd5;color:#ea580c}
+.badge-interes{background:#fee2e2;color:#dc2626}
+.badge-cerrado{background:var(--p5);color:var(--p2)}
+
+/* ── FUNNEL BARS ── */
+.funnel-item{display:flex;align-items:center;gap:.75rem;margin-bottom:.65rem}
+.funnel-label{font-size:.75rem;font-weight:600;color:var(--g2);width:130px;flex-shrink:0}
+.funnel-bar-wrap{flex:1;background:var(--g4);border-radius:4px;height:10px;overflow:hidden}
+.funnel-bar{height:100%;border-radius:4px;transition:width .6s ease}
+.funnel-count{font-size:.72rem;font-weight:700;color:var(--g3);width:24px;text-align:right;flex-shrink:0}
+
+/* ── DONUT ── */
+.donut-wrap{display:flex;align-items:center;gap:1.5rem;justify-content:center;padding:.5rem 0}
+.donut-legend{display:flex;flex-direction:column;gap:.6rem}
+.donut-leg-item{display:flex;align-items:center;gap:.5rem;font-size:.76rem}
+.donut-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* ── UPCOMING ── */
+.booking-item{display:flex;gap:.9rem;padding:.85rem 1.2rem;border-bottom:1px solid var(--g4);align-items:flex-start}
+.booking-item:last-child{border-bottom:none}
+.booking-date{text-align:center;min-width:44px}
+.booking-day{font-size:1.3rem;font-weight:800;color:var(--p2);font-family:'Cormorant Garamond',serif;line-height:1}
+.booking-month{font-size:.6rem;font-weight:700;text-transform:uppercase;color:var(--g3)}
+.booking-info{flex:1}
+.booking-name{font-size:.82rem;font-weight:700;color:var(--g1)}
+.booking-meta{font-size:.72rem;color:var(--g3);margin-top:.15rem}
+.booking-badge{font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:4px;background:var(--p5);color:var(--p2)}
+
+/* ── AGENT HISTORY ── */
+.hist-item{display:flex;gap:.8rem;padding:.8rem 1.2rem;border-bottom:1px solid var(--g4)}
+.hist-item:last-child{border-bottom:none}
+.hist-dot{width:8px;height:8px;border-radius:50%;margin-top:.3rem;flex-shrink:0}
+.hist-dot.blue{background:var(--cold)}
+.hist-dot.green{background:var(--s2)}
+.hist-dot.purple{background:var(--p2)}
+.hist-dot.red{background:var(--hot)}
+.hist-dot.amber{background:var(--warm)}
+.hist-content{flex:1}
+.hist-title{font-size:.8rem;font-weight:700;color:var(--g1)}
+.hist-meta{font-size:.7rem;color:var(--g3);margin-top:.15rem}
+
+/* ── FILTERS BAR ── */
+.filters{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.filter-btn{padding:.35rem .8rem;border-radius:20px;font-size:.73rem;font-weight:700;border:1.5px solid var(--g4);background:var(--wh);color:var(--g3);cursor:pointer;font-family:'Nunito',sans-serif;transition:all .2s}
+.filter-btn:hover{border-color:var(--p3);color:var(--p2)}
+.filter-btn.on{background:var(--p2);border-color:var(--p2);color:#fff}
+.filter-search{padding:.4rem .85rem;border:1.5px solid var(--g4);border-radius:20px;font-family:'Nunito',sans-serif;font-size:.78rem;color:var(--g1);outline:none;width:200px;transition:border .2s}
+.filter-search:focus{border-color:var(--p2)}
+
+/* ── EMPTY STATE ── */
+.empty{text-align:center;padding:2.5rem 1rem;color:var(--g3)}
+.empty-ico{font-size:2.5rem;margin-bottom:.75rem}
+.empty p{font-size:.82rem}
+
+/* ── LOADING ── */
+.loading{text-align:center;padding:2rem;color:var(--g3)}
+.spinner{width:24px;height:24px;border:2.5px solid var(--g4);border-top-color:var(--p2);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto .75rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── SLOTS ── */
+.slots-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:.5rem}
+.slot-btn{padding:.5rem .4rem;border:1.5px solid var(--g4);border-radius:var(--r);font-size:.75rem;font-weight:700;color:var(--g2);background:var(--wh);cursor:pointer;text-align:center;transition:all .2s}
+.slot-btn:hover{border-color:var(--p3);color:var(--p2);background:var(--p6)}
+.slot-date-head{font-size:.72rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.4px;margin:.85rem 0 .4rem;border-bottom:1px solid var(--g4);padding-bottom:.3rem}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .grid-2,.grid-3{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .sidebar{width:0;overflow:hidden}
+  .main{margin-left:0}
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .content{padding:1rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN ──────────────────────────────────────────────────── -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-circle">N</div>
+      <span class="login-logo-text">NutriAge</span>
+    </div>
+    <h2>Dashboard Analítico</h2>
+    <p>Acceso exclusivo para administradores</p>
+    <input class="login-inp" type="password" id="login-pass" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Ingresar</button>
+    <p class="login-err" id="login-err">Contraseña incorrecta</p>
+  </div>
+</div>
+
+<!-- ── DASHBOARD ───────────────────────────────────────────────── -->
+<div id="dashboard">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-c">N</div>
+      <span class="sb-logo-t">NutriAge</span>
+    </div>
+
+    <div class="sb-section">Principal</div>
+    <button class="sb-item on" onclick="showSection('overview',this)">
+      <span class="ico">📊</span> Overview
+    </button>
+    <button class="sb-item" onclick="showSection('leads',this)">
+      <span class="ico">🎯</span> Leads
+      <span class="sb-badge" id="sb-leads-count">—</span>
+    </button>
+    <button class="sb-item" onclick="showSection('citas',this)">
+      <span class="ico">📅</span> Citas
+    </button>
+    <button class="sb-item" onclick="showSection('disponibilidad',this)">
+      <span class="ico">🕐</span> Disponibilidad
+    </button>
+
+    <div class="sb-section">Sistema</div>
+    <button class="sb-item" onclick="showSection('historial',this)">
+      <span class="ico">🤖</span> Historial IA
+    </button>
+
+    <div class="sb-footer">
+      <div class="sb-user">
+        <div class="sb-avatar">F</div>
+        <div>
+          <div class="sb-uname">Fernanda Ugarte</div>
+          <div class="sb-urole">Nutricionista · Admin</div>
+        </div>
+      </div>
+      <button class="sb-logout" onclick="logout()">← Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="topbar-title">Overview</div>
+        <div class="topbar-subtitle" id="topbar-date"></div>
+      </div>
+      <div class="topbar-right">
+        <span class="status-text"><span class="status-dot"></span>API conectada</span>
+        <button class="refresh-btn" onclick="loadAll()">↺ Actualizar</button>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- ══ OVERVIEW ══════════════════════════════════════════════ -->
+      <div class="section on" id="section-overview">
+        <div class="section-header">
+          <h2>Vista General</h2>
+          <p>Resumen del negocio en tiempo real</p>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpi-grid">
+          <div class="kpi-card purple">
+            <div class="kpi-label">Total Leads</div>
+            <div class="kpi-value" id="kpi-total">—</div>
+            <div class="kpi-sub">en CRM Notion</div>
+            <div class="kpi-ico">🎯</div>
+          </div>
+          <div class="kpi-card red">
+            <div class="kpi-label">Leads Hot</div>
+            <div class="kpi-value" id="kpi-hot">—</div>
+            <div class="kpi-sub">alta probabilidad de cierre</div>
+            <div class="kpi-ico">🔥</div>
+          </div>
+          <div class="kpi-card green">
+            <div class="kpi-label">Citas Agendadas</div>
+            <div class="kpi-value" id="kpi-agendadas">—</div>
+            <div class="kpi-sub">estatus activo</div>
+            <div class="kpi-ico">📅</div>
+          </div>
+          <div class="kpi-card amber">
+            <div class="kpi-label">Tasa de Cierre</div>
+            <div class="kpi-value" id="kpi-tasa">—</div>
+            <div class="kpi-sub">leads cerrados vs total</div>
+            <div class="kpi-ico">📈</div>
+          </div>
+        </div>
+
+        <!-- Charts row -->
+        <div class="grid-2">
+          <!-- Funnel -->
+          <div class="card">
+            <div class="card-head">
+              <h3><span class="ico">🔽</span> Pipeline de Leads</h3>
+            </div>
+            <div class="card-body" id="funnel-chart">
+              <div class="loading"><div class="spinner"></div>Cargando...</div>
+            </div>
+          </div>
+
+          <!-- Temperatura donut -->
+          <div class="card">
+            <div class="card-head">
+              <h3><span class="ico">🌡️</span> Temperatura</h3>
+            </div>
+            <div class="card-body" id="temp-chart">
+              <div class="loading"><div class="spinner"></div>Cargando...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Leads recientes + próximas citas -->
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-head">
+              <h3><span class="ico">🕐</span> Leads Recientes</h3>
+            </div>
+            <div class="card-body np" id="recent-leads">
+              <div class="loading"><div class="spinner"></div>Cargando...</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <h3><span class="ico">📅</span> Próximas Citas</h3>
+            </div>
+            <div id="upcoming-bookings">
+              <div class="loading"><div class="spinner"></div>Cargando...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ LEADS ══════════════════════════════════════════════════ -->
+      <div class="section" id="section-leads">
+        <div class="section-header">
+          <h2>CRM · Leads</h2>
+          <p>Gestión completa de prospectos</p>
+        </div>
+        <div class="filters">
+          <button class="filter-btn on" onclick="filterLeads('',this)">Todos</button>
+          <button class="filter-btn" onclick="filterLeads('Pendiente de contactar',this)">Pendiente</button>
+          <button class="filter-btn" onclick="filterLeads('En proceso',this)">En proceso</button>
+          <button class="filter-btn" onclick="filterLeads('Cita agendada',this)">Agendados</button>
+          <button class="filter-btn" onclick="filterLeads('No contestado',this)">No contestado</button>
+          <button class="filter-btn" onclick="filterLeads('Cerrado',this)">Cerrado</button>
+          <input class="filter-search" type="text" id="leads-search" placeholder="🔍  Buscar nombre..." oninput="searchLeads()">
+        </div>
+        <div class="card">
+          <div class="card-body np">
+            <div id="leads-table-wrap">
+              <div class="loading"><div class="spinner"></div>Cargando leads...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ CITAS ══════════════════════════════════════════════════ -->
+      <div class="section" id="section-citas">
+        <div class="section-header">
+          <h2>Citas · Cal.com</h2>
+          <p>Reservas activas y próximas consultas</p>
+        </div>
+        <div class="card">
+          <div class="card-head">
+            <h3><span class="ico">📋</span> Historial de Bookings</h3>
+          </div>
+          <div class="card-body np" id="bookings-list">
+            <div class="loading"><div class="spinner"></div>Cargando citas...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ DISPONIBILIDAD ════════════════════════════════════════ -->
+      <div class="section" id="section-disponibilidad">
+        <div class="section-header">
+          <h2>Disponibilidad</h2>
+          <p>Horarios disponibles en Cal.com</p>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head">
+              <h3><span class="ico">🗓️</span> Tipos de Consulta</h3>
+            </div>
+            <div class="card-body np" id="event-types-list">
+              <div class="loading"><div class="spinner"></div>Cargando...</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <h3><span class="ico">🕐</span> Slots — Próximos 7 días</h3>
+            </div>
+            <div class="card-body" id="slots-list">
+              <div class="loading"><div class="spinner"></div>Cargando...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ HISTORIAL IA ══════════════════════════════════════════ -->
+      <div class="section" id="section-historial">
+        <div class="section-header">
+          <h2>Historial del Agente IA</h2>
+          <p>Registro de acciones automáticas</p>
+        </div>
+        <div class="card">
+          <div class="card-body np" id="historial-list">
+            <div class="loading"><div class="spinner"></div>Cargando historial...</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /dashboard -->
+
+<script>
+const API = 'https://nutriage-api.onrender.com';
+const PASS = 'admin2026';
+let allLeads = [];
+let currentFilter = '';
+
+// ── AUTH ────────────────────────────────────────────────────────
+function doLogin(){
+  const p = document.getElementById('login-pass').value;
+  if(p === PASS){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('dashboard').classList.add('on');
+    setDate(); loadAll();
+  } else {
+    document.getElementById('login-err').style.display='block';
+    setTimeout(()=>document.getElementById('login-err').style.display='none',2500);
+  }
+}
+function logout(){
+  document.getElementById('dashboard').classList.remove('on');
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('login-pass').value='';
+}
+
+// ── NAVIGATION ──────────────────────────────────────────────────
+const titles = {overview:'Vista General',leads:'CRM · Leads',citas:'Citas',disponibilidad:'Disponibilidad',historial:'Historial IA'};
+function showSection(id, btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('on'));
+  document.getElementById('section-'+id).classList.add('on');
+  if(btn) btn.classList.add('on');
+  document.getElementById('topbar-title').textContent = titles[id]||id;
+  // lazy load
+  if(id==='historial') loadHistorial();
+  if(id==='citas') loadBookings();
+  if(id==='disponibilidad'){ loadEventTypes(); loadSlots(); }
+}
+function setDate(){
+  const d = new Date();
+  const opts = {weekday:'long',year:'numeric',month:'long',day:'numeric'};
+  document.getElementById('topbar-date').textContent = d.toLocaleDateString('es-MX',opts);
+}
+
+// ── FETCH HELPER ────────────────────────────────────────────────
+async function apiFetch(path){
+  try{
+    const r = await fetch(API+path);
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    return await r.json();
+  } catch(e){ console.error('API error:',path,e); return null; }
+}
+
+// ── LOAD ALL ────────────────────────────────────────────────────
+async function loadAll(){
+  await loadLeads();
+}
+
+// ── LEADS ───────────────────────────────────────────────────────
+async function loadLeads(){
+  const data = await apiFetch('/leads/');
+  if(!data){ setLeadsError(); return; }
+  allLeads = data.leads || [];
+  updateKPIs(allLeads);
+  renderFunnel(allLeads);
+  renderTempChart(allLeads);
+  renderRecentLeads(allLeads.slice(0,5));
+  renderLeadsTable(allLeads);
+  document.getElementById('sb-leads-count').textContent = allLeads.length;
+}
+
+function setLeadsError(){
+  ['kpi-total','kpi-hot','kpi-agendadas','kpi-tasa'].forEach(id=>{
+    document.getElementById(id).textContent='?';
+  });
+}
+
+function updateKPIs(leads){
+  const total = leads.length;
+  const hot = leads.filter(l=>l.temperatura==='Hot').length;
+  const agendadas = leads.filter(l=>l.estatus==='Cita agendada').length;
+  const cerrados = leads.filter(l=>l.estatus==='Cerrado').length;
+  const tasa = total>0 ? Math.round((cerrados/total)*100)+'%' : '0%';
+  document.getElementById('kpi-total').textContent = total;
+  document.getElementById('kpi-hot').textContent = hot;
+  document.getElementById('kpi-agendadas').textContent = agendadas;
+  document.getElementById('kpi-tasa').textContent = tasa;
+}
+
+function renderFunnel(leads){
+  const steps = [
+    {label:'Pendiente contactar', key:'Pendiente de contactar', color:'#64748b'},
+    {label:'En proceso',          key:'En proceso',             color:'#d97706'},
+    {label:'Cita agendada',       key:'Cita agendada',          color:'#16a34a'},
+    {label:'No contestado',       key:'No contestado',          color:'#ea580c'},
+    {label:'Sin interés',         key:'Sin interes',            color:'#dc2626'},
+    {label:'Cerrado',             key:'Cerrado',                color:'#6b4a9a'},
+  ];
+  const counts = {};
+  leads.forEach(l=>{ counts[l.estatus] = (counts[l.estatus]||0)+1; });
+  const max = Math.max(...Object.values(counts),1);
+  const el = document.getElementById('funnel-chart');
+  if(!leads.length){ el.innerHTML='<div class="empty"><div class="empty-ico">📭</div><p>Sin leads aún</p></div>'; return; }
+  el.innerHTML = steps.map(s=>{
+    const n = counts[s.key]||0;
+    const w = Math.round((n/max)*100);
+    return `<div class="funnel-item">
+      <div class="funnel-label">${s.label}</div>
+      <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:${w}%;background:${s.color}"></div></div>
+      <div class="funnel-count">${n}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderTempChart(leads){
+  const hot = leads.filter(l=>l.temperatura==='Hot').length;
+  const warm = leads.filter(l=>l.temperatura==='Warm').length;
+  const cold = leads.filter(l=>l.temperatura==='Cold').length;
+  const total = hot+warm+cold||1;
+  const el = document.getElementById('temp-chart');
+  if(!leads.length){ el.innerHTML='<div class="empty"><div class="empty-ico">🌡️</div><p>Sin datos</p></div>'; return; }
+
+  // SVG donut
+  const r=60, cx=75, cy=75, stroke=22;
+  const circ = 2*Math.PI*r;
+  function arc(val, offset, color){
+    const dash = (val/total)*circ;
+    return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}" stroke-dasharray="${dash} ${circ}" stroke-dashoffset="${-offset}" transform="rotate(-90 ${cx} ${cy})" stroke-linecap="round"/>`;
+  }
+  const hotDash = (hot/total)*circ;
+  const warmDash = (warm/total)*circ;
+  const svg = `<svg width="150" height="150" viewBox="0 0 150 150">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#f1f5f9" stroke-width="${stroke}"/>
+    ${arc(hot,0,'#ef4444')}
+    ${arc(warm,hotDash,'#f59e0b')}
+    ${arc(cold,hotDash+warmDash,'#3b82f6')}
+    <text x="${cx}" y="${cy-6}" text-anchor="middle" font-family="Nunito" font-size="22" font-weight="800" fill="#0f172a">${total}</text>
+    <text x="${cx}" y="${cy+14}" text-anchor="middle" font-family="Nunito" font-size="10" fill="#64748b">leads</text>
+  </svg>`;
+
+  el.innerHTML = `<div class="donut-wrap">
+    ${svg}
+    <div class="donut-legend">
+      <div class="donut-leg-item"><div class="donut-dot" style="background:#ef4444"></div><span>Hot — ${hot}</span></div>
+      <div class="donut-leg-item"><div class="donut-dot" style="background:#f59e0b"></div><span>Warm — ${warm}</span></div>
+      <div class="donut-leg-item"><div class="donut-dot" style="background:#3b82f6"></div><span>Cold — ${cold}</span></div>
+    </div>
+  </div>`;
+}
+
+function renderRecentLeads(leads){
+  const el = document.getElementById('recent-leads');
+  if(!leads.length){ el.innerHTML='<div class="empty"><div class="empty-ico">📭</div><p>Sin leads</p></div>'; return; }
+  el.innerHTML = '<table><thead><tr><th>Nombre</th><th>Temp.</th><th>Estatus</th></tr></thead><tbody>'
+    + leads.map(l=>`<tr>
+        <td class="td-name">${l.nombre||'—'}</td>
+        <td>${tempBadge(l.temperatura)}</td>
+        <td>${statusBadge(l.estatus)}</td>
+      </tr>`).join('')
+    + '</tbody></table>';
+}
+
+function renderLeadsTable(leads){
+  const el = document.getElementById('leads-table-wrap');
+  if(!leads.length){ el.innerHTML='<div class="empty" style="padding:2rem"><div class="empty-ico">📭</div><p>No hay leads con este filtro</p></div>'; return; }
+  el.innerHTML = '<div class="tbl-wrap"><table><thead><tr><th>Nombre</th><th>Email</th><th>Temperatura</th><th>Estatus</th><th>Noción ID</th></tr></thead><tbody>'
+    + leads.map(l=>`<tr>
+        <td class="td-name">${l.nombre||'—'}</td>
+        <td>${l.email||'—'}</td>
+        <td>${tempBadge(l.temperatura)}</td>
+        <td>${statusBadge(l.estatus)}</td>
+        <td style="font-family:monospace;font-size:.68rem;color:var(--g3)">${(l.id||'').slice(0,8)}…</td>
+      </tr>`).join('')
+    + '</tbody></table></div>';
+}
+
+function filterLeads(estatus, btn){
+  currentFilter = estatus;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  const q = document.getElementById('leads-search').value.toLowerCase();
+  applyFilters(q, estatus);
+}
+
+function searchLeads(){
+  const q = document.getElementById('leads-search').value.toLowerCase();
+  applyFilters(q, currentFilter);
+}
+
+function applyFilters(q, estatus){
+  let filtered = allLeads;
+  if(estatus) filtered = filtered.filter(l=>l.estatus===estatus);
+  if(q) filtered = filtered.filter(l=>(l.nombre||'').toLowerCase().includes(q) || (l.email||'').toLowerCase().includes(q));
+  renderLeadsTable(filtered);
+}
+
+// ── BOOKINGS ────────────────────────────────────────────────────
+async function loadBookings(){
+  const data = await apiFetch('/appointments/');
+  const el = document.getElementById('bookings-list');
+  // Cal.com bookings via our API
+  const r = await fetch(API+'/availability/event-types').then(r=>r.json()).catch(()=>null);
+  if(!r){ el.innerHTML='<div class="empty" style="padding:2rem"><div class="empty-ico">📅</div><p>Sin conexión con Cal.com</p></div>'; return; }
+
+  const types = r.data||[];
+  el.innerHTML = '<table><thead><tr><th>Tipo de consulta</th><th>Duración</th><th>Slug</th><th>Estado</th></tr></thead><tbody>'
+    + types.map(t=>`<tr>
+        <td class="td-name">${t.title}</td>
+        <td>${t.lengthInMinutes} min</td>
+        <td style="font-family:monospace;font-size:.75rem;color:var(--g3)">${t.slug}</td>
+        <td><span class="badge" style="background:#dcfce7;color:#16a34a">Activo</span></td>
+      </tr>`).join('')
+    + '</tbody></table>';
+}
+
+// ── UPCOMING BOOKINGS (overview) ─────────────────────────────────
+async function loadUpcoming(){
+  // Fetch próximos 7 días de Cal.com
+  const now = new Date();
+  const end = new Date(now); end.setDate(end.getDate()+7);
+  const start = now.toISOString();
+  const endStr = end.toISOString();
+  const data = await apiFetch(`/availability/slots?eventTypeId=5378644&start=${start}&end=${endStr}`);
+  const el = document.getElementById('upcoming-bookings');
+  if(!data||!data.data){ el.innerHTML='<div class="empty" style="padding:2rem"><div class="empty-ico">📅</div><p>Sin citas próximas</p></div>'; return; }
+
+  const slots = data.data.slots||{};
+  const days = Object.keys(slots).slice(0,5);
+  if(!days.length){ el.innerHTML='<div class="empty" style="padding:2rem"><div class="empty-ico">📅</div><p>Sin disponibilidad esta semana</p></div>'; return; }
+
+  el.innerHTML = days.map(day=>{
+    const d = new Date(day);
+    const dayNum = d.getDate();
+    const month = d.toLocaleString('es-MX',{month:'short'}).toUpperCase();
+    const count = slots[day].length;
+    return `<div class="booking-item">
+      <div class="booking-date">
+        <div class="booking-day">${dayNum}</div>
+        <div class="booking-month">${month}</div>
+      </div>
+      <div class="booking-info">
+        <div class="booking-name">${count} horario${count!==1?'s':''} disponible${count!==1?'s':''}</div>
+        <div class="booking-meta">Consulta Nutricional Virtual</div>
+      </div>
+      <span class="booking-badge">${count} slots</span>
+    </div>`;
+  }).join('');
+}
+
+// ── EVENT TYPES ──────────────────────────────────────────────────
+async function loadEventTypes(){
+  const data = await apiFetch('/availability/event-types');
+  const el = document.getElementById('event-types-list');
+  if(!data||!data.data){ el.innerHTML='<div class="empty" style="padding:2rem"><div class="empty-ico">📅</div><p>Sin datos</p></div>'; return; }
+  const types = data.data||[];
+  el.innerHTML = '<table><thead><tr><th>Consulta</th><th>Duración</th><th>ID</th></tr></thead><tbody>'
+    + types.map(t=>`<tr>
+        <td class="td-name">${t.title}</td>
+        <td>${t.lengthInMinutes} min</td>
+        <td style="font-family:monospace;font-size:.72rem;color:var(--g3)">${t.id}</td>
+      </tr>`).join('')
+    + '</tbody></table>';
+}
+
+async function loadSlots(){
+  const now = new Date();
+  const end = new Date(now); end.setDate(end.getDate()+7);
+  const data = await apiFetch(`/availability/slots?eventTypeId=5378644&start=${now.toISOString()}&end=${end.toISOString()}`);
+  const el = document.getElementById('slots-list');
+  if(!data||!data.data){ el.innerHTML='<div class="empty"><div class="empty-ico">🕐</div><p>Sin disponibilidad</p></div>'; return; }
+  const slots = data.data.slots||{};
+  const days = Object.keys(slots);
+  if(!days.length){ el.innerHTML='<div class="empty"><div class="empty-ico">🕐</div><p>Sin slots</p></div>'; return; }
+  let html='';
+  days.forEach(day=>{
+    const d = new Date(day);
+    html += `<div class="slot-date-head">${d.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'short'})}</div>`;
+    html += `<div class="slots-grid">`;
+    html += slots[day].slice(0,8).map(s=>{
+      const t = new Date(s.time);
+      const hm = t.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',timeZone:'America/Mexico_City'});
+      return `<div class="slot-btn">${hm}</div>`;
+    }).join('');
+    html += `</div>`;
+  });
+  el.innerHTML = html;
+}
+
+// ── HISTORIAL ────────────────────────────────────────────────────
+async function loadHistorial(){
+  // Query Notion directly via our API — placeholder hasta tener endpoint
+  const el = document.getElementById('historial-list');
+  el.innerHTML = '<div class="empty" style="padding:2rem"><div class="empty-ico">🤖</div><p>Historial disponible cuando el agente IA analice su primer lead</p></div>';
+}
+
+// ── BADGE HELPERS ────────────────────────────────────────────────
+function tempBadge(t){
+  const map = {Hot:'badge-hot',Warm:'badge-warm',Cold:'badge-cold'};
+  const icons = {Hot:'🔥',Warm:'🌤️',Cold:'❄️'};
+  const cls = map[t]||'badge-pendiente';
+  return `<span class="badge ${cls}">${icons[t]||''} ${t||'—'}</span>`;
+}
+function statusBadge(s){
+  const map = {
+    'Pendiente de contactar':'badge-pendiente',
+    'En proceso':'badge-proceso',
+    'Cita agendada':'badge-agendada',
+    'No contestado':'badge-contestado',
+    'Sin interes':'badge-interes',
+    'Cerrado':'badge-cerrado',
+  };
+  return `<span class="badge ${map[s]||'badge-pendiente'}">${s||'—'}</span>`;
+}
+
+// ── INIT ─────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',()=>{
+  setDate();
+  // Pre-cargar upcoming en overview
+  setTimeout(loadUpcoming, 500);
+});
+</script>
+</body>
+</html>
