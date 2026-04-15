@@ -33,12 +33,13 @@ def list_leads():
         leads = []
         for r in results:
             props = r.get("properties", {})
+            titulo = props.get("Nombre", {}).get("title") or []
             leads.append({
                 "id": r["id"],
-                "nombre": props.get("Nombre", {}).get("title", [{}])[0].get("plain_text", ""),
-                "temperatura": props.get("Temperatura", {}).get("select", {}).get("name", ""),
-                "estatus": props.get("Estatus", {}).get("select", {}).get("name", ""),
-                "email": props.get("Email", {}).get("email", ""),
+                "nombre": titulo[0].get("plain_text", "") if titulo else "",
+                "temperatura": (props.get("Temperatura", {}).get("select") or {}).get("name", ""),
+                "estatus": (props.get("Estatus", {}).get("select") or {}).get("name", ""),
+                "email": props.get("Email", {}).get("email") or "",
             })
         return jsonify({"total": len(leads), "leads": leads})
     except Exception as e:
