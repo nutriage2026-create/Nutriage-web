@@ -1,4 +1,5 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_file
+import os
 from flask_cors import CORS
 from app.config import settings
 from app.routers.availability  import bp as availability_bp
@@ -34,6 +35,12 @@ def root():
             "POST /webhooks/make":                 "Recibir eventos de Make.com",
         },
     })
+
+
+@app.get("/dashboard")
+def dashboard():
+    path = os.path.join(os.path.dirname(__file__), "dashboard.html")
+    return send_file(path)
 
 
 @app.get("/health")
