@@ -296,6 +296,67 @@ input,select,textarea,button{font-size:16px!important} /* prevent iOS zoom */
 
 /* EXCEL */
 .btn-excel{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1rem;border-radius:20px;background:linear-gradient(135deg,#1a7f37,#155724);color:#fff;border:none;font-family:'Nunito',sans-serif;font-size:.76rem;font-weight:700;cursor:pointer}
+
+/* ── NUTRI SIDEBAR ── */
+.nutri-layout{display:flex;gap:0;min-height:calc(100vh - var(--nav-h))}
+.nutri-sidebar{width:280px;background:var(--wh);border-right:1px solid var(--g4);padding:1.4rem 1.2rem;flex-shrink:0;overflow-y:auto}
+.nutri-sidebar h3{font-family:'Cormorant Garamond',serif;font-size:1.1rem;color:var(--p1);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+.nutri-sidebar .sf{margin-bottom:.85rem}
+.nutri-sidebar .sf label{display:block;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--g3);margin-bottom:.25rem}
+.nutri-sidebar .sf input{width:100%;padding:.6rem .8rem;border:1.5px solid var(--g4);border-radius:var(--r);font-family:'Nunito',sans-serif;font-size:.85rem;color:var(--g1);background:var(--wh);outline:none;transition:border .2s}
+.nutri-sidebar .sf input:focus{border-color:var(--p2)}
+.nutri-main{flex:1;min-width:0;overflow-y:auto}
+.sidebar-toggle{display:none;position:fixed;bottom:calc(var(--bot-h) + 12px);right:12px;z-index:190;width:46px;height:46px;border-radius:50%;background:var(--p2);color:#fff;border:none;font-size:1.2rem;cursor:pointer;box-shadow:0 4px 16px rgba(107,74,154,.35);display:flex;align-items:center;justify-content:center}
+@media(max-width:800px){
+  .nutri-sidebar{position:fixed;left:-300px;top:var(--nav-h);bottom:var(--bot-h);z-index:180;box-shadow:4px 0 24px rgba(0,0,0,.15);transition:left .3s ease}
+  .nutri-sidebar.open{left:0}
+  .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:170}
+  .sidebar-overlay.open{display:block}
+  .sidebar-toggle{display:flex}
+}
+
+/* ── APPT CARD FIX ── */
+.appt-card{display:flex;align-items:flex-start;gap:.85rem;padding:.75rem 0;border-bottom:1px solid var(--g5)}
+.appt-card:last-child{border-bottom:none}
+.appt-card-info{flex:1;min-width:0}
+.appt-card-name{font-weight:700;font-size:.88rem;margin-bottom:2px;display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+.appt-card-meta{font-size:.75rem;color:var(--g2);margin-top:2px}
+.appt-card-right{display:flex;flex-direction:column;align-items:flex-end;gap:.4rem;flex-shrink:0;min-width:100px}
+.appt-card-time{font-weight:700;font-size:.92rem;color:var(--p1);text-align:right}
+.appt-card-day{font-size:.7rem;color:var(--g3)}
+.appt-card-actions{display:flex;gap:.35rem;flex-wrap:wrap;justify-content:flex-end}
+
+/* ── BLOCK DAY BUTTON ── */
+.btn-block-day{display:inline-flex;align-items:center;gap:.35rem;padding:.5rem .9rem;border-radius:20px;background:#fdecea;color:#c0392b;border:1.5px solid #f1a9a9;font-family:'Nunito',sans-serif;font-size:.76rem;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-block-day:hover{background:#f8d7da;border-color:#c0392b}
+.btn-unblock-day{display:inline-flex;align-items:center;gap:.35rem;padding:.5rem .9rem;border-radius:20px;background:var(--s5);color:var(--s1);border:1.5px solid var(--s4);font-family:'Nunito',sans-serif;font-size:.76rem;font-weight:700;cursor:pointer;transition:all .2s}
+
+/* ── SYNC BUTTON NUTRI ── */
+.btn-sync{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1rem;border-radius:20px;background:var(--p2);color:#fff;border:none;font-family:'Nunito',sans-serif;font-size:.76rem;font-weight:700;cursor:pointer;transition:all .15s}
+.btn-sync:hover{background:var(--p1)}
+
+/* ── ADMIN SIDEBAR ── */
+.admin-layout{display:flex;gap:0;min-height:calc(100vh - var(--nav-h))}
+.admin-sidebar{width:290px;background:var(--wh);border-right:1px solid var(--g4);padding:1.4rem 1.2rem;flex-shrink:0;overflow-y:auto}
+.admin-sidebar h3{font-family:'Cormorant Garamond',serif;font-size:1.05rem;color:var(--p1);margin-bottom:.8rem;display:flex;align-items:center;gap:.45rem}
+.admin-sidebar .as-section{margin-bottom:1.2rem;padding-bottom:1.2rem;border-bottom:1px solid var(--g5)}
+.admin-sidebar .as-section:last-child{border-bottom:none}
+.admin-sidebar .as-row{display:flex;justify-content:space-between;align-items:flex-start;padding:.35rem 0;font-size:.8rem;gap:.5rem}
+.admin-sidebar .as-label{color:var(--g3);font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.4px;flex-shrink:0}
+.admin-sidebar .as-value{color:var(--g1);font-weight:700;text-align:right;word-break:break-all}
+.admin-sidebar .as-pass{font-family:monospace;background:var(--p6);padding:.2rem .5rem;border-radius:6px;font-size:.78rem;letter-spacing:1px;color:var(--p1);border:1px solid var(--p5)}
+.admin-sidebar .as-badge{display:inline-flex;align-items:center;gap:.3rem;padding:.2rem .6rem;border-radius:12px;font-size:.68rem;font-weight:700}
+.admin-sidebar .as-badge.active{background:#e8f5e9;color:#2e7d32}
+.admin-sidebar .as-badge.role{background:var(--p5);color:var(--p2)}
+.admin-main{flex:1;min-width:0;overflow-y:auto}
+.admin-sidebar-toggle{display:none;position:fixed;bottom:calc(var(--bot-h) + 12px);left:12px;z-index:190;width:46px;height:46px;border-radius:50%;background:#2d5e34;color:#fff;border:none;font-size:1.1rem;cursor:pointer;box-shadow:0 4px 16px rgba(45,94,52,.35);align-items:center;justify-content:center}
+@media(max-width:800px){
+  .admin-sidebar{position:fixed;left:-310px;top:var(--nav-h);bottom:var(--bot-h);z-index:180;box-shadow:4px 0 24px rgba(0,0,0,.15);transition:left .3s ease}
+  .admin-sidebar.open{left:0}
+  .admin-sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:170}
+  .admin-sidebar-overlay.open{display:block}
+  .admin-sidebar-toggle{display:flex}
+}
 </style>
 </head>
 <body>
@@ -761,13 +822,60 @@ input,select,textarea,button{font-size:16px!important} /* prevent iOS zoom */
     <input class="linp" type="password" id="np" placeholder="Contraseña" onkeydown="if(event.key==='Enter')loginN()">
     <button class="btn btn-p" style="width:100%;justify-content:center" onclick="loginN()">Ingresar</button>
     <div class="err" id="ne">Contraseña incorrecta</div>
-    <p style="font-size:.72rem;color:var(--g3);margin-top:1rem">Contraseña: <strong>fernanda2026</strong></p>
+    <p style="font-size:.72rem;color:var(--g3);margin-top:1rem">Contraseña por defecto: <strong>fernanda2026</strong> (puede ser cambiada desde el perfil)</p>
   </div>
   <div id="nd" style="display:none">
+    <!-- Sidebar overlay for mobile -->
+    <div class="sidebar-overlay" id="nutri-sidebar-overlay" onclick="toggleNutriSidebar(false)"></div>
+    <div class="nutri-layout">
+      <!-- SIDEBAR PERFIL -->
+      <aside class="nutri-sidebar" id="nutri-sidebar">
+        <h3>👩‍⚕️ Mi Perfil</h3>
+        <div class="sf">
+          <label>Nombre completo</label>
+          <input type="text" id="prof-nombre" placeholder="Fernanda Ugarte" value="Fernanda Ugarte">
+        </div>
+        <div class="sf">
+          <label>Email (recibe comprobantes)</label>
+          <input type="email" id="prof-email" placeholder="correo@ejemplo.com" value="fernandaugarte.nutri@gmail.com">
+        </div>
+        <div class="sf">
+          <label>Teléfono / WhatsApp</label>
+          <input type="tel" id="prof-telefono" placeholder="+56 9 XXXX XXXX" value="+56 9 7124 6200">
+        </div>
+        <div class="sf">
+          <label>RUT</label>
+          <input type="text" id="prof-rut" placeholder="20.726.694-9" value="20.726.694-9">
+        </div>
+        <button class="btn btn-p" style="width:100%;justify-content:center;font-size:.8rem!important;padding:.6rem" onclick="guardarPerfil()">Guardar perfil ✓</button>
+        <div id="prof-msg" style="display:none;margin-top:.5rem;font-size:.78rem;color:var(--s1);font-weight:700;text-align:center"></div>
+        <div style="margin-top:1.4rem;border-top:1px solid var(--g4);padding-top:1.2rem">
+          <h3>🔒 Cambiar contraseña</h3>
+          <div class="sf">
+            <label>Contraseña actual</label>
+            <input type="password" id="prof-pass-old" placeholder="••••••••">
+          </div>
+          <div class="sf">
+            <label>Nueva contraseña</label>
+            <input type="password" id="prof-pass-new" placeholder="Mínimo 6 caracteres">
+          </div>
+          <div class="sf">
+            <label>Confirmar nueva contraseña</label>
+            <input type="password" id="prof-pass-confirm" placeholder="Repetir contraseña">
+          </div>
+          <button class="btn btn-ghost" style="width:100%;justify-content:center;font-size:.78rem!important;padding:.55rem" onclick="cambiarPassword()">Cambiar contraseña</button>
+          <div id="pass-msg" style="display:none;margin-top:.5rem;font-size:.78rem;font-weight:700;text-align:center"></div>
+        </div>
+      </aside>
+      <!-- MAIN CONTENT -->
+      <div class="nutri-main">
     <div class="nutri-body">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:.8rem">
-        <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;color:var(--p1)">Bienvenida, Fernanda 🌿</h2>
-        <button onclick="logoutN()" style="font-size:.78rem;color:var(--g3);background:none;border:none;cursor:pointer">Cerrar sesión</button>
+        <h2 style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;color:var(--p1)">Bienvenida, <span id="nutri-welcome-name">Fernanda</span> 🌿</h2>
+        <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
+          <button class="btn-sync" onclick="sincronizarNutri()">🔄 Sincronizar</button>
+          <button onclick="logoutN()" style="font-size:.78rem;color:var(--g3);background:none;border:none;cursor:pointer">Cerrar sesión</button>
+        </div>
       </div>
       <div class="notif" id="notif-box">
         <div class="pulse"></div>
@@ -798,7 +906,11 @@ input,select,textarea,button{font-size:16px!important} /* prevent iOS zoom */
             <div id="nutri-time-config" style="display:none;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--g4)">
               <p style="font-size:.8rem;font-weight:700;color:var(--g2);margin-bottom:.5rem">Horarios para <span id="nutri-sel-date" style="color:var(--p2)"></span></p>
               <div style="display:flex;flex-wrap:wrap;gap:.4rem" id="nutri-time-toggle"></div>
-              <button class="btn btn-s" style="margin-top:.8rem;font-size:.8rem;padding:.55rem 1rem" onclick="saveNutriTimes()">Guardar horarios ✓</button>
+              <div style="display:flex;gap:.5rem;margin-top:.8rem;flex-wrap:wrap">
+                <button class="btn btn-s" style="font-size:.8rem;padding:.55rem 1rem" onclick="saveNutriTimes()">Guardar horarios ✓</button>
+                <button class="btn-block-day" id="btn-block-day" onclick="bloquearDia()">🚫 Bloquear día completo</button>
+                <button class="btn-unblock-day" id="btn-unblock-all" onclick="habilitarTodosDia()">✅ Habilitar todos</button>
+              </div>
             </div>
           </div>
         </div>
@@ -835,6 +947,10 @@ input,select,textarea,button{font-size:16px!important} /* prevent iOS zoom */
         </div>
       </div>
     </div>
+    </div><!-- /nutri-main -->
+    </div><!-- /nutri-layout -->
+    <!-- Sidebar toggle button mobile -->
+    <button class="sidebar-toggle" id="sidebar-toggle-btn" onclick="toggleNutriSidebar()" style="display:none">👤</button>
   </div>
 </div>
 
@@ -850,6 +966,91 @@ input,select,textarea,button{font-size:16px!important} /* prevent iOS zoom */
     <p style="font-size:.72rem;color:var(--g3);margin-top:1rem">Contraseña: <strong>admin2026</strong></p>
   </div>
   <div id="ad" style="display:none">
+    <!-- Sidebar overlay for mobile -->
+    <div class="admin-sidebar-overlay" id="admin-sidebar-overlay" onclick="toggleAdminSidebar(false)"></div>
+    <div class="admin-layout">
+      <!-- SIDEBAR PROFESIONALES -->
+      <aside class="admin-sidebar" id="admin-sidebar">
+        <h3>👩‍⚕️ Profesional registrado</h3>
+
+        <div class="as-section">
+          <div style="display:flex;align-items:center;gap:.7rem;margin-bottom:.7rem">
+            <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--p2),#2d5e34);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem" id="admin-prof-avatar">FU</div>
+            <div>
+              <div style="font-weight:700;font-size:.9rem;color:var(--g1)" id="admin-prof-name-display">Fernanda Ugarte</div>
+              <span class="as-badge role">Nutricionista</span>
+            </div>
+          </div>
+          <span class="as-badge active" style="margin-bottom:.5rem">● Cuenta activa</span>
+        </div>
+
+        <div class="as-section">
+          <h3>📋 Datos personales</h3>
+          <div class="as-row">
+            <span class="as-label">Nombre</span>
+            <span class="as-value" id="admin-prof-nombre">Fernanda Ugarte</span>
+          </div>
+          <div class="as-row">
+            <span class="as-label">Email</span>
+            <span class="as-value" id="admin-prof-email">fernandaugarte.nutri@gmail.com</span>
+          </div>
+          <div class="as-row">
+            <span class="as-label">Teléfono</span>
+            <span class="as-value" id="admin-prof-telefono">+56 9 7124 6200</span>
+          </div>
+          <div class="as-row">
+            <span class="as-label">RUT</span>
+            <span class="as-value" id="admin-prof-rut">20.726.694-9</span>
+          </div>
+        </div>
+
+        <div class="as-section">
+          <h3>🔐 Credenciales de acceso</h3>
+          <div class="as-row">
+            <span class="as-label">Usuario</span>
+            <span class="as-value">Nutricionista</span>
+          </div>
+          <div class="as-row">
+            <span class="as-label">Contraseña</span>
+            <span class="as-value"><span class="as-pass" id="admin-prof-pass">••••••••</span></span>
+          </div>
+          <button onclick="toggleAdminPassVisibility()" style="margin-top:.5rem;font-size:.72rem;color:var(--p2);background:none;border:none;cursor:pointer;font-weight:700;padding:.3rem 0" id="admin-pass-toggle-btn">👁 Mostrar contraseña</button>
+        </div>
+
+        <div class="as-section">
+          <h3>💼 Datos bancarios</h3>
+          <div class="as-row">
+            <span class="as-label">Banco</span>
+            <span class="as-value">Banco Estado</span>
+          </div>
+          <div class="as-row">
+            <span class="as-label">Tipo cuenta</span>
+            <span class="as-value">Cuenta RUT / Vista</span>
+          </div>
+          <div class="as-row">
+            <span class="as-label">Valor consulta</span>
+            <span class="as-value" style="color:var(--s1)">$15.000 CLP</span>
+          </div>
+        </div>
+
+        <div class="as-section" style="border-bottom:none">
+          <h3>📊 Resumen rápido</h3>
+          <div class="as-row">
+            <span class="as-label">Pacientes totales</span>
+            <span class="as-value" id="admin-sb-total">0</span>
+          </div>
+          <div class="as-row">
+            <span class="as-label">Citas hoy</span>
+            <span class="as-value" id="admin-sb-hoy">0</span>
+          </div>
+          <div class="as-row">
+            <span class="as-label">Ingresos hoy</span>
+            <span class="as-value" style="color:var(--s1)" id="admin-sb-ingresos">$0</span>
+          </div>
+        </div>
+      </aside>
+      <!-- MAIN CONTENT -->
+      <div class="admin-main">
     <div class="admin-body">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:.8rem">
         <div>
@@ -870,7 +1071,7 @@ input,select,textarea,button{font-size:16px!important} /* prevent iOS zoom */
         <div class="tw-head"><h3>Pacientes registrados</h3><div style="display:flex;align-items:center;gap:.7rem;flex-wrap:wrap"><span class="badge bp" id="admin-count">0 pacientes</span><button class="btn-excel" onclick="exportarExcel()">📥 Descargar CSV</button><button class="btn-excel" onclick="sincronizarDesdeGAS()" style="background:var(--p2)">🔄 Sincronizar</button></div></div>
         <div class="tw-scroll">
           <table class="dt">
-            <thead><tr><th>Ticket</th><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Fecha</th><th>Hora</th><th>Motivo</th><th>Comprobante</th><th>WA</th><th>Detalle</th></tr></thead>
+            <thead><tr><th>Ticket</th><th>Nombre</th><th>Email</th><th>Teléfono</th><th>Fecha</th><th>Hora</th><th>Motivo</th><th>Comprobante</th><th>Estado Pago</th><th>WA</th><th>Detalle</th></tr></thead>
             <tbody id="admin-table"></tbody>
           </table>
         </div>
@@ -922,6 +1123,10 @@ input,select,textarea,button{font-size:16px!important} /* prevent iOS zoom */
         </div>
       </div>
     </div>
+    </div><!-- /admin-main -->
+    </div><!-- /admin-layout -->
+    <!-- Admin sidebar toggle mobile -->
+    <button class="admin-sidebar-toggle" id="admin-sidebar-toggle-btn" onclick="toggleAdminSidebar()" style="display:none">👩‍⚕️</button>
   </div>
 </div>
 
@@ -1043,7 +1248,8 @@ async function initAvail(){
     var data = await gasGet({ action:'getAvailability' });
     if(data.ok && data.availability && Object.keys(data.availability).length > 0){
       var db = getDB();
-      db.availability = data.availability;   // GAS es la fuente de verdad
+      db.availability = data.availability;
+      normalizeAvailability(db);  // ← Limpiar formatos de hora GAS
       saveDB(db);
       gasLoading(false);
       renderCal();
@@ -1075,6 +1281,59 @@ function fmtDate(k){
 function fmtMoney(n){ return '$'+Number(n).toLocaleString('es-CL'); }
 function initials(name){ return name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase(); }
 
+/** Normaliza cualquier formato de hora a "HH:MM" limpio.
+ *  Maneja: "09:00", "Sat Dec 30 1899 13:17:15 GMT-0442", Date objects, timestamps GAS */
+function normalizeTime(t){
+  if(!t) return '';
+  var s = String(t).trim();
+  // Ya es formato HH:MM o HH:MM:SS — extraer HH:MM
+  var simple = s.match(/^(\d{1,2}:\d{2})(:\d{2})?$/);
+  if(simple) return simple[1].length === 4 ? '0'+simple[1] : simple[1];
+  // Contiene formato tipo Date string — extraer hora
+  var dateMatch = s.match(/(\d{1,2}):(\d{2}):\d{2}\s*(GMT|UTC)/i);
+  if(dateMatch){
+    var h = parseInt(dateMatch[1],10);
+    var m = dateMatch[2];
+    // Corregir offset GMT-0442 de Chile → sumar 4h42m aprox (no necesario, usamos hora local)
+    return String(h).padStart(2,'0')+':'+m;
+  }
+  // Intentar parsear como Date object
+  try {
+    var d = new Date(s);
+    if(!isNaN(d.getTime())){
+      // Si el año es 1899/1900 es un timestamp de Google Sheets (hora serial)
+      // Extraer solo horas y minutos
+      var hours = d.getHours();
+      var mins = d.getMinutes();
+      return String(hours).padStart(2,'0')+':'+String(mins).padStart(2,'0');
+    }
+  } catch(e){}
+  // Fallback: buscar cualquier patrón HH:MM en el string
+  var any = s.match(/(\d{1,2}):(\d{2})/);
+  if(any) return String(parseInt(any[1],10)).padStart(2,'0')+':'+any[2];
+  return s; // devolver tal cual si no se puede parsear
+}
+
+/** Normaliza un array de horarios */
+function normalizeTimes(arr){
+  if(!Array.isArray(arr)) return [];
+  return arr.map(normalizeTime).filter(function(t){ return t && /^\d{2}:\d{2}$/.test(t); });
+}
+
+/** Normaliza toda la disponibilidad de la DB */
+function normalizeAvailability(db){
+  var changed = false;
+  Object.keys(db.availability||{}).forEach(function(k){
+    var orig = db.availability[k];
+    var norm = normalizeTimes(orig);
+    if(JSON.stringify(orig) !== JSON.stringify(norm)){
+      db.availability[k] = norm;
+      changed = true;
+    }
+  });
+  return changed;
+}
+
 // ─── ESTADO WIZARD ───
 let selDate=null,selTime=null,formData=null,uploadedDataURL=null,uploadedName=null;
 
@@ -1091,8 +1350,17 @@ function showV(name,btn,botId){
   const desktopMap={patient:0,nutri:1,admin:2};
   const tabs=document.querySelectorAll('.ntab');
   if(tabs[desktopMap[name]]) tabs[desktopMap[name]].classList.add('on');
-  if(name==='admin') renderAdmin();
-  if(name==='nutri'){ renderNutriRecords(); renderNutriAppts(); setTimeout(function(){renderNutriStats();},80); }
+  if(name==='admin') renderAdmin(); // renderAdmin ya incluye sync GAS con caché 60s
+  if(name==='nutri'){
+    // Sincronizar con GAS si han pasado más de 60 segundos (caché compartida)
+    if(Date.now()-_lastNutriSync>SYNC_TTL){
+      sincronizarNutri(); // async — muestra loading spinner mientras carga
+    } else {
+      renderNutriRecords(); renderNutriAppts(); renderNutriCal();
+      setTimeout(function(){renderNutriStats();},80);
+    }
+  }
+  if(name==='patient') renderCal(); // ← Sincronizar calendario paciente al cambiar vista
 }
 
 function goStep(n){
@@ -1109,10 +1377,11 @@ function goStep(n){
 let calDate=new Date(); calDate.setDate(1);
 const MONTHS=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
-function isTaken(key,time){ return getDB().patients.some(p=>p.date===key&&p.time===time); }
+function isTaken(key,time){ var nt=normalizeTime(time); return getDB().patients.some(function(p){return p.date===key&&normalizeTime(p.time)===nt;}); }
 
 function renderCal(){
   const db=getDB();
+  normalizeAvailability(db); saveDB(db); // asegurar horas limpias
   const y=calDate.getFullYear(),m=calDate.getMonth();
   document.getElementById('cal-title').textContent=MONTHS[m]+' '+y;
   const first=(new Date(y,m,1).getDay()+6)%7;
@@ -1124,7 +1393,7 @@ function renderCal(){
   for(let d=1;d<=days;d++){
     const dd=new Date(y,m,d); dd.setHours(0,0,0,0);
     const k=dk(dd);
-    const avail=db.availability[k]||[];
+    const avail=normalizeTimes(db.availability[k]||[]);
     const allTaken=avail.length>0&&avail.every(t=>isTaken(k,t));
     const el=document.createElement('div');
     el.textContent=d;
@@ -1140,15 +1409,16 @@ function selectDay(k){
   document.getElementById('btn-step1').disabled=true;
   renderCal();
   const db=getDB();
-  const avail=(db.availability[k]||[]).filter(t=>!isTaken(k,t));
+  const avail=normalizeTimes(db.availability[k]||[]).filter(t=>!isTaken(k,t));
   const wrap=document.getElementById('slots-wrap');
   const sl=document.getElementById('time-slots');
   document.getElementById('slots-date').textContent=fmtDate(k);
   sl.innerHTML='';
   avail.forEach(t=>{
+    var display=normalizeTime(t);
     const el=document.createElement('div');
-    el.className='ts'; el.textContent=t;
-    el.onclick=()=>{ document.querySelectorAll('.ts').forEach(x=>x.classList.remove('on')); el.classList.add('on'); selTime=t; document.getElementById('btn-step1').disabled=false; };
+    el.className='ts'; el.textContent=display;
+    el.onclick=()=>{ document.querySelectorAll('.ts').forEach(x=>x.classList.remove('on')); el.classList.add('on'); selTime=display; document.getElementById('btn-step1').disabled=false; };
     sl.appendChild(el);
   });
   if(!avail.length){ sl.innerHTML='<p style="color:var(--g3);font-size:.85rem;padding:.5rem 0">No hay horarios disponibles para este día.</p>'; }
@@ -1301,25 +1571,30 @@ async function finalizarReserva(){
 }
 
 // ─── LOGIN ───
-function loginN(){
-  if(document.getElementById('np').value==='fernanda2026'){
+async function loginN(){
+  if(document.getElementById('np').value===getNutriPass()){
     document.getElementById('nl').style.display='none';
     document.getElementById('nd').style.display='block';
     document.getElementById('ne').style.display='none';
-    renderNutriRecords(); renderNutriAppts(); renderNutriCal();
-    setTimeout(function(){ renderNutriStats(); },80);
+    loadProfile();
+    // Sincronizar con GAS al login para ver datos reales desde cualquier dispositivo
+    await sincronizarNutri();
+    // Mostrar sidebar toggle en mobile
+    var tb=document.getElementById('sidebar-toggle-btn');if(tb)tb.style.display='';
   } else document.getElementById('ne').style.display='block';
 }
-function logoutN(){ document.getElementById('nl').style.display='block'; document.getElementById('nd').style.display='none'; document.getElementById('np').value=''; }
+function logoutN(){ document.getElementById('nl').style.display='block'; document.getElementById('nd').style.display='none'; document.getElementById('np').value=''; toggleNutriSidebar(false); var tb=document.getElementById('sidebar-toggle-btn');if(tb)tb.style.display='none'; }
 function loginA(){
   if(document.getElementById('ap').value==='admin2026'){
     document.getElementById('al').style.display='none';
     document.getElementById('ad').style.display='block';
     document.getElementById('ae').style.display='none';
     renderAdmin();
+    updateAdminSidebar();
+    var tb=document.getElementById('admin-sidebar-toggle-btn');if(tb)tb.style.display='';
   } else document.getElementById('ae').style.display='block';
 }
-function logoutA(){ document.getElementById('al').style.display='block'; document.getElementById('ad').style.display='none'; document.getElementById('ap').value=''; }
+function logoutA(){ document.getElementById('al').style.display='block'; document.getElementById('ad').style.display='none'; document.getElementById('ap').value=''; toggleAdminSidebar(false); var tb=document.getElementById('admin-sidebar-toggle-btn');if(tb)tb.style.display='none'; }
 
 // ─── RENDER NUTRICIONISTA ───
 function renderNutriAppts(){
@@ -1330,25 +1605,29 @@ function renderNutriAppts(){
   const list=document.getElementById('appt-list');
   if(!list) return;
   if(!todayAppts.length){ list.innerHTML='<p style="color:var(--g3);font-size:.85rem;text-align:center;padding:1rem">No hay consultas agendadas para hoy</p>'; return; }
-  list.innerHTML=todayAppts.sort((a,b)=>a.time.localeCompare(b.time)).map(function(p){
+  list.innerHTML=todayAppts.sort((a,b)=>normalizeTime(a.time).localeCompare(normalizeTime(b.time))).map(function(p){
     var seed=String(p.telefono||p.id).replace(/[^0-9]/g,'');
     var nom=(p.nombre||'Paciente').replace(/'/g,'');
-    var tk=p.ticket?'<span class="ticket-badge">'+p.ticket+'</span>':'';
-    return '<div class="appt-item">'+
+    var timeClean=normalizeTime(p.time);
+    var tk=p.ticket?'<span class="ticket-badge" style="font-size:.62rem">'+p.ticket+'</span>':'';
+    return '<div class="appt-card">'+
       '<div class="appt-av">'+initials(p.nombre||'PA')+'</div>'+
-      '<div style="flex:1;min-width:0">'+
-        '<div class="appt-name">'+p.nombre+' '+tk+'</div>'+
-        '<div class="appt-meta">'+(p.motivo||'Consulta')+' · #'+p.consultations+'</div>'+
+      '<div class="appt-card-info">'+
+        '<div class="appt-card-name">'+p.nombre+'</div>'+
+        '<div class="appt-card-meta">'+(p.motivo||'Consulta')+' · Sesión #'+(p.consultations||1)+'</div>'+
+        (tk?'<div style="margin-top:3px">'+tk+'</div>':'')+
       '</div>'+
-      '<div class="appt-time" style="display:flex;flex-direction:column;align-items:flex-end;gap:.3rem">'+
-        '<div><span class="t">'+p.time+'</span> <span class="d">Hoy</span></div>'+
-        '<div style="display:flex;gap:.35rem;flex-wrap:wrap;justify-content:flex-end">'+
-          '<button class="appt-video-btn" onclick="iniciarLlamada(\''+seed+'\',\''+nom+'\')">📹 Sala Virtual</button>'+
-          (function(){var wl=waLinkNutri(nom,p.time,p.telefono,seed);return wl?'<a class="btn-wa" href="'+wl+'" target="_blank" rel="noopener">'+
+      '<div class="appt-card-right">'+
+        '<div class="appt-card-time">'+timeClean+' hrs</div>'+
+        '<div class="appt-card-day">Hoy</div>'+
+        '<div class="appt-card-actions">'+
+          '<button class="appt-video-btn" onclick="iniciarLlamada(\''+seed+'\',\''+nom+'\')">📹 Sala</button>'+
+          (function(){var wl=waLinkNutri(nom,timeClean,p.telefono,seed);return wl?'<a class="btn-wa" href="'+wl+'" target="_blank" rel="noopener">'+
             '<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>'+
-            ' WhatsApp</a>':'';})() +
+            ' WA</a>':'';})() +
         '</div>'+
-      '</div></div>';
+      '</div>'+
+    '</div>';
   }).join('');
 }
 
@@ -1364,10 +1643,10 @@ function renderNutriRecords(){
       <div class="rec-head" onclick="toggleRec(this)">
         <div style="flex:1;min-width:0">
           <div class="rec-name">${p.nombre} <span class="badge bg" style="font-size:.65rem">${p.status}</span>${p.ticket?' <span class="ticket-badge">'+p.ticket+'</span>':''}</div>
-          <div class="rec-sub">${p.dateFormatted} · ${p.time} hrs</div>
+          <div class="rec-sub">${p.dateFormatted} · ${normalizeTime(p.time)} hrs</div>
         </div>
         <div style="display:flex;align-items:center;gap:.5rem">
-          <button class="det-btn" onclick="event.stopPropagation();openModal(${p.id})">Ficha completa</button>
+          <button class="det-btn" onclick="event.stopPropagation();openModal('${p.ticket||p.id}')">Ficha completa</button>
           <div class="rec-arr">▼</div>
         </div>
       </div>
@@ -1383,7 +1662,7 @@ function renderNutriRecords(){
         <div class="rf" style="margin-top:.6rem;padding-top:.6rem;border-top:1px solid var(--g4)"><strong>Comprobante de pago ($15.000):</strong></div>
         ${p.comprobante?`<img src="${p.comprobante}" class="comprobante-img" alt="comprobante"><br><span style="font-size:.75rem;color:var(--g3)">${p.comprobanteNombre}</span>`:'<span style="font-size:.82rem;color:var(--g3)">No adjuntado aún</span>'}
         <div style="margin-top:.8rem">
-          <button class="btn btn-p" style="width:100%;justify-content:center;font-size:.82rem!important" onclick="openModal(${p.id})">Ver ficha clínica completa →</button>
+          <button class="btn btn-p" style="width:100%;justify-content:center;font-size:.82rem!important" onclick="openModal('${p.ticket||p.id}')">Ver ficha clínica completa →</button>
         </div>
       </div>
     </div>`).join('');
@@ -1403,6 +1682,7 @@ const ALL_TIMES=['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00'
 
 function renderNutriCal(){
   const db=getDB();
+  normalizeAvailability(db); saveDB(db);
   const y=nutriCalDate.getFullYear(),m=nutriCalDate.getMonth();
   document.getElementById('nutri-cal-title').textContent=MONTHS[m]+' '+y;
   const first=(new Date(y,m,1).getDay()+6)%7;
@@ -1414,7 +1694,7 @@ function renderNutriCal(){
   for(let d=1;d<=days;d++){
     const dd=new Date(y,m,d); dd.setHours(0,0,0,0);
     const k=dk(dd);
-    const avail=db.availability[k]||[];
+    const avail=normalizeTimes(db.availability[k]||[]);
     const hasAppt=db.patients.some(p=>p.date===k);
     const el=document.createElement('div');
     el.textContent=d;
@@ -1429,11 +1709,19 @@ function renderNutriCal(){
 function editNutriDay(k){
   nutriSelDate=k;
   const db=getDB();
-  const avail=db.availability[k]||[];
+  const avail=normalizeTimes(db.availability[k]||[]);
   document.getElementById('nutri-sel-date').textContent=fmtDate(k);
   const toggle=document.getElementById('nutri-time-toggle');
   toggle.innerHTML=ALL_TIMES.map(t=>`<div class="tt${avail.includes(t)?' on':''}" onclick="this.classList.toggle('on')">${t}</div>`).join('');
   document.getElementById('nutri-time-config').style.display='block';
+}
+
+function bloquearDia(){
+  document.querySelectorAll('#nutri-time-toggle .tt').forEach(function(el){el.classList.remove('on');});
+}
+
+function habilitarTodosDia(){
+  document.querySelectorAll('#nutri-time-toggle .tt').forEach(function(el){el.classList.add('on');});
 }
 
 async function saveNutriTimes(){
@@ -1442,7 +1730,8 @@ async function saveNutriTimes(){
   var dateGuardada=nutriSelDate;
   // Actualizar local inmediatamente (UX rápida)
   var db=getDB(); db.availability[dateGuardada]=times; saveDB(db);
-  renderNutriCal(); renderCal();
+  renderNutriCal();
+  renderCal(); // ← Sincronizar vista paciente inmediatamente
   document.getElementById('nutri-time-config').style.display='none';
   nutriSelDate=null;
   // Sincronizar con GAS en segundo plano
@@ -1451,27 +1740,183 @@ async function saveNutriTimes(){
   gasLoading(false);
   if(!r.ok) console.warn('saveNutriTimes GAS error:',r.error);
 }
-function nutriCalNav(dir){ nutriCalDate.setMonth(nutriCalDate.getMonth()+dir); renderNutriCal(); }
 
-// ─── RENDER ADMIN — Sincroniza desde GAS al abrir ───
-var _adminSynced=false;
-async function renderAdmin(){
-  var db=getDB();
-  if(!_adminSynced){
-    _adminSynced=true;
-    gasLoading(true,'Sincronizando con Google Sheets...');
+// ─── SINCRONIZAR NUTRICIONISTA ───
+var _lastNutriSync=0;
+async function sincronizarNutri(){
+  _lastNutriSync=Date.now();
+  gasLoading(true,'Sincronizando con Google Sheets...');
+  try {
     var r=await gasGet({action:'sincronizarTodo'});
     if(r.ok){
+      var db=getDB();
       if(r.patients&&r.patients.length>0) db.patients=r.patients;
       if(r.availability&&Object.keys(r.availability).length>0) db.availability=r.availability;
+      // Aplicar stats del servidor si vienen
+      if(r.stats) db.stats=r.stats;
+      normalizeAvailability(db);
       saveDB(db);
     }
+  } catch(e){ console.warn('sincronizarNutri error:', e); }
+  gasLoading(false);
+  renderNutriRecords(); renderNutriAppts(); renderNutriCal(); renderCal();
+  setTimeout(function(){ renderNutriStats(); },80);
+}
+
+// ─── PERFIL NUTRICIONISTA ───
+var NUTRI_PROFILE_KEY='nutriageProfile';
+var NUTRI_PASS_KEY='nutriagePass';
+function getProfile(){
+  try { return JSON.parse(localStorage.getItem(NUTRI_PROFILE_KEY))||{}; } catch(e){ return {}; }
+}
+function saveProfile(p){ localStorage.setItem(NUTRI_PROFILE_KEY,JSON.stringify(p)); }
+function getNutriPass(){ return localStorage.getItem(NUTRI_PASS_KEY)||'fernanda2026'; }
+function setNutriPass(p){ localStorage.setItem(NUTRI_PASS_KEY,p); }
+
+function loadProfile(){
+  var p=getProfile();
+  if(p.nombre) document.getElementById('prof-nombre').value=p.nombre;
+  if(p.email) document.getElementById('prof-email').value=p.email;
+  if(p.telefono) document.getElementById('prof-telefono').value=p.telefono;
+  if(p.rut) document.getElementById('prof-rut').value=p.rut;
+  // Actualizar nombre de bienvenida
+  var wn=document.getElementById('nutri-welcome-name');
+  if(wn) wn.textContent=(p.nombre||'Fernanda').split(' ')[0];
+  // Actualizar WhatsApp number global
+  if(p.telefono){
+    var tel=String(p.telefono).replace(/[^0-9]/g,'');
+    if(tel.length===9 && tel[0]==='9') tel='56'+tel;
+    if(tel.length>=11) FERNANDA_WA=tel;
+  }
+}
+
+async function guardarPerfil(){
+  var p={
+    nombre:document.getElementById('prof-nombre').value.trim(),
+    email:document.getElementById('prof-email').value.trim(),
+    telefono:document.getElementById('prof-telefono').value.trim(),
+    rut:document.getElementById('prof-rut').value.trim()
+  };
+  saveProfile(p);
+  loadProfile();
+  // Sincronizar con GAS
+  gasLoading(true,'Guardando perfil...');
+  var r=await gasPost({action:'saveProfile',nombre:p.nombre,email:p.email,telefono:p.telefono,rut:p.rut});
+  gasLoading(false);
+  var msg=document.getElementById('prof-msg');
+  msg.style.display='block';msg.style.color='var(--s1)';msg.textContent='✅ Perfil actualizado correctamente';
+  setTimeout(function(){msg.style.display='none';},3000);
+}
+
+function cambiarPassword(){
+  var oldP=document.getElementById('prof-pass-old').value;
+  var newP=document.getElementById('prof-pass-new').value;
+  var confP=document.getElementById('prof-pass-confirm').value;
+  var msg=document.getElementById('pass-msg');
+  if(oldP!==getNutriPass()){msg.style.display='block';msg.style.color='#c0392b';msg.textContent='❌ Contraseña actual incorrecta';return;}
+  if(newP.length<6){msg.style.display='block';msg.style.color='#c0392b';msg.textContent='❌ La nueva contraseña debe tener al menos 6 caracteres';return;}
+  if(newP!==confP){msg.style.display='block';msg.style.color='#c0392b';msg.textContent='❌ Las contraseñas no coinciden';return;}
+  setNutriPass(newP);
+  document.getElementById('prof-pass-old').value='';
+  document.getElementById('prof-pass-new').value='';
+  document.getElementById('prof-pass-confirm').value='';
+  msg.style.display='block';msg.style.color='var(--s1)';msg.textContent='✅ Contraseña cambiada con éxito';
+  setTimeout(function(){msg.style.display='none';},3000);
+}
+
+function toggleNutriSidebar(force){
+  var sb=document.getElementById('nutri-sidebar');
+  var ov=document.getElementById('nutri-sidebar-overlay');
+  if(typeof force==='boolean'){
+    sb.classList.toggle('open',force); ov.classList.toggle('open',force);
+  } else {
+    sb.classList.toggle('open'); ov.classList.toggle('open');
+  }
+}
+
+function nutriCalNav(dir){ nutriCalDate.setMonth(nutriCalDate.getMonth()+dir); renderNutriCal(); }
+
+// ─── RENDER ADMIN — Sincroniza desde GAS SIEMPRE al abrir (caché 60s) ───
+var _lastAdminSync=0;
+var SYNC_TTL=60000; // 60 segundos entre sincronizaciones automáticas
+async function renderAdmin(){
+  var db=getDB();
+  var now=Date.now();
+  // Sincronizar si han pasado más de 60 segundos desde la última vez
+  if(now-_lastAdminSync>SYNC_TTL){
+    _lastAdminSync=now;
+    gasLoading(true,'Sincronizando con Google Sheets...');
+    try {
+      var r=await gasGet({action:'sincronizarTodo'});
+      if(r.ok){
+        if(r.patients&&r.patients.length>0) db.patients=r.patients;
+        if(r.availability&&Object.keys(r.availability).length>0) db.availability=r.availability;
+        if(r.stats) db.stats=r.stats;
+        normalizeAvailability(db);
+        saveDB(db);
+      }
+    } catch(e){ console.warn('renderAdmin sync error:',e); }
     gasLoading(false);
   }
   _renderAdminUI(db);
 }
 
-function sincronizarDesdeGAS(){ _adminSynced=false; renderAdmin(); }
+// Forzar sincronización inmediata ignorando el caché
+function sincronizarDesdeGAS(){ _lastAdminSync=0; renderAdmin(); }
+
+// ─── ADMIN SIDEBAR FUNCTIONS ───
+function toggleAdminSidebar(force){
+  var sb=document.getElementById('admin-sidebar');
+  var ov=document.getElementById('admin-sidebar-overlay');
+  if(typeof force==='boolean'){
+    sb.classList.toggle('open',force); ov.classList.toggle('open',force);
+  } else {
+    sb.classList.toggle('open'); ov.classList.toggle('open');
+  }
+}
+
+var _adminPassVisible=false;
+function toggleAdminPassVisibility(){
+  _adminPassVisible=!_adminPassVisible;
+  var el=document.getElementById('admin-prof-pass');
+  var btn=document.getElementById('admin-pass-toggle-btn');
+  if(_adminPassVisible){
+    el.textContent=getNutriPass();
+    btn.textContent='🔒 Ocultar contraseña';
+  } else {
+    el.textContent='••••••••';
+    btn.textContent='👁 Mostrar contraseña';
+  }
+}
+
+function updateAdminSidebar(){
+  var p=getProfile();
+  var nombre=p.nombre||'Fernanda Ugarte';
+  var email=p.email||'fernandaugarte.nutri@gmail.com';
+  var telefono=p.telefono||'+56 9 7124 6200';
+  var rut=p.rut||'20.726.694-9';
+  // Avatar initials
+  var av=document.getElementById('admin-prof-avatar');
+  if(av) av.textContent=initials(nombre);
+  // Display name
+  var nd=document.getElementById('admin-prof-name-display');
+  if(nd) nd.textContent=nombre;
+  // Fields
+  var fn=document.getElementById('admin-prof-nombre');if(fn)fn.textContent=nombre;
+  var fe=document.getElementById('admin-prof-email');if(fe)fe.textContent=email;
+  var ft=document.getElementById('admin-prof-telefono');if(ft)ft.textContent=telefono;
+  var fr=document.getElementById('admin-prof-rut');if(fr)fr.textContent=rut;
+  // Password
+  var fp=document.getElementById('admin-prof-pass');
+  if(fp) fp.textContent=_adminPassVisible?getNutriPass():'••••••••';
+  // Stats
+  var db=getDB();
+  var todayKey=dk(new Date());
+  var todayP=db.patients.filter(function(x){return x.date===todayKey;});
+  var st=document.getElementById('admin-sb-total');if(st)st.textContent=db.patients.length;
+  var sh=document.getElementById('admin-sb-hoy');if(sh)sh.textContent=todayP.length;
+  var si=document.getElementById('admin-sb-ingresos');if(si)si.textContent=fmtMoney(todayP.length*15000);
+}
 
 function _renderAdminUI(db){
   var todayKey=dk(new Date());
@@ -1487,19 +1932,29 @@ function _renderAdminUI(db){
   var s_h_n=document.getElementById('stat-hoy-n'); if(s_h_n) s_h_n.textContent=todayP.length;
   var tbody=document.getElementById('admin-table');
   if(!tbody) return;
-  if(!db.patients.length){tbody.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--g3);padding:1.5rem">No hay pacientes registrados aún</td></tr>';return;}
+  if(!db.patients.length){tbody.innerHTML='<tr><td colspan="11" style="text-align:center;color:var(--g3);padding:1.5rem">No hay pacientes registrados aún</td></tr>';return;}
   tbody.innerHTML=db.patients.map(function(p){
     var ticket=p.ticket?'<span class="ticket-badge">'+p.ticket+'</span>':'<span style="color:var(--g4);font-size:.72rem">—</span>';
-    var comp=p.comprobante?'<span class="badge bg">✓ Adjunto</span>':'<span class="badge br">Pendiente</span>';
+    // Comprobante: usa comprobanteUrl (GAS) o comprobante (local base64)
+    var tieneComp=!!(p.comprobanteUrl||p.comprobante);
+    var comp=tieneComp?'<span class="badge bg">✓ Adjunto</span>':'<span class="badge br">Pendiente</span>';
+    // Estado de pago desde hoja PAGOS (retornado por GAS v6)
+    var estadoPago=p.pagoEstado||'Pendiente';
+    var pagoColor=(estadoPago.toLowerCase().indexOf('verif')>=0)?'bg':(estadoPago.toLowerCase().indexOf('rechazo')>=0||estadoPago.toLowerCase().indexOf('rechaz')>=0)?'br':'ba';
+    var pagoBadge='<span class="badge '+pagoColor+'">'+estadoPago+'</span>';
     var wa=(p.waNotificado&&p.waNotificado!=='No')?'<span class="badge bg">📲 Notificó</span>':'<span style="color:var(--g4);font-size:.72rem">—</span>';
-    return '<tr><td>'+ticket+'</td><td><strong>'+(p.nombre||'—')+'</strong></td><td>'+(p.email||'—')+'</td><td>'+(p.telefono||'—')+'</td><td>'+(p.dateFormatted||p.date||'—')+'</td><td>'+(p.time||'—')+' hrs</td><td>'+(p.motivo||'—')+'</td><td>'+comp+'</td><td>'+wa+'</td><td><button class="det-btn" onclick="openModal(\''+p.id+'\')">Ver ficha</button></td></tr>';
+    // Usar ticket como clave de lookup (funciona para pacientes de GAS y locales)
+    var lookupKey=p.ticket||p.id;
+    return '<tr><td>'+ticket+'</td><td><strong>'+(p.nombre||'—')+'</strong></td><td>'+(p.email||'—')+'</td><td>'+(p.telefono||'—')+'</td><td>'+(p.dateFormatted||p.date||'—')+'</td><td>'+normalizeTime(p.time||'—')+' hrs</td><td>'+(p.motivo||'—')+'</td><td>'+comp+'</td><td>'+pagoBadge+'</td><td>'+wa+'</td><td><button class="det-btn" onclick="openModal(\''+lookupKey+'\')">Ver ficha</button></td></tr>';
   }).join('');
   setTimeout(function(){renderAdminPieChart();buildBarSvg('admin-bar-svg',adminChartDays,null);},50);
+  updateAdminSidebar();
 }
 
-function openModal(id){
+function openModal(idOrTicket){
   const db=getDB();
-  const p=db.patients.find(x=>x.id===id);
+  // Buscar primero por ticket (pacientes GAS), luego por id (pacientes locales)
+  const p=db.patients.find(x=>x.ticket===idOrTicket)||db.patients.find(x=>String(x.id)===String(idOrTicket));
   if(!p) return;
   const fields=(label,val)=>`<div class="mf"><strong>${label}</strong><span>${val||'—'}</span></div>`;
   document.getElementById('modal-title').textContent=p.nombre+' — Ficha completa';
@@ -1508,7 +1963,7 @@ function openModal(id){
     ${fields('Email',p.email)}${fields('Teléfono',p.telefono)}${fields('Edad',p.edad)}
     ${fields('Ocupación',p.ocupacion)}${fields('Peso',p.peso)}${fields('Talla',p.talla)}
     <div class="msect">Consulta</div>
-    ${fields('Fecha',p.dateFormatted+' · '+p.time+' hrs')}${fields('Motivo',p.motivo)}${fields('Nutricionista',p.nutricionista)}
+    ${fields('Fecha',p.dateFormatted+' · '+normalizeTime(p.time)+' hrs')}${fields('Motivo',p.motivo)}${fields('Nutricionista',p.nutricionista)}
     <div class="msect">Historial médico</div>
     ${fields('Enfermedades',p.enfermedad)}${fields('Lesiones',p.lesion)}${fields('Antecedentes familiares',p.familiar)}${fields('Cirugías',p.cirugia)}
     <div class="msect">Estilo de vida</div>
@@ -1520,7 +1975,12 @@ function openModal(id){
     <div class="msect">Registro 24 horas</div>
     <div class="mf"><strong>Alimentación</strong><span style="white-space:pre-line">${p.registro24||'—'}</span></div>
     <div class="msect">Pago — $15.000 CLP</div>
-    ${p.comprobante?`<img src="${p.comprobante}" style="max-width:100%;border-radius:8px;border:1px solid var(--g4)" alt="comprobante"><br><span style="font-size:.75rem;color:var(--g3)">${p.comprobanteNombre}</span>`:'<span style="font-size:.82rem;color:var(--g3)">Comprobante no adjuntado aún</span>'}
+    <div class="mf"><strong>Estado de pago</strong><span>${p.pagoEstado||'Pendiente verificación'}</span></div>
+    ${(p.comprobanteUrl||p.comprobante)?
+      (p.comprobanteUrl
+        ? `<div class="mf"><strong>Comprobante (Drive)</strong><a href="${p.comprobanteUrl}" target="_blank" rel="noopener" style="color:var(--s1);font-weight:700">Ver comprobante →</a></div>`
+        : `<img src="${p.comprobante}" style="max-width:100%;border-radius:8px;border:1px solid var(--g4)" alt="comprobante"><br><span style="font-size:.75rem;color:var(--g3)">${p.comprobanteNombre||''}</span>`)
+      :'<span style="font-size:.82rem;color:var(--g3)">Comprobante no adjuntado aún</span>'}
     `;
   document.getElementById('modal').classList.add('open');
   document.body.style.overflow='hidden';
@@ -1876,6 +2336,7 @@ function cerrarLlamada(){
 document.addEventListener('DOMContentLoaded', function(){
   initAvail();
   renderCal();
+  loadProfile(); // Cargar perfil nutricionista
 });
 </script>
 </body>
