@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: nutriage-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn main:app
+    envVars:
+      - key: NOTION_TOKEN
+        sync: false
+      - key: NOTION_DB_PACIENTES
+        sync: false
+      - key: NOTION_DB_LEADS
+        sync: false
+      - key: NOTION_DB_HISTORIAL_AGENTE
+        sync: false
+      - key: CALCOM_API_KEY
+        sync: false
+      - key: CALCOM_USERNAME
+        sync: false
+      - key: CALCOM_EVENT_TYPE_ID
+        sync: false
+      - key: MAKE_API_TOKEN
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: GMAIL_USER
+        sync: false
+      - key: GMAIL_APP_PASSWORD
+        sync: false
+      - key: APP_ENV
+        value: production
+      - key: TZ
+        value: America/Santiago
