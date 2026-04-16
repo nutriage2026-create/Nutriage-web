@@ -1000,7 +1000,8 @@ function renderScCalendar(){
 
   const today     = new Date(); today.setHours(0,0,0,0);
   const avail     = scheduleData?.availability || [];
-  const overrides = new Set((scheduleData?.overrides||[]).map(o=>o.date));
+  const overridesMap = {};
+  for(const o of (scheduleData?.overrides||[])) overridesMap[o.date] = o;
 
   // días habilitados de la semana (nombres en inglés)
   const enabledWeekdays = new Set();
@@ -1017,7 +1018,8 @@ function renderScCalendar(){
     const date  = new Date(y, mo, d);
     const wdEN  = DAY_NAMES_EN[date.getDay()];
     const isPast     = date < today;
-    const isBlocked  = overrides.has(ds);
+    const ov = overridesMap[ds];
+    const isBlocked  = !!ov && ov.endTime === '00:00';
     const isAvail    = !isPast && !isBlocked && enabledWeekdays.has(wdEN);
     const hasBk      = !!bookingsByDate[ds];
 
@@ -1070,7 +1072,7 @@ async function toggleDateBlock(ds, block){
   if(!scheduleData) return;
   let overrides = [...(scheduleData.overrides||[])];
   if(block){
-    if(!overrides.find(o=>o.date===ds)) overrides.push({date:ds});
+    if(!overrides.find(o=>o.date===ds)) overrides.push({date:ds, startTime:'00:00', endTime:'00:00'});
   } else {
     overrides = overrides.filter(o=>o.date!==ds);
   }
