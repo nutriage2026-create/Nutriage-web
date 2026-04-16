@@ -185,6 +185,58 @@ tr:hover td{background:var(--g5)}
 .slot-btn:hover{border-color:var(--p3);color:var(--p2);background:var(--p6)}
 .slot-date-head{font-size:.72rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.4px;margin:.85rem 0 .4rem;border-bottom:1px solid var(--g4);padding-bottom:.3rem}
 
+/* ── SCHEDULE EDITOR ── */
+.sched-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.day-row{display:flex;align-items:center;gap:.75rem;padding:.7rem .9rem;border-radius:var(--r);border:1.5px solid var(--g4);background:var(--wh);transition:all .2s;margin-bottom:.5rem}
+.day-row.active{border-color:var(--p4);background:var(--p6)}
+.day-row.blocked{background:var(--g5);opacity:.65}
+.day-toggle{display:flex;align-items:center;gap:.5rem;min-width:100px}
+.day-toggle input[type=checkbox]{width:16px;height:16px;accent-color:var(--p2);cursor:pointer;flex-shrink:0}
+.day-toggle label{font-size:.82rem;font-weight:700;color:var(--g2);cursor:pointer}
+.day-hours{display:flex;align-items:center;gap:.4rem;flex:1}
+.day-hours input[type=time]{padding:.3rem .5rem;border:1.5px solid var(--g4);border-radius:6px;font-family:'Nunito',sans-serif;font-size:.78rem;color:var(--g1);outline:none;background:var(--wh);width:90px}
+.day-hours input[type=time]:focus{border-color:var(--p2)}
+.day-hours span{color:var(--g3);font-size:.8rem}
+.day-hours.disabled{opacity:.35;pointer-events:none}
+.sched-save{width:100%;padding:.8rem;background:var(--p2);color:#fff;border:none;border-radius:var(--r);font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:background .2s;margin-top:.25rem;display:flex;align-items:center;justify-content:center;gap:.4rem}
+.sched-save:hover{background:var(--p1)}
+.sched-save:disabled{background:var(--g4);cursor:not-allowed;color:var(--g3)}
+.sched-status{font-size:.78rem;margin-top:.6rem;text-align:center;min-height:1.2rem;font-weight:600}
+.sched-status.ok{color:var(--s2)}
+.sched-status.err{color:#dc2626}
+
+/* ── SCHEDULE CALENDAR ── */
+.sc-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
+.sc-month{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:600;color:var(--p1)}
+.sc-arrow{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--g4);background:var(--wh);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;color:var(--g2);transition:all .18s;line-height:1}
+.sc-arrow:hover{border-color:var(--p3);color:var(--p2)}
+.sc-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:.75rem}
+.sc-dow{text-align:center;font-size:.6rem;font-weight:800;color:var(--g3);padding:.4rem 0;text-transform:uppercase;letter-spacing:.3px}
+.sc-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:7px;font-size:.75rem;font-weight:600;position:relative;transition:all .15s;cursor:default;color:var(--g3)}
+.sc-day.avail{background:var(--s5);color:var(--g1);cursor:pointer}
+.sc-day.avail:hover{background:var(--s4);transform:scale(1.05)}
+.sc-day.blocked-day{background:#fee2e2;color:#dc2626;cursor:pointer}
+.sc-day.blocked-day:hover{background:#fecaca}
+.sc-day.past{color:var(--g4)}
+.sc-day.has-booking::after{content:'';position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:var(--p2)}
+.sc-day.selected-day{box-shadow:inset 0 0 0 2px var(--p2)}
+.sc-legend{display:flex;flex-wrap:wrap;gap:.75rem;margin-bottom:1rem}
+.sc-leg{display:flex;align-items:center;gap:.35rem;font-size:.68rem;color:var(--g3)}
+.sc-leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.sc-day-panel{background:var(--p5);border-radius:var(--r);padding:.75rem 1rem;margin-top:.5rem;font-size:.8rem;display:none}
+.sc-day-panel.show{display:block}
+.sc-day-panel h4{font-size:.82rem;font-weight:700;color:var(--p1);margin-bottom:.5rem}
+.sc-booking-item{display:flex;align-items:center;gap:.6rem;padding:.3rem 0;border-bottom:1px solid var(--p4)}
+.sc-booking-item:last-child{border-bottom:none}
+.sc-booking-hora{font-weight:800;color:var(--p1);min-width:42px;font-size:.78rem}
+.sc-booking-name{flex:1;font-weight:600;color:var(--g1)}
+.sc-booking-email{font-size:.68rem;color:var(--g3)}
+.sc-block-btn{padding:.35rem .8rem;border-radius:20px;font-size:.72rem;font-weight:700;border:1.5px solid;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .18s;margin-top:.6rem}
+.sc-block-btn.block{border-color:#fca5a5;background:#fee2e2;color:#dc2626}
+.sc-block-btn.block:hover{background:#fecaca}
+.sc-block-btn.unblock{border-color:var(--s4);background:var(--s5);color:var(--s1)}
+.sc-block-btn.unblock:hover{background:var(--s4)}
+
 /* ── RESPONSIVE ── */
 @media(max-width:900px){
   .kpi-grid{grid-template-columns:1fr 1fr}
@@ -398,25 +450,43 @@ tr:hover td{background:var(--g5)}
       <div class="section" id="section-disponibilidad">
         <div class="section-header">
           <h2>Disponibilidad</h2>
-          <p>Horarios disponibles en Cal.com</p>
+          <p>Edita tu horario semanal y bloquea días específicos</p>
         </div>
-        <div class="grid-2">
+        <div class="sched-grid">
+
+          <!-- Horario semanal -->
           <div class="card">
             <div class="card-head">
-              <h3><span class="ico">🗓️</span> Tipos de Consulta</h3>
+              <h3><span class="ico">🗓️</span> Horario Semanal</h3>
             </div>
-            <div class="card-body np" id="event-types-list">
-              <div class="loading"><div class="spinner"></div>Cargando...</div>
+            <div class="card-body" id="weekly-editor">
+              <div class="loading"><div class="spinner"></div>Cargando horario...</div>
             </div>
           </div>
+
+          <!-- Calendario con pacientes -->
           <div class="card">
             <div class="card-head">
-              <h3><span class="ico">🕐</span> Slots — Próximos 7 días</h3>
+              <h3><span class="ico">📅</span> Calendario de Citas</h3>
             </div>
-            <div class="card-body" id="slots-list">
-              <div class="loading"><div class="spinner"></div>Cargando...</div>
+            <div class="card-body">
+              <div class="sc-nav">
+                <button class="sc-arrow" onclick="scPrevMonth()">&#8592;</button>
+                <div class="sc-month" id="sc-month-lbl">Cargando...</div>
+                <button class="sc-arrow" onclick="scNextMonth()">&#8594;</button>
+              </div>
+              <div class="sc-grid" id="sc-cal-grid">
+                <div class="loading" style="grid-column:1/-1"><div class="spinner"></div></div>
+              </div>
+              <div class="sc-legend">
+                <div class="sc-leg"><div class="sc-leg-dot" style="background:var(--s5);border:1px solid var(--s4)"></div>Disponible</div>
+                <div class="sc-leg"><div class="sc-leg-dot" style="background:#fee2e2;border:1px solid #fca5a5"></div>Bloqueado</div>
+                <div class="sc-leg"><div class="sc-leg-dot" style="background:var(--p2)"></div>Paciente agendado</div>
+              </div>
+              <div id="sc-day-panel" class="sc-day-panel"></div>
             </div>
           </div>
+
         </div>
       </div>
 
@@ -440,8 +510,12 @@ tr:hover td{background:var(--g5)}
 <script>
 const API = 'https://nutriage-api.onrender.com';
 const PASS = 'admin2026';
-let allLeads = [];
+let allLeads      = [];
 let currentFilter = '';
+let bookingsMap   = {};   // bookingId(str) → {videoUrl, nombre, start}
+let scheduleData  = null; // schedule de Cal.com
+let bookingsByDate = {};  // "YYYY-MM-DD" → [{nombre,hora,email}]
+let scMonth       = new Date(); // mes visible en calendario de disponibilidad
 
 // ── AUTH ────────────────────────────────────────────────────────
 function doLogin(){
@@ -472,7 +546,7 @@ function showSection(id, btn){
   // lazy load
   if(id==='historial') loadHistorial();
   if(id==='citas') loadBookings();
-  if(id==='disponibilidad'){ loadEventTypes(); loadSlots(); }
+  if(id==='disponibilidad') loadDisponibilidad();
 }
 function setDate(){
   const d = new Date();
@@ -491,6 +565,23 @@ async function apiFetch(path){
 
 // ── LOAD ALL ────────────────────────────────────────────────────
 async function loadAll(){
+  // Cargar bookings primero para tener el mapa disponible al renderizar leads
+  const bkData = await apiFetch('/bookings/?status=upcoming&limit=50');
+  bookingsMap = {};
+  bookingsByDate = {};
+  for(const b of (bkData?.bookings || [])){
+    if(b.id) bookingsMap[String(b.id)] = b;
+    const ds = (b.start||'').slice(0,10);
+    if(ds){
+      if(!bookingsByDate[ds]) bookingsByDate[ds]=[];
+      const t = new Date(b.start);
+      bookingsByDate[ds].push({
+        nombre: b.nombre,
+        email:  b.email,
+        hora:   t.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',timeZone:'America/Santiago'}),
+      });
+    }
+  }
   await Promise.all([loadLeads(), loadUpcomingBookings()]);
 }
 
@@ -602,16 +693,31 @@ function renderTempChart(leads){
   </div>`;
 }
 
+function parseBookingId(notas){
+  if(!notas) return null;
+  const m = notas.match(/Booking ID:\s*(\d+)/);
+  return m ? m[1] : null;
+}
 function renderRecentLeads(leads){
   const el = document.getElementById('recent-leads');
   if(!leads.length){ el.innerHTML='<div class="empty"><div class="empty-ico">📭</div><p>Sin leads</p></div>'; return; }
-  el.innerHTML = '<table><thead><tr><th>Nombre</th><th>Temp.</th><th>Cita</th></tr></thead><tbody>'
+  el.innerHTML = '<table><thead><tr><th>Nombre</th><th>Tel.</th><th>Cita</th><th>Sala</th></tr></thead><tbody>'
     + leads.map(l=>{
-        const cita = formatCita(l.notas);
+        const cita  = formatCita(l.notas);
+        const bkId  = parseBookingId(l.notas);
+        const bk    = bkId ? bookingsMap[bkId] : null;
+        const video = bk?.videoUrl;
+        const tel   = l.telefono
+          ? `<a href="tel:${l.telefono}" style="color:var(--p2);font-size:.72rem;text-decoration:none;white-space:nowrap">${l.telefono}</a>`
+          : '<span style="color:var(--g4);font-size:.72rem">—</span>';
+        const sala  = video
+          ? `<a href="${video}" target="_blank" title="Abrir sala virtual" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;background:var(--p5);border-radius:6px;text-decoration:none;font-size:.85rem">📹</a>`
+          : '<span style="color:var(--g4);font-size:.72rem">—</span>';
         return `<tr>
-          <td class="td-name">${l.nombre||'—'}</td>
-          <td>${tempBadge(l.temperatura)}</td>
-          <td style="font-size:.75rem;color:var(--g2);white-space:nowrap">${cita||'<span style="color:var(--g4)">—</span>'}</td>
+          <td class="td-name" style="font-size:.78rem">${l.nombre||'—'}</td>
+          <td>${tel}</td>
+          <td style="font-size:.72rem;color:var(--g2);white-space:nowrap">${cita||'<span style="color:var(--g4)">—</span>'}</td>
+          <td style="text-align:center">${sala}</td>
         </tr>`;
       }).join('')
     + '</tbody></table>';
@@ -773,6 +879,226 @@ async function loadSlots(){
     html += `</div>`;
   });
   el.innerHTML = html;
+}
+
+// ── DISPONIBILIDAD ───────────────────────────────────────────────
+const DAY_NAMES_EN = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const DAY_NAMES_ES = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+const DAY_FULL_ES  = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const MONTHS_ES2   = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+async function loadDisponibilidad(){
+  const [sched, bkRaw] = await Promise.all([
+    apiFetch('/availability/schedule'),
+    apiFetch('/bookings/?status=upcoming&limit=100'),
+  ]);
+  scheduleData = sched;
+  // rebuild bookingsByDate para esta vista
+  bookingsByDate = {};
+  for(const b of (bkRaw?.bookings||[])){
+    const ds = (b.start||'').slice(0,10);
+    if(!ds) continue;
+    if(!bookingsByDate[ds]) bookingsByDate[ds]=[];
+    const t = new Date(b.start);
+    bookingsByDate[ds].push({
+      nombre: b.nombre, email: b.email,
+      hora: t.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',timeZone:'America/Santiago'}),
+      videoUrl: b.videoUrl||'',
+    });
+  }
+  renderWeeklyEditor();
+  renderScCalendar();
+}
+
+function renderWeeklyEditor(){
+  const el = document.getElementById('weekly-editor');
+  if(!scheduleData){ el.innerHTML='<div class="empty"><p>No se pudo cargar el horario</p></div>'; return; }
+
+  const avail   = scheduleData.availability || [];
+  const enabledDays = new Set();
+  const dayTimes = {}; // dayName → {start, end}
+  for(const a of avail){
+    for(const d of a.days){
+      enabledDays.add(d);
+      dayTimes[d] = {start: a.startTime||'09:00', end: a.endTime||'17:00'};
+    }
+  }
+
+  const days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  const esMap = {Monday:'Lunes',Tuesday:'Martes',Wednesday:'Miércoles',Thursday:'Jueves',Friday:'Viernes',Saturday:'Sábado',Sunday:'Domingo'};
+
+  let html = '';
+  for(const d of days){
+    const on  = enabledDays.has(d);
+    const st  = dayTimes[d]?.start || '09:00';
+    const en  = dayTimes[d]?.end   || '17:00';
+    html += `<div class="day-row ${on?'active':'blocked'}" id="dr-${d}">
+      <div class="day-toggle">
+        <input type="checkbox" id="chk-${d}" ${on?'checked':''} onchange="toggleDay('${d}')">
+        <label for="chk-${d}">${esMap[d]}</label>
+      </div>
+      <div class="day-hours ${on?'':'disabled'}" id="dh-${d}">
+        <input type="time" id="st-${d}" value="${st}">
+        <span>—</span>
+        <input type="time" id="en-${d}" value="${en}">
+      </div>
+    </div>`;
+  }
+  html += `<button class="sched-save" onclick="saveSchedule()">💾 Guardar horario</button>
+           <div class="sched-status" id="sched-status"></div>`;
+  el.innerHTML = html;
+}
+
+function toggleDay(d){
+  const on  = document.getElementById('chk-'+d).checked;
+  const row = document.getElementById('dr-'+d);
+  const hrs = document.getElementById('dh-'+d);
+  row.classList.toggle('active', on);
+  row.classList.toggle('blocked', !on);
+  hrs.classList.toggle('disabled', !on);
+}
+
+async function saveSchedule(){
+  const btn = document.querySelector('.sched-save');
+  const status = document.getElementById('sched-status');
+  btn.disabled = true; btn.textContent = 'Guardando...';
+  status.textContent = ''; status.className = 'sched-status';
+
+  const days  = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  const avail = [];
+  for(const d of days){
+    if(document.getElementById('chk-'+d)?.checked){
+      const st = document.getElementById('st-'+d)?.value || '09:00';
+      const en = document.getElementById('en-'+d)?.value || '17:00';
+      avail.push({days:[d], startTime:st, endTime:en});
+    }
+  }
+  const overrides = scheduleData?.overrides || [];
+  try{
+    const r = await fetch(API+'/availability/schedule',{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({id: scheduleData?.id, availability: avail, overrides})
+    });
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.error||'Error');
+    scheduleData = d.data || scheduleData;
+    status.textContent = '✓ Horario guardado correctamente';
+    status.className   = 'sched-status ok';
+    renderScCalendar();
+  } catch(e){
+    status.textContent = '✗ ' + (e.message||'Error al guardar');
+    status.className   = 'sched-status err';
+  }
+  btn.disabled = false; btn.innerHTML = '💾 Guardar horario';
+}
+
+// ── CALENDARIO DE DISPONIBILIDAD ─────────────────────────────────
+function renderScCalendar(){
+  const y = scMonth.getFullYear(), mo = scMonth.getMonth();
+  document.getElementById('sc-month-lbl').textContent = `${MONTHS_ES2[mo]} ${y}`;
+
+  const today     = new Date(); today.setHours(0,0,0,0);
+  const avail     = scheduleData?.availability || [];
+  const overrides = new Set((scheduleData?.overrides||[]).map(o=>o.date));
+
+  // días habilitados de la semana (nombres en inglés)
+  const enabledWeekdays = new Set();
+  for(const a of avail) for(const d of a.days) enabledWeekdays.add(d);
+
+  const firstDow   = new Date(y, mo, 1).getDay();
+  const daysInMo   = new Date(y, mo+1, 0).getDate();
+
+  let html = DAY_NAMES_ES.map(d=>`<div class="sc-dow">${d}</div>`).join('');
+  for(let i=0;i<firstDow;i++) html += '<div class="sc-day"></div>';
+
+  for(let d=1;d<=daysInMo;d++){
+    const ds    = `${y}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const date  = new Date(y, mo, d);
+    const wdEN  = DAY_NAMES_EN[date.getDay()];
+    const isPast     = date < today;
+    const isBlocked  = overrides.has(ds);
+    const isAvail    = !isPast && !isBlocked && enabledWeekdays.has(wdEN);
+    const hasBk      = !!bookingsByDate[ds];
+
+    let cls = 'sc-day';
+    if(isPast) cls += ' past';
+    else if(isBlocked) cls += ' blocked-day';
+    else if(isAvail) cls += ' avail';
+    if(hasBk && !isPast) cls += ' has-booking';
+
+    const click = !isPast ? `onclick="scDayClick('${ds}','${isBlocked?'blocked':'avail'}')"` : '';
+    const count = bookingsByDate[ds]?.length;
+    const badge = (hasBk && !isPast) ? `<span style="font-size:.58rem;line-height:1;color:var(--p2);font-weight:800">${count}</span>` : '';
+    html += `<div class="${cls}" ${click} title="${ds}">${d}${badge}</div>`;
+  }
+  document.getElementById('sc-cal-grid').innerHTML = html;
+  document.getElementById('sc-day-panel').className = 'sc-day-panel';
+}
+
+function scDayClick(ds, state){
+  // Mostrar panel con info del día
+  const panel  = document.getElementById('sc-day-panel');
+  const bks    = bookingsByDate[ds] || [];
+  const date   = new Date(ds+'T12:00:00');
+  const dlbl   = date.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'});
+  const isBlocked = state === 'blocked';
+
+  let html = `<h4>📅 ${dlbl.charAt(0).toUpperCase()+dlbl.slice(1)}</h4>`;
+  if(bks.length){
+    html += bks.map(b=>`<div class="sc-booking-item">
+      <div class="sc-booking-hora">${b.hora}</div>
+      <div class="sc-booking-name">${b.nombre}</div>
+      <div class="sc-booking-email">${b.email}</div>
+    </div>`).join('');
+  } else {
+    html += `<div style="color:var(--g3);font-size:.78rem;margin-bottom:.3rem">Sin citas agendadas</div>`;
+  }
+  const btnLbl = isBlocked
+    ? `<button class="sc-block-btn unblock" onclick="toggleDateBlock('${ds}',false)">✓ Habilitar este día</button>`
+    : `<button class="sc-block-btn block" onclick="toggleDateBlock('${ds}',true)">🚫 Bloquear este día</button>`;
+  html += btnLbl;
+  panel.innerHTML = html;
+  panel.className = 'sc-day-panel show';
+
+  // Marcar seleccionado
+  document.querySelectorAll('.sc-day').forEach(el=>el.classList.remove('selected-day'));
+  event.currentTarget.classList.add('selected-day');
+}
+
+async function toggleDateBlock(ds, block){
+  if(!scheduleData) return;
+  let overrides = [...(scheduleData.overrides||[])];
+  if(block){
+    if(!overrides.find(o=>o.date===ds)) overrides.push({date:ds});
+  } else {
+    overrides = overrides.filter(o=>o.date!==ds);
+  }
+  const panel = document.getElementById('sc-day-panel');
+  panel.innerHTML = '<div style="text-align:center;padding:.5rem"><span class="spinner dark"></span></div>';
+  try{
+    const r = await fetch(API+'/availability/schedule',{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({id:scheduleData.id, availability:scheduleData.availability, overrides})
+    });
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.error||'Error');
+    if(d.data) scheduleData = d.data;
+    else scheduleData.overrides = overrides;
+    renderScCalendar();
+  } catch(e){
+    panel.innerHTML = `<div style="color:#dc2626;font-size:.78rem">Error: ${e.message}</div>`;
+  }
+}
+
+function scPrevMonth(){
+  scMonth = new Date(scMonth.getFullYear(), scMonth.getMonth()-1, 1);
+  renderScCalendar();
+}
+function scNextMonth(){
+  scMonth = new Date(scMonth.getFullYear(), scMonth.getMonth()+1, 1);
+  renderScCalendar();
 }
 
 // ── HISTORIAL ────────────────────────────────────────────────────

@@ -33,6 +33,26 @@ def get_available_slots(event_type_id: str, start: str, end: str) -> dict:
         return r.json()
 
 
+def get_schedule() -> dict:
+    """Obtiene el primer schedule activo de la nutricionista."""
+    with httpx.Client(timeout=15) as c:
+        r = c.get(f"{BASE}/schedules", headers=_headers())
+        r.raise_for_status()
+        data = r.json()
+        schedules = data.get("data") or []
+        return schedules[0] if schedules else {}
+
+
+def update_schedule(schedule_id: int, availability: list, overrides: list) -> dict:
+    """Actualiza el horario semanal y/o bloqueos de fechas."""
+    payload = {"availability": availability, "overrides": overrides}
+    with httpx.Client(timeout=15) as c:
+        r = c.patch(f"{BASE}/schedules/{schedule_id}", headers=_headers(), json=payload)
+        if not r.is_success:
+            raise Exception(f"Cal.com {r.status_code}: {r.text[:400]}")
+        return r.json()
+
+
 def get_bookings(status: str = "upcoming", limit: int = 20) -> dict:
     with httpx.Client(timeout=15) as c:
         r = c.get(
