@@ -491,7 +491,23 @@ async function apiFetch(path){
 
 // ── LOAD ALL ────────────────────────────────────────────────────
 async function loadAll(){
-  await loadLeads();
+  await Promise.all([loadLeads(), loadUpcomingBookings()]);
+}
+
+// ── PARSE CITA DESDE NOTAS ───────────────────────────────────────
+function parseCitaISO(notas){
+  if(!notas) return null;
+  const m = notas.match(/Cita:\s*([^\s|]+)/);
+  return m ? m[1] : null;
+}
+function formatCita(notas){
+  const iso = parseCitaISO(notas);
+  if(!iso) return '';
+  const d = new Date(iso);
+  if(isNaN(d)) return '';
+  const date = d.toLocaleDateString('es-CL',{day:'numeric',month:'short',timeZone:'America/Santiago'});
+  const time = d.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',timeZone:'America/Santiago'});
+  return `${date} ${time}`;
 }
 
 // ── LEADS ───────────────────────────────────────────────────────
@@ -589,26 +605,46 @@ function renderTempChart(leads){
 function renderRecentLeads(leads){
   const el = document.getElementById('recent-leads');
   if(!leads.length){ el.innerHTML='<div class="empty"><div class="empty-ico">📭</div><p>Sin leads</p></div>'; return; }
-  el.innerHTML = '<table><thead><tr><th>Nombre</th><th>Temp.</th><th>Estatus</th></tr></thead><tbody>'
-    + leads.map(l=>`<tr>
-        <td class="td-name">${l.nombre||'—'}</td>
-        <td>${tempBadge(l.temperatura)}</td>
-        <td>${statusBadge(l.estatus)}</td>
-      </tr>`).join('')
+  el.innerHTML = '<table><thead><tr><th>Nombre</th><th>Temp.</th><th>Cita</th></tr></thead><tbody>'
+    + leads.map(l=>{
+        const cita = formatCita(l.notas);
+        return `<tr>
+          <td class="td-name">${l.nombre||'—'}</td>
+          <td>${tempBadge(l.temperatura)}</td>
+          <td style="font-size:.75rem;color:var(--g2);white-space:nowrap">${cita||'<span style="color:var(--g4)">—</span>'}</td>
+        </tr>`;
+      }).join('')
     + '</tbody></table>';
 }
 
 function renderLeadsTable(leads){
   const el = document.getElementById('leads-table-wrap');
   if(!leads.length){ el.innerHTML='<div class="empty" style="padding:2rem"><div class="empty-ico">📭</div><p>No hay leads con este filtro</p></div>'; return; }
-  el.innerHTML = '<div class="tbl-wrap"><table><thead><tr><th>Nombre</th><th>Email</th><th>Temperatura</th><th>Estatus</th><th>Noción ID</th></tr></thead><tbody>'
-    + leads.map(l=>`<tr>
-        <td class="td-name">${l.nombre||'—'}</td>
-        <td>${l.email||'—'}</td>
-        <td>${tempBadge(l.temperatura)}</td>
-        <td>${statusBadge(l.estatus)}</td>
-        <td style="font-family:monospace;font-size:.68rem;color:var(--g3)">${(l.id||'').slice(0,8)}…</td>
-      </tr>`).join('')
+  // Ordenar por fecha de cita (más próxima primero), los sin cita al final
+  const sorted = [...leads].sort((a,b)=>{
+    const ia = parseCitaISO(a.notas), ib = parseCitaISO(b.notas);
+    if(ia && ib) return new Date(ia)-new Date(ib);
+    if(ia) return -1;
+    if(ib) return 1;
+    return (a.fecha||'').localeCompare(b.fecha||'');
+  });
+  el.innerHTML = '<div class="tbl-wrap"><table><thead><tr>'
+    + '<th>#</th><th>Nombre</th><th>Email</th><th>Teléfono</th>'
+    + '<th>Temperatura</th><th>Estatus</th><th>Cita agendada</th>'
+    + '</tr></thead><tbody>'
+    + sorted.map((l,i)=>{
+        const cita = formatCita(l.notas);
+        const tel  = l.telefono ? `<a href="tel:${l.telefono}" style="color:var(--p2);text-decoration:none">${l.telefono}</a>` : '<span style="color:var(--g4)">—</span>';
+        return `<tr>
+          <td style="color:var(--g3);font-size:.72rem;font-weight:700">${i+1}</td>
+          <td class="td-name">${l.nombre||'—'}</td>
+          <td style="font-size:.78rem">${l.email||'—'}</td>
+          <td style="font-size:.78rem">${tel}</td>
+          <td>${tempBadge(l.temperatura)}</td>
+          <td>${statusBadge(l.estatus)}</td>
+          <td style="font-size:.75rem;color:var(--g2);white-space:nowrap">${cita||'<span style="color:var(--g4)">—</span>'}</td>
+        </tr>`;
+      }).join('')
     + '</tbody></table></div>';
 }
 
@@ -633,54 +669,69 @@ function applyFilters(q, estatus){
 }
 
 // ── BOOKINGS ────────────────────────────────────────────────────
+// ── CITAS AGENDADAS (sección Citas) ──────────────────────────────
 async function loadBookings(){
-  const data = await apiFetch('/appointments/');
   const el = document.getElementById('bookings-list');
-  // Cal.com bookings via our API
-  const r = await fetch(API+'/availability/event-types').then(r=>r.json()).catch(()=>null);
-  if(!r){ el.innerHTML='<div class="empty" style="padding:2rem"><div class="empty-ico">📅</div><p>Sin conexión con Cal.com</p></div>'; return; }
-
-  const types = r.data||[];
-  el.innerHTML = '<table><thead><tr><th>Tipo de consulta</th><th>Duración</th><th>Slug</th><th>Estado</th></tr></thead><tbody>'
-    + types.map(t=>`<tr>
-        <td class="td-name">${t.title}</td>
-        <td>${t.lengthInMinutes} min</td>
-        <td style="font-family:monospace;font-size:.75rem;color:var(--g3)">${t.slug}</td>
-        <td><span class="badge" style="background:#dcfce7;color:#16a34a">Activo</span></td>
-      </tr>`).join('')
-    + '</tbody></table>';
+  const data = await apiFetch('/bookings/?status=upcoming&limit=30');
+  if(!data||data.error){
+    el.innerHTML='<div class="empty" style="padding:2rem"><div class="empty-ico">📅</div><p>Sin conexión con Cal.com</p></div>';
+    return;
+  }
+  const bks = data.bookings||[];
+  if(!bks.length){
+    el.innerHTML='<div class="empty" style="padding:2rem"><div class="empty-ico">📅</div><p>No hay citas próximas agendadas</p></div>';
+    return;
+  }
+  el.innerHTML = '<div class="tbl-wrap"><table><thead><tr>'
+    + '<th>#</th><th>Paciente</th><th>Email</th><th>Fecha</th><th>Hora</th><th>Estado</th>'
+    + '</tr></thead><tbody>'
+    + bks.map((b,i)=>{
+        const start = new Date(b.start);
+        const fecha = start.toLocaleDateString('es-CL',{weekday:'short',day:'numeric',month:'short',year:'numeric',timeZone:'America/Santiago'});
+        const hora  = start.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',timeZone:'America/Santiago'});
+        const stCls = b.status==='accepted'?'badge-agendada':'badge-pendiente';
+        const stLbl = b.status==='accepted'?'Confirmada':'Pendiente';
+        return `<tr>
+          <td style="color:var(--g3);font-size:.72rem;font-weight:700">${i+1}</td>
+          <td class="td-name">${b.nombre||'—'}</td>
+          <td style="font-size:.78rem">${b.email||'—'}</td>
+          <td style="font-size:.78rem;white-space:nowrap">${fecha}</td>
+          <td style="font-size:.78rem;font-weight:700">${hora}</td>
+          <td><span class="badge ${stCls}">${stLbl}</span></td>
+        </tr>`;
+      }).join('')
+    + '</tbody></table></div>';
 }
 
-// ── UPCOMING BOOKINGS (overview) ─────────────────────────────────
-async function loadUpcoming(){
-  // Fetch próximos 7 días de Cal.com
-  const now = new Date();
-  const end = new Date(now); end.setDate(end.getDate()+7);
-  const start = now.toISOString();
-  const endStr = end.toISOString();
-  const data = await apiFetch(`/availability/slots?eventTypeId=5378644&start=${start}&end=${endStr}`);
+// ── PRÓXIMAS CITAS (overview) ─────────────────────────────────────
+async function loadUpcomingBookings(){
   const el = document.getElementById('upcoming-bookings');
-  if(!data||!data.data){ el.innerHTML='<div class="empty" style="padding:2rem"><div class="empty-ico">📅</div><p>Sin citas próximas</p></div>'; return; }
-
-  const slots = data.data.slots||{};
-  const days = Object.keys(slots).slice(0,5);
-  if(!days.length){ el.innerHTML='<div class="empty" style="padding:2rem"><div class="empty-ico">📅</div><p>Sin disponibilidad esta semana</p></div>'; return; }
-
-  el.innerHTML = days.map(day=>{
-    const d = new Date(day);
-    const dayNum = d.getDate();
-    const month = d.toLocaleString('es-MX',{month:'short'}).toUpperCase();
-    const count = slots[day].length;
+  const data = await apiFetch('/bookings/?status=upcoming&limit=5');
+  if(!data||data.error||!data.bookings){
+    el.innerHTML='<div class="empty" style="padding:1.5rem"><div class="empty-ico">📅</div><p>Sin citas próximas</p></div>';
+    return;
+  }
+  const bks = data.bookings||[];
+  if(!bks.length){
+    el.innerHTML='<div class="empty" style="padding:1.5rem"><div class="empty-ico">📅</div><p>No hay citas agendadas</p></div>';
+    return;
+  }
+  el.innerHTML = bks.map(b=>{
+    const start  = new Date(b.start);
+    const dayNum = start.toLocaleDateString('es-CL',{day:'numeric',timeZone:'America/Santiago'});
+    const month  = start.toLocaleDateString('es-CL',{month:'short',timeZone:'America/Santiago'}).toUpperCase();
+    const hora   = start.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',timeZone:'America/Santiago'});
+    const dow    = start.toLocaleDateString('es-CL',{weekday:'long',timeZone:'America/Santiago'});
     return `<div class="booking-item">
       <div class="booking-date">
         <div class="booking-day">${dayNum}</div>
         <div class="booking-month">${month}</div>
       </div>
       <div class="booking-info">
-        <div class="booking-name">${count} horario${count!==1?'s':''} disponible${count!==1?'s':''}</div>
-        <div class="booking-meta">Consulta Nutricional Virtual</div>
+        <div class="booking-name">${b.nombre||'Paciente'}</div>
+        <div class="booking-meta">${dow} · ${hora} · Consulta Virtual</div>
       </div>
-      <span class="booking-badge">${count} slots</span>
+      <span class="booking-badge">${hora}</span>
     </div>`;
   }).join('');
 }
@@ -753,8 +804,6 @@ function statusBadge(s){
 // ── INIT ─────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',()=>{
   setDate();
-  // Pre-cargar upcoming en overview
-  setTimeout(loadUpcoming, 500);
 });
 </script>
 </body>

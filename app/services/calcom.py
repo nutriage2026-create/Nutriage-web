@@ -33,6 +33,17 @@ def get_available_slots(event_type_id: str, start: str, end: str) -> dict:
         return r.json()
 
 
+def get_bookings(status: str = "upcoming", limit: int = 20) -> dict:
+    with httpx.Client(timeout=15) as c:
+        r = c.get(
+            f"{BASE}/bookings",
+            headers=_headers(),
+            params={"status": status, "limit": limit},
+        )
+        r.raise_for_status()
+        return r.json()
+
+
 def create_booking(event_type_id: str, start: str, name: str, email: str, notes: str = "") -> dict:
     payload = {
         "eventTypeId": int(event_type_id),

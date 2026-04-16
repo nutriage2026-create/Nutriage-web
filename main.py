@@ -7,6 +7,7 @@ from app.routers.leads         import bp as leads_bp
 from app.routers.appointments  import bp as appointments_bp
 from app.routers.analysis      import bp as analysis_bp
 from app.routers.webhooks      import bp as webhooks_bp
+from app.routers.bookings      import bp as bookings_bp
 
 app = Flask(__name__)
 CORS(app)
@@ -16,6 +17,7 @@ app.register_blueprint(leads_bp)
 app.register_blueprint(appointments_bp)
 app.register_blueprint(analysis_bp)
 app.register_blueprint(webhooks_bp)
+app.register_blueprint(bookings_bp)
 
 
 @app.get("/")

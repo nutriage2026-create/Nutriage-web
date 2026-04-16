@@ -32,14 +32,20 @@ def list_leads():
         results = get_leads(estatus=estatus, temperatura=temperatura)
         leads = []
         for r in results:
-            props = r.get("properties", {})
+            props  = r.get("properties", {})
             titulo = props.get("Nombre", {}).get("title") or []
+            notas_rt = props.get("Notas", {}).get("rich_text") or []
+            notas    = notas_rt[0].get("plain_text", "") if notas_rt else ""
+            fecha_d  = (props.get("Primer contacto", {}).get("date") or {})
             leads.append({
-                "id": r["id"],
-                "nombre": titulo[0].get("plain_text", "") if titulo else "",
+                "id":          r["id"],
+                "nombre":      titulo[0].get("plain_text", "") if titulo else "",
                 "temperatura": (props.get("Temperatura", {}).get("select") or {}).get("name", ""),
-                "estatus": (props.get("Estatus", {}).get("select") or {}).get("name", ""),
-                "email": props.get("Email", {}).get("email") or "",
+                "estatus":     (props.get("Estatus", {}).get("select") or {}).get("name", ""),
+                "email":       props.get("Email", {}).get("email") or "",
+                "telefono":    props.get("Telefono", {}).get("phone_number") or "",
+                "notas":       notas,
+                "fecha":       fecha_d.get("start", ""),
             })
         return jsonify({"total": len(leads), "leads": leads})
     except Exception as e:
