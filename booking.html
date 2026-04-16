@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NutriAge · Reservar Consulta</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --p1:#3d2459;--p2:#6b4a9a;--p3:#a47cc5;--p4:#d4bbec;--p5:#f0e8fa;
+  --s1:#2d5e34;--s2:#4a8c54;--s3:#7ab882;--s4:#b8d9bc;--s5:#edf6ee;
+  --g1:#0f172a;--g2:#334155;--g3:#64748b;--g4:#e2e8f0;--g5:#f8fafc;
+  --wh:#fff;--cr:#faf7f2;--r:10px;--rl:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Nunito',sans-serif;background:var(--cr);color:var(--g1);min-height:100vh}
+
+/* ── HEADER ── */
+.hdr{background:var(--p1);padding:1rem 1.5rem;display:flex;align-items:center;justify-content:center;gap:.75rem}
+.hdr-circle{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--p3),var(--s3));display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:15px;color:#fff;flex-shrink:0}
+.hdr-info{text-align:center}
+.hdr-title{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;color:#fff;line-height:1}
+.hdr-sub{font-size:.72rem;color:rgba(255,255,255,.5);margin-top:.2rem}
+
+/* ── CONTAINER ── */
+.wrap{max-width:620px;margin:0 auto;padding:1.8rem 1rem 4rem}
+
+/* ── PROGRESS ── */
+.prog{display:flex;align-items:center;margin-bottom:2rem}
+.ps{display:flex;flex-direction:column;align-items:center;gap:.3rem;flex:1}
+.ps-circle{width:30px;height:30px;border-radius:50%;border:2px solid var(--g4);background:var(--wh);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;color:var(--g3);transition:all .3s;position:relative;z-index:1}
+.ps.done .ps-circle{background:var(--s2);border-color:var(--s2);color:#fff}
+.ps.active .ps-circle{background:var(--p2);border-color:var(--p2);color:#fff;box-shadow:0 0 0 4px var(--p5)}
+.ps-lbl{font-size:.6rem;font-weight:800;color:var(--g3);text-align:center;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+.ps.active .ps-lbl{color:var(--p2)}
+.ps.done .ps-lbl{color:var(--s2)}
+.pl{flex:1;height:2px;background:var(--g4);max-width:70px;margin-bottom:14px;transition:background .3s}
+.pl.done{background:var(--s2)}
+
+/* ── CARD ── */
+.card{background:var(--wh);border-radius:var(--rl);border:1px solid var(--g4);padding:1.8rem;box-shadow:0 2px 16px rgba(0,0,0,.06)}
+.card-ttl{font-family:'Cormorant Garamond',serif;font-size:1.55rem;font-weight:600;color:var(--p1);margin-bottom:.3rem}
+.card-sub{font-size:.82rem;color:var(--g3);margin-bottom:1.6rem;line-height:1.55}
+
+/* ── TYPE SELECTION ── */
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.type-card{border:2px solid var(--g4);border-radius:var(--rl);padding:1.5rem 1.2rem;text-align:center;cursor:pointer;transition:all .22s;background:var(--wh);user-select:none}
+.type-card:hover{border-color:var(--p3);transform:translateY(-3px);box-shadow:0 8px 28px rgba(107,74,154,.13)}
+.type-card.on{border-color:var(--p2);background:var(--p5);transform:translateY(-3px);box-shadow:0 8px 28px rgba(107,74,154,.16)}
+.tc-ico{font-size:2.5rem;display:block;margin-bottom:.75rem}
+.tc-ttl{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;color:var(--p1);margin-bottom:.35rem}
+.tc-desc{font-size:.74rem;color:var(--g3);line-height:1.55}
+
+/* ── FORM ── */
+.field{margin-bottom:1rem}
+.field label{display:block;font-size:.74rem;font-weight:800;color:var(--g2);margin-bottom:.35rem;text-transform:uppercase;letter-spacing:.5px}
+.inp{width:100%;padding:.72rem 1rem;border:1.5px solid var(--g4);border-radius:var(--r);font-family:'Nunito',sans-serif;font-size:.92rem;color:var(--g1);background:var(--wh);outline:none;transition:border .2s;-webkit-appearance:none}
+.inp:focus{border-color:var(--p2);box-shadow:0 0 0 3px var(--p5)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.inp-note{font-size:.72rem;color:var(--g3);margin-top:.3rem}
+
+/* ── CALENDAR ── */
+.cal-nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.cal-month-lbl{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:600;color:var(--p1)}
+.cal-arrow{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--g4);background:var(--wh);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--g2);transition:all .2s;line-height:1}
+.cal-arrow:hover{border-color:var(--p3);color:var(--p2);background:var(--p5)}
+.cal-arrow:disabled{opacity:.35;cursor:default}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-dow{text-align:center;font-size:.64rem;font-weight:800;color:var(--g3);padding:.5rem 0;text-transform:uppercase;letter-spacing:.4px}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:.82rem;font-weight:600;position:relative;transition:all .18s;cursor:default;color:var(--g3)}
+.cal-day.past{color:var(--g4)}
+.cal-day.other{color:var(--g4)}
+.cal-day.avail{cursor:pointer;color:var(--g1);background:var(--s5);font-weight:700}
+.cal-day.avail:hover{background:var(--s4);color:var(--s1);transform:scale(1.05)}
+.cal-day.avail::after{content:'';position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--s2)}
+.cal-day.selected{background:var(--p2) !important;color:#fff !important;transform:scale(1.08)}
+.cal-day.selected::after{background:#fff !important}
+.cal-day.today-mark{box-shadow:inset 0 0 0 1.5px var(--p3)}
+.cal-loading{text-align:center;padding:2.5rem;color:var(--g3);font-size:.85rem;grid-column:1/-1}
+.cal-legend{display:flex;align-items:center;gap:1.2rem;margin-top:.75rem;flex-wrap:wrap}
+.cl-item{display:flex;align-items:center;gap:.4rem;font-size:.7rem;color:var(--g3)}
+.cl-dot{width:10px;height:10px;border-radius:3px}
+
+/* ── SLOTS ── */
+.slots-section{margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid var(--g4)}
+.slots-lbl{font-size:.74rem;font-weight:800;color:var(--g2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.75rem}
+.slots-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem}
+.slot-btn{padding:.6rem .2rem;border:1.5px solid var(--g4);border-radius:var(--r);background:var(--wh);text-align:center;font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:700;color:var(--g2);cursor:pointer;transition:all .18s}
+.slot-btn:hover{border-color:var(--p3);color:var(--p2);background:var(--p5)}
+.slot-btn.on{border-color:var(--p2);background:var(--p2);color:#fff}
+.no-slots{font-size:.82rem;color:var(--g3);padding:.75rem 0}
+
+/* ── SUMMARY ── */
+.sum-item{display:flex;align-items:center;gap:.9rem;padding:.85rem 0;border-bottom:1px solid var(--g5)}
+.sum-item:last-child{border-bottom:none}
+.sum-ico{width:38px;height:38px;border-radius:10px;background:var(--p5);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.sum-lbl{font-size:.68rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.5px}
+.sum-val{font-size:.92rem;font-weight:700;color:var(--g1);margin-top:.1rem}
+.price-badge{display:inline-block;background:var(--s5);color:var(--s1);border:1px solid var(--s4);border-radius:20px;padding:.25rem .85rem;font-size:.78rem;font-weight:800;margin-top:.75rem}
+
+/* ── SUCCESS ── */
+.success-body{text-align:center;padding:1.5rem .5rem}
+.success-check{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--s1),var(--s3));display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 1.25rem;color:#fff}
+.success-title{font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:600;color:var(--p1);margin-bottom:.5rem}
+.success-sub{font-size:.85rem;color:var(--g3);line-height:1.6;max-width:400px;margin:0 auto 1.5rem}
+.success-box{background:var(--p5);border:1px solid var(--p4);border-radius:var(--rl);padding:1.2rem 1.4rem;text-align:left;margin-bottom:1.5rem}
+.sb-row{display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:1px solid var(--p4);font-size:.83rem}
+.sb-row:last-child{border-bottom:none}
+.sb-row span:first-child{color:var(--g3);font-weight:600}
+.sb-row span:last-child{font-weight:700;color:var(--p1);text-align:right;max-width:60%}
+
+/* ── BUTTONS ── */
+.btn-row{display:flex;gap:.75rem;margin-top:1.5rem}
+.btn{padding:.82rem 1.6rem;border-radius:var(--r);font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;border:none;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;line-height:1}
+.btn-primary{background:var(--p2);color:#fff;flex:1}
+.btn-primary:hover:not(:disabled){background:var(--p1)}
+.btn-primary:disabled{background:var(--g4);color:var(--g3);cursor:not-allowed}
+.btn-ghost{background:transparent;color:var(--g3);border:1.5px solid var(--g4);flex-shrink:0;padding:.82rem 1.2rem}
+.btn-ghost:hover{border-color:var(--p3);color:var(--p2)}
+.btn-confirm{background:var(--s2);color:#fff;flex:1}
+.btn-confirm:hover:not(:disabled){background:var(--s1)}
+.btn-confirm:disabled{background:var(--g4);color:var(--g3);cursor:not-allowed}
+.btn-new{background:var(--p2);color:#fff;width:100%;margin-top:.5rem}
+.btn-new:hover{background:var(--p1)}
+
+/* ── ALERT ── */
+.alert{border-radius:var(--r);padding:.7rem 1rem;font-size:.82rem;font-weight:600;margin-top:.9rem;display:none}
+.alert-err{background:#fee2e2;color:#dc2626;border:1px solid #fca5a5}
+.alert-info{background:var(--p5);color:var(--p1);border:1px solid var(--p4)}
+
+/* ── SPINNER ── */
+.spin{width:16px;height:16px;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:rot .65s linear infinite;display:inline-block}
+.spin.dark{border-color:rgba(100,116,139,.2);border-top-color:var(--p2)}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:500px){
+  .wrap{padding:1.2rem .75rem 4rem}
+  .type-grid{grid-template-columns:1fr}
+  .field-row{grid-template-columns:1fr}
+  .slots-grid{grid-template-columns:repeat(3,1fr)}
+  .btn-row{flex-direction:column-reverse}
+  .btn-ghost{flex:none}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-circle">N</div>
+  <div class="hdr-info">
+    <div class="hdr-title">NutriAge</div>
+    <div class="hdr-sub">Nutricionista Fernanda Ugarte · Consulta Online</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- PROGRESS -->
+  <div class="prog" id="prog-bar">
+    <div class="ps active" id="ps1"><div class="ps-circle">1</div><div class="ps-lbl">Consulta</div></div>
+    <div class="pl" id="pl1"></div>
+    <div class="ps" id="ps2"><div class="ps-circle">2</div><div class="ps-lbl">Tus datos</div></div>
+    <div class="pl" id="pl2"></div>
+    <div class="ps" id="ps3"><div class="ps-circle">3</div><div class="ps-lbl">Fecha</div></div>
+    <div class="pl" id="pl3"></div>
+    <div class="ps" id="ps4"><div class="ps-circle">4</div><div class="ps-lbl">Confirmar</div></div>
+  </div>
+
+  <!-- ── PASO 1: TIPO ── -->
+  <div id="step1">
+    <div class="card">
+      <div class="card-ttl">¿Es tu primera vez con Fernanda?</div>
+      <div class="card-sub">Selecciona el tipo de consulta para que podamos prepararnos mejor para atenderte.</div>
+      <div class="type-grid">
+        <div class="type-card" id="tc-primera" onclick="selectTipo('primera')">
+          <span class="tc-ico">🌱</span>
+          <div class="tc-ttl">Primera consulta</div>
+          <div class="tc-desc">Es tu primera vez. Haremos una evaluación nutricional completa y diseñaremos tu plan personalizado.</div>
+        </div>
+        <div class="type-card" id="tc-seguimiento" onclick="selectTipo('seguimiento')">
+          <span class="tc-ico">🔄</span>
+          <div class="tc-ttl">Seguimiento</div>
+          <div class="tc-desc">Ya eres paciente de Fernanda. Revisaremos tu avance y ajustaremos tu plan alimentario.</div>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="btn1" onclick="goStep(2)" disabled>Continuar &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ── PASO 2: DATOS ── -->
+  <div id="step2" style="display:none">
+    <div class="card">
+      <div class="card-ttl">Tus datos personales</div>
+      <div class="card-sub">Necesitamos esta información para confirmar tu reserva y enviarte el enlace de la videollamada.</div>
+      <div class="field">
+        <label>Nombre completo *</label>
+        <input class="inp" type="text" id="f-nombre" placeholder="Ej: María González" oninput="checkStep2()">
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Correo electrónico *</label>
+          <input class="inp" type="email" id="f-email" placeholder="tucorreo@email.com" oninput="checkStep2()">
+        </div>
+        <div class="field">
+          <label>Teléfono (opcional)</label>
+          <input class="inp" type="tel" id="f-tel" placeholder="+56 9 0000 0000">
+        </div>
+      </div>
+      <div class="field">
+        <label>¿Cuál es tu objetivo principal?</label>
+        <select class="inp" id="f-objetivo">
+          <option value="">Seleccionar...</option>
+          <option>Bajar de peso</option>
+          <option>Ganar masa muscular</option>
+          <option>Mejorar hábitos alimenticios</option>
+          <option>Control de enfermedad (diabetes, colesterol, presión)</option>
+          <option>Nutrición deportiva</option>
+          <option>Alimentación vegetariana o vegana</option>
+          <option>Embarazo o lactancia</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div class="alert alert-err" id="err2">Por favor ingresa tu nombre y un correo válido.</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goStep(1)">&larr; Volver</button>
+      <button class="btn btn-primary" id="btn2" onclick="goStep(3)" disabled>Continuar &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ── PASO 3: FECHA Y HORA ── -->
+  <div id="step3" style="display:none">
+    <div class="card">
+      <div class="card-ttl">Elige fecha y hora</div>
+      <div class="card-sub">Selecciona un día disponible y luego el horario que mejor te acomode. Las consultas duran 45 minutos y son online por videollamada.</div>
+
+      <div class="cal-nav-row">
+        <button class="cal-arrow" id="cal-prev" onclick="prevMonth()">&#8592;</button>
+        <div class="cal-month-lbl" id="cal-month-lbl">Cargando...</div>
+        <button class="cal-arrow" id="cal-next" onclick="nextMonth()">&#8594;</button>
+      </div>
+      <div class="cal-grid" id="cal-grid">
+        <div class="cal-loading"><span class="spin dark"></span> Cargando disponibilidad...</div>
+      </div>
+      <div class="cal-legend">
+        <div class="cl-item"><div class="cl-dot" style="background:var(--s5);border:1px solid var(--s4)"></div>Con disponibilidad</div>
+        <div class="cl-item"><div class="cl-dot" style="background:var(--p2)"></div>Día seleccionado</div>
+        <div class="cl-item"><div class="cl-dot" style="background:var(--g4)"></div>Sin disponibilidad</div>
+      </div>
+
+      <div id="slots-section" style="display:none">
+        <div class="slots-section">
+          <div class="slots-lbl" id="slots-date-lbl"></div>
+          <div class="slots-grid" id="slots-grid"></div>
+        </div>
+      </div>
+      <div class="alert alert-err" id="err3">Selecciona una fecha y un horario para continuar.</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goStep(2)">&larr; Volver</button>
+      <button class="btn btn-primary" id="btn3" onclick="goStep(4)" disabled>Ver resumen &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ── PASO 4: CONFIRMAR ── -->
+  <div id="step4" style="display:none">
+    <div class="card">
+      <div class="card-ttl">Confirmar reserva</div>
+      <div class="card-sub">Revisa los detalles y confirma tu cita. Recibirás un correo de confirmación.</div>
+      <div id="summary-body"></div>
+      <div class="price-badge">Consulta Nutricional Virtual &middot; 45 min &middot; $15.000 CLP</div>
+    </div>
+    <div class="alert alert-err" id="err4">Hubo un problema al agendar. Por favor intenta de nuevo.</div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goStep(3)">&larr; Volver</button>
+      <button class="btn btn-confirm" id="btn4" onclick="confirmBooking()">&#10003; Confirmar reserva</button>
+    </div>
+  </div>
+
+  <!-- ── PASO 5: ÉXITO ── -->
+  <div id="step5" style="display:none">
+    <div class="card">
+      <div class="success-body">
+        <div class="success-check">&#10003;</div>
+        <div class="success-title">&#161;Cita confirmada!</div>
+        <div class="success-sub">Tu consulta fue agendada exitosamente con Fernanda. Revisa tu correo para el enlace de la videollamada.</div>
+        <div class="success-box" id="success-box"></div>
+        <div style="font-size:.78rem;color:var(--g3);margin-bottom:1rem">Si tienes dudas, escribe a <strong>nutriage2026@gmail.com</strong></div>
+        <button class="btn btn-new" onclick="resetFlow()">+ Agendar otra consulta</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<script>
+const API = 'https://nutriage-api.onrender.com';
+const EID = '5378644';
+const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DOWS   = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+
+let S = {
+  tipo: null,
+  nombre:'', email:'', telefono:'', objetivo:'',
+  selDate: null, selTime: null, selTimeLabel: null,
+  slots: {},
+  month: new Date()
+};
+
+// ── NAVEGACIÓN ───────────────────────────────────────────────────
+function goStep(n){
+  [1,2,3,4,5].forEach(i=>{
+    const el = document.getElementById('step'+i);
+    if(el) el.style.display = (i===n) ? 'block' : 'none';
+  });
+  updateProg(n);
+  if(n===3) initCal();
+  if(n===4) buildSummary();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function updateProg(active){
+  for(let i=1;i<=4;i++){
+    const s = document.getElementById('ps'+i);
+    s.classList.remove('active','done');
+    if(i < active) s.classList.add('done');
+    else if(i === active) s.classList.add('active');
+    const l = document.getElementById('pl'+i);
+    if(l) l.classList.toggle('done', i < active);
+  }
+}
+
+// ── PASO 1 ───────────────────────────────────────────────────────
+function selectTipo(t){
+  S.tipo = t;
+  document.getElementById('tc-primera').classList.toggle('on', t==='primera');
+  document.getElementById('tc-seguimiento').classList.toggle('on', t==='seguimiento');
+  document.getElementById('btn1').disabled = false;
+}
+
+// ── PASO 2 ───────────────────────────────────────────────────────
+function checkStep2(){
+  const n = document.getElementById('f-nombre').value.trim();
+  const e = document.getElementById('f-email').value.trim();
+  document.getElementById('btn2').disabled = !(n && e && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+}
+
+// ── CALENDARIO ───────────────────────────────────────────────────
+async function initCal(){
+  renderCal(true);
+  await fetchSlots();
+}
+
+async function fetchSlots(){
+  const m = S.month;
+  const y = m.getFullYear(), mo = m.getMonth();
+  const start = new Date(y, mo, 1).toISOString();
+  const end   = new Date(y, mo+1, 0, 23, 59, 59).toISOString();
+  document.getElementById('cal-grid').innerHTML =
+    '<div class="cal-loading"><span class="spin dark"></span>&nbsp;Cargando disponibilidad...</div>';
+  try{
+    const r = await fetch(`${API}/availability/slots?eventTypeId=${EID}&start=${start}&end=${end}`);
+    const d = await r.json();
+    S.slots = d.data?.slots || {};
+  } catch(_){ S.slots = {}; }
+  renderCal(false);
+}
+
+function renderCal(loading){
+  const m = S.month, y = m.getFullYear(), mo = m.getMonth();
+  const lbl = `${MONTHS[mo]} ${y}`;
+  document.getElementById('cal-month-lbl').textContent = lbl;
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const prevBtn = document.getElementById('cal-prev');
+  const firstOfMonth = new Date(y, mo, 1);
+  prevBtn.disabled = firstOfMonth <= today;
+
+  if(loading) return;
+
+  const firstDow  = firstOfMonth.getDay();
+  const daysInMo  = new Date(y, mo+1, 0).getDate();
+
+  let html = DOWS.map(d=>`<div class="cal-dow">${d}</div>`).join('');
+  for(let i=0; i<firstDow; i++) html += '<div class="cal-day"></div>';
+
+  for(let d=1; d<=daysInMo; d++){
+    const ds = `${y}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const date = new Date(y, mo, d);
+    const isPast   = date < today;
+    const hasSlots = !isPast && S.slots[ds] && S.slots[ds].length > 0;
+    const isSel    = S.selDate === ds;
+    const isToday  = date.getTime() === today.getTime();
+
+    let cls = 'cal-day';
+    if(isPast) cls += ' past';
+    else if(hasSlots) cls += ' avail';
+    if(isSel) cls += ' selected';
+    if(isToday) cls += ' today-mark';
+
+    const click = hasSlots ? `onclick="pickDate('${ds}')"` : '';
+    html += `<div class="${cls}" ${click} title="${hasSlots ? S.slots[ds].length+' horarios disponibles' : ''}">${d}</div>`;
+  }
+  document.getElementById('cal-grid').innerHTML = html;
+
+  // Restaurar slots si ya había fecha seleccionada
+  if(S.selDate && S.slots[S.selDate]){
+    showSlots(S.selDate);
+  }
+}
+
+function pickDate(ds){
+  S.selDate = ds;
+  S.selTime = null;
+  S.selTimeLabel = null;
+  document.getElementById('btn3').disabled = true;
+  renderCal(false);
+  showSlots(ds);
+  setTimeout(()=>{
+    const el = document.getElementById('slots-section');
+    if(el) el.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }, 120);
+}
+
+function showSlots(ds){
+  const slots = S.slots[ds] || [];
+  const d = new Date(ds + 'T12:00:00');
+  const lbl = d.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'});
+  document.getElementById('slots-date-lbl').textContent =
+    lbl.charAt(0).toUpperCase() + lbl.slice(1) + ' — selecciona un horario';
+
+  if(!slots.length){
+    document.getElementById('slots-grid').innerHTML = '<div class="no-slots">No hay horarios disponibles para este día.</div>';
+    document.getElementById('slots-section').style.display = 'block';
+    return;
+  }
+
+  document.getElementById('slots-grid').innerHTML = slots.map(s=>{
+    const t  = new Date(s.time);
+    const hm = t.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',timeZone:'America/Santiago'});
+    const on = S.selTime === s.time ? ' on' : '';
+    return `<button class="slot-btn${on}" onclick="pickTime('${s.time}','${hm}')">${hm}</button>`;
+  }).join('');
+  document.getElementById('slots-section').style.display = 'block';
+}
+
+function pickTime(iso, lbl){
+  S.selTime = iso;
+  S.selTimeLabel = lbl;
+  document.getElementById('btn3').disabled = false;
+  document.getElementById('err3').style.display = 'none';
+  showSlots(S.selDate);
+}
+
+function prevMonth(){
+  S.month = new Date(S.month.getFullYear(), S.month.getMonth()-1, 1);
+  S.selDate = null; S.selTime = null;
+  document.getElementById('btn3').disabled = true;
+  document.getElementById('slots-section').style.display = 'none';
+  fetchSlots();
+}
+function nextMonth(){
+  S.month = new Date(S.month.getFullYear(), S.month.getMonth()+1, 1);
+  S.selDate = null; S.selTime = null;
+  document.getElementById('btn3').disabled = true;
+  document.getElementById('slots-section').style.display = 'none';
+  fetchSlots();
+}
+
+// ── PASO 4: RESUMEN ──────────────────────────────────────────────
+function buildSummary(){
+  S.nombre   = document.getElementById('f-nombre').value.trim();
+  S.email    = document.getElementById('f-email').value.trim();
+  S.telefono = document.getElementById('f-tel').value.trim();
+  S.objetivo = document.getElementById('f-objetivo').value;
+
+  const d    = new Date(S.selDate + 'T12:00:00');
+  const dlbl = d.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const tipo = S.tipo === 'primera' ? '🌱 Primera consulta' : '🔄 Seguimiento';
+
+  document.getElementById('summary-body').innerHTML = `
+    <div class="sum-item">
+      <div class="sum-ico">👤</div>
+      <div><div class="sum-lbl">Paciente</div><div class="sum-val">${S.nombre}</div></div>
+    </div>
+    <div class="sum-item">
+      <div class="sum-ico">📧</div>
+      <div><div class="sum-lbl">Correo</div><div class="sum-val">${S.email}</div></div>
+    </div>
+    ${S.telefono ? `<div class="sum-item">
+      <div class="sum-ico">📱</div>
+      <div><div class="sum-lbl">Teléfono</div><div class="sum-val">${S.telefono}</div></div>
+    </div>` : ''}
+    <div class="sum-item">
+      <div class="sum-ico">🩺</div>
+      <div><div class="sum-lbl">Tipo de consulta</div><div class="sum-val">${tipo}</div></div>
+    </div>
+    <div class="sum-item">
+      <div class="sum-ico">📅</div>
+      <div><div class="sum-lbl">Fecha</div><div class="sum-val">${dlbl.charAt(0).toUpperCase()+dlbl.slice(1)}</div></div>
+    </div>
+    <div class="sum-item">
+      <div class="sum-ico">🕐</div>
+      <div><div class="sum-lbl">Hora</div><div class="sum-val">${S.selTimeLabel} (hora Chile)</div></div>
+    </div>
+    ${S.objetivo ? `<div class="sum-item">
+      <div class="sum-ico">🎯</div>
+      <div><div class="sum-lbl">Objetivo</div><div class="sum-val">${S.objetivo}</div></div>
+    </div>` : ''}
+    <div class="sum-item">
+      <div class="sum-ico">💻</div>
+      <div><div class="sum-lbl">Modalidad</div><div class="sum-val">Videollamada online · 45 minutos</div></div>
+    </div>`;
+}
+
+// ── CONFIRMAR ────────────────────────────────────────────────────
+async function confirmBooking(){
+  const btn = document.getElementById('btn4');
+  btn.innerHTML = '<span class="spin"></span>&nbsp;Agendando...';
+  btn.disabled = true;
+  document.getElementById('err4').style.display = 'none';
+
+  const body = {
+    eventTypeId: EID,
+    start: S.selTime,
+    name: S.nombre,
+    email: S.email,
+    telefono: S.telefono,
+    objetivo: S.objetivo,
+    canal: 'Web',
+    notes: `Tipo: ${S.tipo === 'primera' ? 'Primera consulta' : 'Seguimiento'}. Objetivo: ${S.objetivo}`
+  };
+
+  try{
+    const r = await fetch(`${API}/appointments/`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    });
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.error || 'Error al agendar');
+    showSuccess(d);
+  } catch(e){
+    const msg = document.getElementById('err4');
+    msg.textContent = e.message || 'Error al agendar. Intenta de nuevo.';
+    msg.style.display = 'block';
+    btn.innerHTML = '&#10003; Confirmar reserva';
+    btn.disabled = false;
+  }
+}
+
+function showSuccess(data){
+  const d    = new Date(S.selDate + 'T12:00:00');
+  const dlbl = d.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+  document.getElementById('success-box').innerHTML = `
+    <div class="sb-row"><span>Paciente</span><span>${S.nombre}</span></div>
+    <div class="sb-row"><span>Correo</span><span>${S.email}</span></div>
+    <div class="sb-row"><span>Fecha</span><span>${dlbl.charAt(0).toUpperCase()+dlbl.slice(1)}</span></div>
+    <div class="sb-row"><span>Hora</span><span>${S.selTimeLabel} (Chile)</span></div>
+    <div class="sb-row"><span>Tipo</span><span>${S.tipo==='primera'?'Primera consulta':'Seguimiento'}</span></div>
+    <div class="sb-row"><span>Booking #</span><span>${data.booking?.id || '—'}</span></div>`;
+
+  [1,2,3,4].forEach(i=>{
+    const el = document.getElementById('step'+i);
+    if(el) el.style.display='none';
+  });
+  document.getElementById('prog-bar').style.display = 'none';
+  document.getElementById('step5').style.display = 'block';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// ── RESET ────────────────────────────────────────────────────────
+function resetFlow(){
+  S = {tipo:null, nombre:'', email:'', telefono:'', objetivo:'',
+       selDate:null, selTime:null, selTimeLabel:null, slots:{}, month:new Date()};
+  document.getElementById('prog-bar').style.display = 'flex';
+  ['f-nombre','f-email','f-tel'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-objetivo').value = '';
+  document.getElementById('btn1').disabled = true;
+  document.getElementById('btn2').disabled = true;
+  document.getElementById('btn3').disabled = true;
+  document.getElementById('tc-primera').classList.remove('on');
+  document.getElementById('tc-seguimiento').classList.remove('on');
+  document.getElementById('slots-section').style.display = 'none';
+  goStep(1);
+}
+
+document.addEventListener('DOMContentLoaded', ()=> goStep(1));
+</script>
+</body>
+</html>

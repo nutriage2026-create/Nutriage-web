@@ -43,6 +43,12 @@ def dashboard():
     return send_file(path)
 
 
+@app.get("/booking")
+def booking():
+    path = os.path.join(os.path.dirname(__file__), "booking.html")
+    return send_file(path)
+
+
 @app.get("/health")
 def health():
     return jsonify({"status": "ok"})
