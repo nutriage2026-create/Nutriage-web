@@ -576,6 +576,8 @@ const PASS = 'admin2026';
 let allLeads      = [];
 let currentFilter = '';
 let bookingsMap   = {};   // bookingId(str) → {videoUrl, nombre, start}
+let leadsByEmail  = {};   // email(lower) → lead
+let leadsByBookingId = {}; // bookingId(str) → lead
 let scheduleData  = null; // schedule de Cal.com
 let bookingsByDate = {};  // "YYYY-MM-DD" → [{nombre,hora,email}]
 let scMonth       = new Date(); // mes visible en calendario de disponibilidad
@@ -748,6 +750,13 @@ async function loadLeads(){
   const data = await apiFetch('/leads/');
   if(!data){ setLeadsError(); return; }
   allLeads = data.leads || [];
+  leadsByEmail = {};
+  leadsByBookingId = {};
+  allLeads.forEach(l=>{
+    if(l.email) leadsByEmail[l.email.toLowerCase()] = l;
+    const bId = parseBookingId(l.notas);
+    if(bId) leadsByBookingId[bId] = l;
+  });
   updateKPIs(allLeads);
   renderFunnel(allLeads);
   renderTempChart(allLeads);
@@ -885,9 +894,13 @@ function renderLeadsTable(leads){
         const tel  = l.telefono ? `<a href="tel:${l.telefono}" style="color:var(--p2);text-decoration:none">${l.telefono}</a>` : '<span style="color:var(--g4)">—</span>';
         const bkId = parseBookingId(l.notas);
         const bk   = bkId ? bookingsMap[bkId] : null;
-        const tieneFicha = !!(bk && (bk.ficha || (bk.notes && /FICHA CLÍNICA/i.test(bk.notes))));
+        const tieneFicha = !!(
+          (bk && (bk.ficha || (bk.notes && /FICHA CLÍNICA/i.test(bk.notes)))) ||
+          (l.notas && /FICHA CLÍNICA/i.test(l.notas))
+        );
+        const fichaKey = bkId || `email:${(l.email||'').toLowerCase()}`;
         const fichaCell = tieneFicha
-          ? `<button class="ficha-row-btn" onclick="openFicha('${bkId}')">📋 Ver ficha</button>`
+          ? `<button class="ficha-row-btn" onclick="openFicha('${fichaKey}')">📋 Ver ficha</button>`
           : `<span style="color:var(--g4);font-size:.72rem">—</span>`;
         return `<tr>
           <td style="color:var(--g3);font-size:.72rem;font-weight:700">${i+1}</td>
@@ -947,7 +960,8 @@ async function loadBookings(){
         const hora  = start.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',timeZone:'America/Santiago'});
         const stCls = b.status==='accepted'?'badge-agendada':'badge-pendiente';
         const stLbl = b.status==='accepted'?'Confirmada':'Pendiente';
-        const tieneFicha = !!(b.ficha || (b.notes && /FICHA CLÍNICA/i.test(b.notes)));
+        const ld = b.email ? leadsByEmail[b.email.toLowerCase()] : null;
+        const tieneFicha = !!(b.ficha || (b.notes && /FICHA CLÍNICA/i.test(b.notes)) || (ld && ld.notas && /FICHA CLÍNICA/i.test(ld.notas)));
         const fichaBtn = tieneFicha
           ? `<button class="ficha-row-btn" onclick="openFicha(${i})">📋 Ver ficha</button>`
           : `<span style="font-size:.7rem;color:var(--g3)">—</span>`;
@@ -1308,22 +1322,37 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 // ── FICHA CLÍNICA MODAL ─────────────────────────────────────────
 function openFicha(key){
-  let b;
+  let b = null, lead = null;
   if(typeof key === 'number'){
     b = (window.__lastBookings || [])[key];
+    if(b && b.email) lead = leadsByEmail[b.email.toLowerCase()] || null;
   } else {
-    b = bookingsMap[String(key)];
+    const k = String(key);
+    if(k.startsWith('email:')){
+      lead = leadsByEmail[k.slice(6)] || null;
+    } else {
+      b = bookingsMap[k];
+      lead = leadsByBookingId[k] || (b && b.email ? leadsByEmail[b.email.toLowerCase()] : null);
+    }
   }
-  if(!b) return;
-  const start = new Date(b.start);
-  const fecha = start.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'America/Santiago'});
-  const hora  = start.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',timeZone:'America/Santiago'});
+  if(!b && !lead) return;
 
-  document.getElementById('ficha-mtitle').innerHTML =
-    `Ficha de ${b.nombre || 'paciente'}<small>${fecha.charAt(0).toUpperCase()+fecha.slice(1)} · ${hora}</small>`;
+  const nombre = (b && b.nombre) || (lead && lead.nombre) || 'paciente';
+  const startIso = b && b.start ? b.start : parseCitaISO(lead && lead.notas);
+  let cab = `Ficha de ${nombre}`;
+  if(startIso){
+    const start = new Date(startIso);
+    const fecha = start.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'America/Santiago'});
+    const hora  = start.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',timeZone:'America/Santiago'});
+    cab += `<small>${fecha.charAt(0).toUpperCase()+fecha.slice(1)} · ${hora}</small>`;
+  }
+  document.getElementById('ficha-mtitle').innerHTML = cab;
 
-  const ficha = b.ficha || b.metadata?.ficha || null;
-  const notes = b.notes || b.description || b.additionalNotes || '';
+  const ficha = (b && (b.ficha || b.metadata?.ficha)) || null;
+  let notes = (b && (b.notes || b.description || b.additionalNotes)) || '';
+  if((!notes || !/FICHA CLÍNICA/i.test(notes)) && lead && lead.notas){
+    notes = lead.notas;
+  }
   const body = document.getElementById('ficha-mbody');
 
   if(ficha){
