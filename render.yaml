@@ -31,3 +31,17 @@ services:
         value: production
       - key: TZ
         value: America/Santiago
+
+  - type: web
+    name: nutriage-frontend
+    runtime: static
+    buildCommand: ""
+    staticPublishPath: .
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache, no-store, must-revalidate
+    routes:
+      - type: rewrite
+        source: /
+        destination: /booking.html

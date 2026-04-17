@@ -169,6 +169,21 @@ tr:hover td{background:var(--g5)}
 .filter-search{padding:.4rem .85rem;border:1.5px solid var(--g4);border-radius:20px;font-family:'Nunito',sans-serif;font-size:.78rem;color:var(--g1);outline:none;width:200px;transition:border .2s}
 .filter-search:focus{border-color:var(--p2)}
 
+/* ── FICHA MODAL ── */
+.ficha-modal{position:fixed;inset:0;background:rgba(15,23,42,.6);display:none;align-items:center;justify-content:center;z-index:200;padding:1rem}
+.ficha-modal.on{display:flex}
+.ficha-mbox{background:var(--wh);border-radius:var(--rl);max-width:640px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.3)}
+.ficha-mhead{padding:1.1rem 1.4rem;border-bottom:1px solid var(--g4);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--wh);z-index:1}
+.ficha-mtitle{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:600;color:var(--p1)}
+.ficha-mtitle small{display:block;font-family:'Nunito',sans-serif;font-size:.75rem;font-weight:600;color:var(--g3);margin-top:.15rem}
+.ficha-mclose{background:none;border:none;font-size:1.8rem;color:var(--g3);cursor:pointer;padding:0 .4rem;line-height:1}
+.ficha-mclose:hover{color:var(--p1)}
+.ficha-mbody{padding:1.2rem 1.4rem 1.6rem}
+.ficha-mbody pre{background:var(--g5);border:1px solid var(--g4);border-radius:var(--r);padding:1rem;font-family:'Nunito',sans-serif;font-size:.84rem;color:var(--g1);white-space:pre-wrap;word-wrap:break-word;line-height:1.6}
+.ficha-empty{padding:1.5rem;text-align:center;color:var(--g3);font-size:.85rem;background:var(--g5);border-radius:var(--r);border:1px dashed var(--g4)}
+.ficha-row-btn{border:1px solid var(--p4);background:var(--p5);color:var(--p2);font-family:'Nunito',sans-serif;font-size:.7rem;font-weight:700;padding:.28rem .7rem;border-radius:6px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.ficha-row-btn:hover{background:var(--p2);color:#fff;border-color:var(--p2)}
+
 /* ── EMPTY STATE ── */
 .empty{text-align:center;padding:2.5rem 1rem;color:var(--g3)}
 .empty-ico{font-size:2.5rem;margin-bottom:.75rem}
@@ -237,16 +252,49 @@ tr:hover td{background:var(--g5)}
 .sc-block-btn.unblock{border-color:var(--s4);background:var(--s5);color:var(--s1)}
 .sc-block-btn.unblock:hover{background:var(--s4)}
 
+/* ── TODAY BANNER ── */
+.today-banner{display:none;align-items:center;gap:.75rem;background:linear-gradient(135deg,var(--p5),#e8f5e9);border:1.5px solid var(--p4);border-radius:var(--rl);padding:.85rem 1.2rem;margin-bottom:1.25rem}
+.today-banner.show{display:flex}
+.today-banner-ico{font-size:1.4rem}
+.today-banner-text{flex:1}
+.today-banner-title{font-size:.85rem;font-weight:800;color:var(--p1)}
+.today-banner-sub{font-size:.75rem;color:var(--g3);margin-top:.1rem}
+.today-banner-count{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:800;color:var(--p2);line-height:1}
+
+/* ── TOAST ── */
+#toast-container{position:fixed;bottom:1.5rem;right:1.5rem;z-index:9999;display:flex;flex-direction:column;gap:.5rem;pointer-events:none}
+.toast{display:flex;align-items:center;gap:.6rem;padding:.7rem 1.1rem;border-radius:var(--rl);font-size:.8rem;font-weight:700;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,.18);animation:toastIn .25s ease;pointer-events:auto;max-width:300px}
+.toast.ok{background:linear-gradient(135deg,var(--s1),var(--s2))}
+.toast.err{background:linear-gradient(135deg,#b91c1c,#ef4444)}
+.toast.info{background:linear-gradient(135deg,var(--p1),var(--p2))}
+@keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastOut{to{opacity:0;transform:translateY(12px)}}
+
+/* ── REFRESH SPIN ── */
+@keyframes refreshSpin{to{transform:rotate(360deg)}}
+.refresh-btn.loading .refresh-ico{display:inline-block;animation:refreshSpin .6s linear infinite}
+.refresh-btn:disabled{opacity:.6;cursor:not-allowed}
+
+/* ── LAST UPDATED ── */
+.last-updated{font-size:.68rem;color:var(--g3);font-style:italic}
+
+/* ── API STATUS ── */
+.status-dot.ok{background:#22c55e}
+.status-dot.warn{background:#f59e0b}
+.status-dot.err{background:#ef4444}
+
 /* ── RESPONSIVE ── */
 @media(max-width:900px){
   .kpi-grid{grid-template-columns:1fr 1fr}
   .grid-2,.grid-3{grid-template-columns:1fr}
+  .sched-grid{grid-template-columns:1fr}
 }
 @media(max-width:640px){
   .sidebar{width:0;overflow:hidden}
   .main{margin-left:0}
   .kpi-grid{grid-template-columns:1fr 1fr}
   .content{padding:1rem}
+  .sched-grid{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -287,6 +335,7 @@ tr:hover td{background:var(--g5)}
     </button>
     <button class="sb-item" onclick="showSection('citas',this)">
       <span class="ico">📅</span> Citas
+      <span class="sb-badge" id="sb-bookings-count" style="display:none">—</span>
     </button>
     <button class="sb-item" onclick="showSection('disponibilidad',this)">
       <span class="ico">🕐</span> Disponibilidad
@@ -319,8 +368,9 @@ tr:hover td{background:var(--g5)}
         <div class="topbar-subtitle" id="topbar-date"></div>
       </div>
       <div class="topbar-right">
-        <span class="status-text"><span class="status-dot"></span>API conectada</span>
-        <button class="refresh-btn" onclick="loadAll()">↺ Actualizar</button>
+        <span class="last-updated" id="last-updated"></span>
+        <span class="status-text"><span class="status-dot ok" id="api-dot"></span><span id="api-status-lbl">API conectada</span></span>
+        <button class="refresh-btn" id="refresh-btn" onclick="loadAll()"><span class="refresh-ico">↺</span> Actualizar</button>
       </div>
     </div>
 
@@ -332,6 +382,16 @@ tr:hover td{background:var(--g5)}
         <div class="section-header">
           <h2>Vista General</h2>
           <p>Resumen del negocio en tiempo real</p>
+        </div>
+
+        <!-- Today banner -->
+        <div class="today-banner" id="today-banner">
+          <div class="today-banner-ico">🔔</div>
+          <div class="today-banner-text">
+            <div class="today-banner-title" id="today-banner-title">Tienes citas hoy</div>
+            <div class="today-banner-sub" id="today-banner-sub"></div>
+          </div>
+          <div class="today-banner-count" id="today-banner-count"></div>
         </div>
 
         <!-- KPIs -->
@@ -507,6 +567,9 @@ tr:hover td{background:var(--g5)}
   </div><!-- /main -->
 </div><!-- /dashboard -->
 
+<!-- Toast container -->
+<div id="toast-container"></div>
+
 <script>
 const API = 'https://nutriage-api.onrender.com';
 const PASS = 'admin2026';
@@ -516,6 +579,8 @@ let bookingsMap   = {};   // bookingId(str) → {videoUrl, nombre, start}
 let scheduleData  = null; // schedule de Cal.com
 let bookingsByDate = {};  // "YYYY-MM-DD" → [{nombre,hora,email}]
 let scMonth       = new Date(); // mes visible en calendario de disponibilidad
+let lastUpdated   = null; // timestamp último refresh
+let autoRefreshTimer = null;
 
 // ── AUTH ────────────────────────────────────────────────────────
 function doLogin(){
@@ -554,6 +619,19 @@ function setDate(){
   document.getElementById('topbar-date').textContent = d.toLocaleDateString('es-MX',opts);
 }
 
+// ── TOAST ────────────────────────────────────────────────────────
+function showToast(msg, type='info', duration=3500){
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.textContent = msg;
+  c.appendChild(t);
+  setTimeout(()=>{
+    t.style.animation = 'toastOut .25s ease forwards';
+    setTimeout(()=>t.remove(), 260);
+  }, duration);
+}
+
 // ── FETCH HELPER ────────────────────────────────────────────────
 async function apiFetch(path){
   try{
@@ -563,12 +641,39 @@ async function apiFetch(path){
   } catch(e){ console.error('API error:',path,e); return null; }
 }
 
+// ── API STATUS ────────────────────────────────────────────────────
+function setApiStatus(ok){
+  const dot = document.getElementById('api-dot');
+  const lbl = document.getElementById('api-status-lbl');
+  if(!dot||!lbl) return;
+  dot.className = 'status-dot ' + (ok ? 'ok' : 'err');
+  lbl.textContent = ok ? 'API conectada' : 'Sin conexión';
+}
+
+// ── LAST UPDATED ─────────────────────────────────────────────────
+function updateLastUpdatedLabel(){
+  if(!lastUpdated) return;
+  const diff = Math.round((Date.now() - lastUpdated) / 60000);
+  const el = document.getElementById('last-updated');
+  if(!el) return;
+  el.textContent = diff < 1 ? 'Actualizado ahora' : `Actualizado hace ${diff} min`;
+}
+function startLastUpdatedTick(){
+  setInterval(updateLastUpdatedLabel, 60000);
+}
+
 // ── LOAD ALL ────────────────────────────────────────────────────
 async function loadAll(){
-  // Cargar bookings primero para tener el mapa disponible al renderizar leads
+  const btn = document.getElementById('refresh-btn');
+  if(btn){ btn.classList.add('loading'); btn.disabled = true; }
+
   const bkData = await apiFetch('/bookings/?status=upcoming&limit=50');
+  const apiOk  = bkData !== null;
+  setApiStatus(apiOk);
+
   bookingsMap = {};
   bookingsByDate = {};
+  const todayStr = new Date().toISOString().slice(0,10);
   for(const b of (bkData?.bookings || [])){
     if(b.id) bookingsMap[String(b.id)] = b;
     const ds = (b.start||'').slice(0,10);
@@ -579,10 +684,47 @@ async function loadAll(){
         nombre: b.nombre,
         email:  b.email,
         hora:   t.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',timeZone:'America/Santiago'}),
+        videoUrl: b.videoUrl||'',
       });
     }
   }
+
+  // Today banner
+  const todayBks = bookingsByDate[todayStr] || [];
+  const banner = document.getElementById('today-banner');
+  if(banner){
+    if(todayBks.length){
+      const names = todayBks.map(b=>b.nombre).join(', ');
+      document.getElementById('today-banner-title').textContent = `${todayBks.length === 1 ? 'Tienes 1 cita' : `Tienes ${todayBks.length} citas`} hoy`;
+      document.getElementById('today-banner-sub').textContent   = names;
+      document.getElementById('today-banner-count').textContent = todayBks.length;
+      banner.classList.add('show');
+    } else {
+      banner.classList.remove('show');
+    }
+  }
+
+  // Bookings badge in sidebar
+  const bkTotal = bkData?.total || 0;
+  const sbBk = document.getElementById('sb-bookings-count');
+  if(sbBk){
+    if(bkTotal > 0){ sbBk.textContent = bkTotal; sbBk.style.display = ''; }
+    else { sbBk.style.display = 'none'; }
+  }
+
   await Promise.all([loadLeads(), loadUpcomingBookings()]);
+
+  // Update last-updated timestamp
+  lastUpdated = Date.now();
+  updateLastUpdatedLabel();
+
+  if(btn){ btn.classList.remove('loading'); btn.disabled = false; }
+  scheduleAutoRefresh();
+}
+
+function scheduleAutoRefresh(){
+  if(autoRefreshTimer) clearTimeout(autoRefreshTimer);
+  autoRefreshTimer = setTimeout(()=>{ loadAll(); }, 5 * 60 * 1000); // 5 min
 }
 
 // ── PARSE CITA DESDE NOTAS ───────────────────────────────────────
@@ -736,11 +878,17 @@ function renderLeadsTable(leads){
   });
   el.innerHTML = '<div class="tbl-wrap"><table><thead><tr>'
     + '<th>#</th><th>Nombre</th><th>Email</th><th>Teléfono</th>'
-    + '<th>Temperatura</th><th>Estatus</th><th>Cita agendada</th>'
+    + '<th>Temperatura</th><th>Estatus</th><th>Cita agendada</th><th>Ficha</th>'
     + '</tr></thead><tbody>'
     + sorted.map((l,i)=>{
         const cita = formatCita(l.notas);
         const tel  = l.telefono ? `<a href="tel:${l.telefono}" style="color:var(--p2);text-decoration:none">${l.telefono}</a>` : '<span style="color:var(--g4)">—</span>';
+        const bkId = parseBookingId(l.notas);
+        const bk   = bkId ? bookingsMap[bkId] : null;
+        const tieneFicha = !!(bk && (bk.ficha || (bk.notes && /FICHA CLÍNICA/i.test(bk.notes))));
+        const fichaCell = tieneFicha
+          ? `<button class="ficha-row-btn" onclick="openFicha('${bkId}')">📋 Ver ficha</button>`
+          : `<span style="color:var(--g4);font-size:.72rem">—</span>`;
         return `<tr>
           <td style="color:var(--g3);font-size:.72rem;font-weight:700">${i+1}</td>
           <td class="td-name">${l.nombre||'—'}</td>
@@ -749,6 +897,7 @@ function renderLeadsTable(leads){
           <td>${tempBadge(l.temperatura)}</td>
           <td>${statusBadge(l.estatus)}</td>
           <td style="font-size:.75rem;color:var(--g2);white-space:nowrap">${cita||'<span style="color:var(--g4)">—</span>'}</td>
+          <td>${fichaCell}</td>
         </tr>`;
       }).join('')
     + '</tbody></table></div>';
@@ -788,8 +937,9 @@ async function loadBookings(){
     el.innerHTML='<div class="empty" style="padding:2rem"><div class="empty-ico">📅</div><p>No hay citas próximas agendadas</p></div>';
     return;
   }
+  window.__lastBookings = bks;
   el.innerHTML = '<div class="tbl-wrap"><table><thead><tr>'
-    + '<th>#</th><th>Paciente</th><th>Email</th><th>Fecha</th><th>Hora</th><th>Estado</th>'
+    + '<th>#</th><th>Paciente</th><th>Email</th><th>Fecha</th><th>Hora</th><th>Estado</th><th>Ficha</th>'
     + '</tr></thead><tbody>'
     + bks.map((b,i)=>{
         const start = new Date(b.start);
@@ -797,6 +947,10 @@ async function loadBookings(){
         const hora  = start.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',timeZone:'America/Santiago'});
         const stCls = b.status==='accepted'?'badge-agendada':'badge-pendiente';
         const stLbl = b.status==='accepted'?'Confirmada':'Pendiente';
+        const tieneFicha = !!(b.ficha || (b.notes && /FICHA CLÍNICA/i.test(b.notes)));
+        const fichaBtn = tieneFicha
+          ? `<button class="ficha-row-btn" onclick="openFicha(${i})">📋 Ver ficha</button>`
+          : `<span style="font-size:.7rem;color:var(--g3)">—</span>`;
         return `<tr>
           <td style="color:var(--g3);font-size:.72rem;font-weight:700">${i+1}</td>
           <td class="td-name">${b.nombre||'—'}</td>
@@ -804,6 +958,7 @@ async function loadBookings(){
           <td style="font-size:.78rem;white-space:nowrap">${fecha}</td>
           <td style="font-size:.78rem;font-weight:700">${hora}</td>
           <td><span class="badge ${stCls}">${stLbl}</span></td>
+          <td>${fichaBtn}</td>
         </tr>`;
       }).join('')
     + '</tbody></table></div>';
@@ -842,45 +997,6 @@ async function loadUpcomingBookings(){
   }).join('');
 }
 
-// ── EVENT TYPES ──────────────────────────────────────────────────
-async function loadEventTypes(){
-  const data = await apiFetch('/availability/event-types');
-  const el = document.getElementById('event-types-list');
-  if(!data||!data.data){ el.innerHTML='<div class="empty" style="padding:2rem"><div class="empty-ico">📅</div><p>Sin datos</p></div>'; return; }
-  const types = data.data||[];
-  el.innerHTML = '<table><thead><tr><th>Consulta</th><th>Duración</th><th>ID</th></tr></thead><tbody>'
-    + types.map(t=>`<tr>
-        <td class="td-name">${t.title}</td>
-        <td>${t.lengthInMinutes} min</td>
-        <td style="font-family:monospace;font-size:.72rem;color:var(--g3)">${t.id}</td>
-      </tr>`).join('')
-    + '</tbody></table>';
-}
-
-async function loadSlots(){
-  const now = new Date();
-  const end = new Date(now); end.setDate(end.getDate()+7);
-  const data = await apiFetch(`/availability/slots?eventTypeId=5378644&start=${now.toISOString()}&end=${end.toISOString()}`);
-  const el = document.getElementById('slots-list');
-  if(!data||!data.data){ el.innerHTML='<div class="empty"><div class="empty-ico">🕐</div><p>Sin disponibilidad</p></div>'; return; }
-  const slots = data.data.slots||{};
-  const days = Object.keys(slots);
-  if(!days.length){ el.innerHTML='<div class="empty"><div class="empty-ico">🕐</div><p>Sin slots</p></div>'; return; }
-  let html='';
-  days.forEach(day=>{
-    const d = new Date(day);
-    html += `<div class="slot-date-head">${d.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'short'})}</div>`;
-    html += `<div class="slots-grid">`;
-    html += slots[day].slice(0,8).map(s=>{
-      const t = new Date(s.time);
-      const hm = t.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',timeZone:'America/Mexico_City'});
-      return `<div class="slot-btn">${hm}</div>`;
-    }).join('');
-    html += `</div>`;
-  });
-  el.innerHTML = html;
-}
-
 // ── DISPONIBILIDAD ───────────────────────────────────────────────
 const DAY_NAMES_EN = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const DAY_NAMES_ES = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
@@ -906,8 +1022,56 @@ async function loadDisponibilidad(){
       videoUrl: b.videoUrl||'',
     });
   }
+  await applyScheduleAutoCorrections();
   renderWeeklyEditor();
   renderScCalendar();
+}
+
+function todayStr(){
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+async function applyScheduleAutoCorrections(){
+  if(!scheduleData) return;
+  const ts = todayStr();
+  let overrides   = [...(scheduleData.overrides||[])];
+  let availability = JSON.parse(JSON.stringify(scheduleData.availability||[]));
+  let changed = false;
+
+  // Migración única: extender endTime < 19:00 a 19:00
+  if(!localStorage.getItem('na-hours-19-migrated')){
+    for(const a of availability){
+      if(a.endTime && a.endTime !== '00:00' && a.endTime < '19:00'){
+        a.endTime = '19:00';
+        changed = true;
+      }
+    }
+    localStorage.setItem('na-hours-19-migrated','1');
+  }
+
+  // Auto-bloquear el día actual (una sola vez por día; respeta desbloqueo manual posterior)
+  const autoKey = 'na-autoblock-'+ts;
+  if(!localStorage.getItem(autoKey)){
+    const idx = overrides.findIndex(o=>o.date===ts);
+    if(idx === -1){
+      overrides.push({date:ts, startTime:'00:00', endTime:'00:00'});
+      changed = true;
+    }
+    localStorage.setItem(autoKey,'1');
+  }
+
+  if(!changed) return;
+  try{
+    const r = await fetch(API+'/availability/schedule',{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({id:scheduleData.id, availability, overrides})
+    });
+    const d = await r.json();
+    if(r.ok && d.data){ scheduleData = d.data; }
+    else { scheduleData.overrides = overrides; scheduleData.availability = availability; }
+  } catch(e){ console.error('auto-correct schedule:', e); }
 }
 
 function renderWeeklyEditor(){
@@ -920,7 +1084,7 @@ function renderWeeklyEditor(){
   for(const a of avail){
     for(const d of a.days){
       enabledDays.add(d);
-      dayTimes[d] = {start: a.startTime||'09:00', end: a.endTime||'17:00'};
+      dayTimes[d] = {start: a.startTime||'09:00', end: a.endTime||'19:00'};
     }
   }
 
@@ -931,7 +1095,7 @@ function renderWeeklyEditor(){
   for(const d of days){
     const on  = enabledDays.has(d);
     const st  = dayTimes[d]?.start || '09:00';
-    const en  = dayTimes[d]?.end   || '17:00';
+    const en  = dayTimes[d]?.end   || '19:00';
     html += `<div class="day-row ${on?'active':'blocked'}" id="dr-${d}">
       <div class="day-toggle">
         <input type="checkbox" id="chk-${d}" ${on?'checked':''} onchange="toggleDay('${d}')">
@@ -969,7 +1133,7 @@ async function saveSchedule(){
   for(const d of days){
     if(document.getElementById('chk-'+d)?.checked){
       const st = document.getElementById('st-'+d)?.value || '09:00';
-      const en = document.getElementById('en-'+d)?.value || '17:00';
+      const en = document.getElementById('en-'+d)?.value || '19:00';
       avail.push({days:[d], startTime:st, endTime:en});
     }
   }
@@ -985,10 +1149,12 @@ async function saveSchedule(){
     scheduleData = d.data || scheduleData;
     status.textContent = '✓ Horario guardado correctamente';
     status.className   = 'sched-status ok';
+    showToast('Horario guardado correctamente', 'ok');
     renderScCalendar();
   } catch(e){
     status.textContent = '✗ ' + (e.message||'Error al guardar');
     status.className   = 'sched-status err';
+    showToast('Error al guardar: ' + (e.message||''), 'err');
   }
   btn.disabled = false; btn.innerHTML = '💾 Guardar horario';
 }
@@ -1029,7 +1195,7 @@ function renderScCalendar(){
     else if(isAvail) cls += ' avail';
     if(hasBk && !isPast) cls += ' has-booking';
 
-    const click = !isPast ? `onclick="scDayClick('${ds}','${isBlocked?'blocked':'avail'}')"` : '';
+    const click = !isPast ? `onclick="scDayClick(this,'${ds}','${isBlocked?'blocked':'avail'}')"` : '';
     const count = bookingsByDate[ds]?.length;
     const badge = (hasBk && !isPast) ? `<span style="font-size:.58rem;line-height:1;color:var(--p2);font-weight:800">${count}</span>` : '';
     html += `<div class="${cls}" ${click} title="${ds}">${d}${badge}</div>`;
@@ -1038,7 +1204,7 @@ function renderScCalendar(){
   document.getElementById('sc-day-panel').className = 'sc-day-panel';
 }
 
-function scDayClick(ds, state){
+function scDayClick(el, ds, state){
   // Mostrar panel con info del día
   const panel  = document.getElementById('sc-day-panel');
   const bks    = bookingsByDate[ds] || [];
@@ -1064,8 +1230,8 @@ function scDayClick(ds, state){
   panel.className = 'sc-day-panel show';
 
   // Marcar seleccionado
-  document.querySelectorAll('.sc-day').forEach(el=>el.classList.remove('selected-day'));
-  event.currentTarget.classList.add('selected-day');
+  document.querySelectorAll('.sc-day').forEach(d=>d.classList.remove('selected-day'));
+  el.classList.add('selected-day');
 }
 
 async function toggleDateBlock(ds, block){
@@ -1088,9 +1254,11 @@ async function toggleDateBlock(ds, block){
     if(!r.ok) throw new Error(d.error||'Error');
     if(d.data) scheduleData = d.data;
     else scheduleData.overrides = overrides;
+    showToast(block ? 'Día bloqueado' : 'Día habilitado', 'ok');
     renderScCalendar();
   } catch(e){
     panel.innerHTML = `<div style="color:#dc2626;font-size:.78rem">Error: ${e.message}</div>`;
+    showToast('Error: ' + (e.message||''), 'err');
   }
 }
 
@@ -1132,7 +1300,70 @@ function statusBadge(s){
 // ── INIT ─────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded',()=>{
   setDate();
+  startLastUpdatedTick();
+  const modal = document.getElementById('ficha-modal');
+  if(modal) modal.addEventListener('click', e => { if(e.target === modal) closeFicha(); });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') closeFicha(); });
 });
+
+// ── FICHA CLÍNICA MODAL ─────────────────────────────────────────
+function openFicha(key){
+  let b;
+  if(typeof key === 'number'){
+    b = (window.__lastBookings || [])[key];
+  } else {
+    b = bookingsMap[String(key)];
+  }
+  if(!b) return;
+  const start = new Date(b.start);
+  const fecha = start.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'America/Santiago'});
+  const hora  = start.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',timeZone:'America/Santiago'});
+
+  document.getElementById('ficha-mtitle').innerHTML =
+    `Ficha de ${b.nombre || 'paciente'}<small>${fecha.charAt(0).toUpperCase()+fecha.slice(1)} · ${hora}</small>`;
+
+  const ficha = b.ficha || b.metadata?.ficha || null;
+  const notes = b.notes || b.description || b.additionalNotes || '';
+  const body = document.getElementById('ficha-mbody');
+
+  if(ficha){
+    const talla = ficha.tallaM && ficha.tallaCm
+      ? `${ficha.tallaM} m ${ficha.tallaCm} cm`
+      : (ficha.tallaM ? `${ficha.tallaM} m` : (ficha.tallaCm ? `${ficha.tallaCm} cm` : '—'));
+    body.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem">
+        <div><div style="font-size:.68rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.5px">Peso</div><div style="font-size:.95rem;font-weight:700;color:var(--g1);margin-top:.2rem">${ficha.peso || '—'} kg</div></div>
+        <div><div style="font-size:.68rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.5px">Talla</div><div style="font-size:.95rem;font-weight:700;color:var(--g1);margin-top:.2rem">${talla}</div></div>
+        <div style="grid-column:1/-1"><div style="font-size:.68rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.5px">Actividad física</div><div style="font-size:.9rem;font-weight:600;color:var(--g1);margin-top:.2rem">${ficha.actividad || '—'}</div></div>
+        <div style="grid-column:1/-1"><div style="font-size:.68rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.5px">Enfermedades</div><div style="font-size:.85rem;color:var(--g1);margin-top:.2rem;line-height:1.5">${ficha.enfermedades || 'Ninguna declarada'}</div></div>
+        <div style="grid-column:1/-1"><div style="font-size:.68rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.5px">Operaciones previas</div><div style="font-size:.85rem;color:var(--g1);margin-top:.2rem;line-height:1.5">${ficha.operaciones || 'Ninguna declarada'}</div></div>
+        <div style="grid-column:1/-1"><div style="font-size:.68rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.5px">Intolerancias</div><div style="font-size:.85rem;color:var(--g1);margin-top:.2rem;line-height:1.5">${ficha.intolerancias || 'Ninguna declarada'}</div></div>
+      </div>
+      <div style="font-size:.68rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem">Recordatorio 24 horas</div>
+      <pre>${(ficha.reg24h || '—').replace(/</g,'&lt;')}</pre>`;
+  } else if(notes && notes.length > 3){
+    body.innerHTML = `<pre>${notes.replace(/</g,'&lt;')}</pre>`;
+  } else {
+    body.innerHTML = `<div class="ficha-empty">Este paciente aún no completó la ficha clínica. Se trata de un seguimiento o la reserva es anterior a esta función.</div>`;
+  }
+  document.getElementById('ficha-modal').classList.add('on');
+}
+
+function closeFicha(){
+  const m = document.getElementById('ficha-modal');
+  if(m) m.classList.remove('on');
+}
 </script>
+
+<!-- ── FICHA CLÍNICA MODAL ── -->
+<div class="ficha-modal" id="ficha-modal">
+  <div class="ficha-mbox">
+    <div class="ficha-mhead">
+      <div class="ficha-mtitle" id="ficha-mtitle">Ficha clínica</div>
+      <button class="ficha-mclose" onclick="closeFicha()" title="Cerrar">&times;</button>
+    </div>
+    <div class="ficha-mbody" id="ficha-mbody"></div>
+  </div>
+</div>
 </body>
 </html>

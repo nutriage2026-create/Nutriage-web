@@ -59,6 +59,12 @@ body{font-family:'Nunito',sans-serif;background:var(--cr);color:var(--g1);min-he
 .inp:focus{border-color:var(--p2);box-shadow:0 0 0 3px var(--p5)}
 .field-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
 .inp-note{font-size:.72rem;color:var(--g3);margin-top:.3rem}
+textarea.inp{resize:vertical;min-height:60px;line-height:1.5;font-family:'Nunito',sans-serif}
+.ficha-section{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:600;color:var(--p1);margin:1.4rem 0 .75rem;padding-bottom:.35rem;border-bottom:1px solid var(--g4);display:flex;align-items:center;gap:.45rem}
+.ficha-section:first-child{margin-top:.25rem}
+.ficha-intro{background:var(--p5);border:1px solid var(--p4);border-radius:var(--r);padding:.8rem 1rem;font-size:.8rem;color:var(--p1);margin-bottom:1.2rem;line-height:1.55}
+.talla-row{display:flex;gap:.5rem;align-items:stretch}
+.talla-row .inp{flex:1;min-width:0}
 
 /* ── CALENDAR ── */
 .cal-nav-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
@@ -229,7 +235,79 @@ body{font-family:'Nunito',sans-serif;background:var(--cr);color:var(--g1);min-he
     </div>
     <div class="btn-row">
       <button class="btn btn-ghost" onclick="goStep(1)">&larr; Volver</button>
-      <button class="btn btn-primary" id="btn2" onclick="goStep(3)" disabled>Continuar &rarr;</button>
+      <button class="btn btn-primary" id="btn2" onclick="nextFromDatos()" disabled>Continuar &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ── PASO FICHA CLÍNICA (solo primera consulta) ── -->
+  <div id="stepFicha" style="display:none">
+    <div class="card">
+      <div class="card-ttl">Ficha clínica inicial</div>
+      <div class="card-sub">Completa esta información antes de tu primera consulta. Fernanda la revisará para preparar tu plan nutricional personalizado.</div>
+
+      <div class="ficha-intro">🌿 Todos los datos son confidenciales y se usan únicamente para tu evaluación nutricional. Si un campo no aplica, puedes dejarlo en blanco.</div>
+
+      <div class="ficha-section">📏 Datos antropométricos</div>
+      <div class="field-row">
+        <div class="field">
+          <label>Peso actual (kg) *</label>
+          <input class="inp" type="number" step="0.1" min="20" max="300" id="f-peso" placeholder="Ej: 68.5" oninput="checkFicha()">
+        </div>
+        <div class="field">
+          <label>Talla *</label>
+          <div class="talla-row">
+            <input class="inp" type="number" min="0" max="2" id="f-talla-m" placeholder="metros" oninput="checkFicha()">
+            <input class="inp" type="number" min="0" max="99" id="f-talla-cm" placeholder="cm" oninput="checkFicha()">
+          </div>
+          <div class="inp-note">Ej: 1 metro y 65 cm</div>
+        </div>
+      </div>
+
+      <div class="ficha-section">🩺 Antecedentes médicos</div>
+      <div class="field">
+        <label>¿Tienes alguna enfermedad diagnosticada?</label>
+        <textarea class="inp" rows="2" id="f-enf" placeholder="Ej: diabetes tipo 2, hipertensión, hipotiroidismo, colesterol alto, síndrome de ovario poliquístico... (deja en blanco si no aplica)"></textarea>
+      </div>
+      <div class="field">
+        <label>¿Te has operado alguna vez?</label>
+        <textarea class="inp" rows="2" id="f-ope" placeholder="Ej: apendicitis, cesárea, vesícula, bypass gástrico, manga gástrica... (deja en blanco si no aplica)"></textarea>
+      </div>
+      <div class="field">
+        <label>Intolerancias o alergias alimentarias</label>
+        <textarea class="inp" rows="2" id="f-int" placeholder="Ej: lactosa, gluten, frutos secos, mariscos, huevo, soya... (deja en blanco si no aplica)"></textarea>
+      </div>
+
+      <div class="ficha-section">🏃 Estilo de vida</div>
+      <div class="field">
+        <label>Actividad física *</label>
+        <select class="inp" id="f-act" onchange="checkFicha()">
+          <option value="">Seleccionar frecuencia...</option>
+          <option value="Sedentario">Sedentario — sin actividad física</option>
+          <option value="Ligero (1-2 veces/semana)">Ligero — 1 a 2 veces por semana</option>
+          <option value="Moderado (3-4 veces/semana)">Moderado — 3 a 4 veces por semana</option>
+          <option value="Intenso (5+ veces/semana)">Intenso — 5 o más veces por semana</option>
+        </select>
+      </div>
+
+      <div class="ficha-section">🍽️ Recordatorio 24 horas</div>
+      <div class="field">
+        <label>Alimentos consumidos ayer *</label>
+        <textarea class="inp" rows="8" id="f-24h" placeholder="Nombra todos los alimentos sólidos y líquidos que consumiste ayer, desde que te levantaste hasta que te acostaste. Incluye cantidades (ml, tazas o gramos, como te acomode) y el horario de cada comida.
+
+Ejemplo:
+8:00 — 1 taza de café con leche + 2 tostadas con palta
+11:00 — 1 manzana + 10 almendras
+13:30 — 150 g de pollo + 1 taza de arroz + ensalada lechuga/tomate + 1 vaso de agua
+17:00 — 1 yogurt natural + 1 plátano
+20:30 — 2 huevos revueltos + 1 tostada integral + té" oninput="checkFicha()"></textarea>
+        <div class="inp-note">Mientras más detallado, mejor podrá Fernanda evaluar tu alimentación.</div>
+      </div>
+
+      <div class="alert alert-err" id="errFicha">Completa los campos obligatorios: peso, talla, actividad física y recordatorio 24h.</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="goStep(2)">&larr; Volver</button>
+      <button class="btn btn-primary" id="btnFicha" onclick="nextFromFicha()" disabled>Continuar &rarr;</button>
     </div>
   </div>
 
@@ -262,7 +340,7 @@ body{font-family:'Nunito',sans-serif;background:var(--cr);color:var(--g1);min-he
       <div class="alert alert-err" id="err3">Selecciona una fecha y un horario para continuar.</div>
     </div>
     <div class="btn-row">
-      <button class="btn btn-ghost" onclick="goStep(2)">&larr; Volver</button>
+      <button class="btn btn-ghost" onclick="backFromFecha()">&larr; Volver</button>
       <button class="btn btn-primary" id="btn3" onclick="goStep(4)" disabled>Ver resumen &rarr;</button>
     </div>
   </div>
@@ -307,6 +385,9 @@ const DOWS   = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 let S = {
   tipo: null,
   nombre:'', email:'', telefono:'', objetivo:'',
+  peso:'', tallaM:'', tallaCm:'',
+  enfermedades:'', operaciones:'', intolerancias:'',
+  actividad:'', reg24h:'',
   selDate: null, selTime: null, selTimeLabel: null,
   slots: {},
   month: new Date()
@@ -314,14 +395,45 @@ let S = {
 
 // ── NAVEGACIÓN ───────────────────────────────────────────────────
 function goStep(n){
-  [1,2,3,4,5].forEach(i=>{
-    const el = document.getElementById('step'+i);
-    if(el) el.style.display = (i===n) ? 'block' : 'none';
-  });
-  updateProg(n);
+  const ids = ['step1','step2','stepFicha','step3','step4','step5'];
+  ids.forEach(id => { const el = document.getElementById(id); if(el) el.style.display = 'none'; });
+  const targetId = (n === 'ficha') ? 'stepFicha' : 'step'+n;
+  const target = document.getElementById(targetId);
+  if(target) target.style.display = 'block';
+  updateProg(n === 'ficha' ? 2 : n);
   if(n===3) initCal();
   if(n===4) buildSummary();
   window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function nextFromDatos(){
+  goStep(S.tipo === 'primera' ? 'ficha' : 3);
+}
+
+function nextFromFicha(){
+  S.peso          = document.getElementById('f-peso').value.trim();
+  S.tallaM        = document.getElementById('f-talla-m').value.trim();
+  S.tallaCm       = document.getElementById('f-talla-cm').value.trim();
+  S.enfermedades  = document.getElementById('f-enf').value.trim();
+  S.operaciones   = document.getElementById('f-ope').value.trim();
+  S.intolerancias = document.getElementById('f-int').value.trim();
+  S.actividad     = document.getElementById('f-act').value;
+  S.reg24h        = document.getElementById('f-24h').value.trim();
+  goStep(3);
+}
+
+function backFromFecha(){
+  goStep(S.tipo === 'primera' ? 'ficha' : 2);
+}
+
+function checkFicha(){
+  const peso  = document.getElementById('f-peso').value.trim();
+  const tM    = document.getElementById('f-talla-m').value.trim();
+  const tCm   = document.getElementById('f-talla-cm').value.trim();
+  const act   = document.getElementById('f-act').value;
+  const r24   = document.getElementById('f-24h').value.trim();
+  const ok = !!(peso && (tM || tCm) && act && r24.length >= 10);
+  document.getElementById('btnFicha').disabled = !ok;
 }
 
 function updateProg(active){
@@ -353,7 +465,40 @@ function checkStep2(){
 // ── CALENDARIO ───────────────────────────────────────────────────
 async function initCal(){
   renderCal(true);
+  await ensureHours19();
   await fetchSlots();
+}
+
+// Migra el horario en Cal.com a 09:00–19:00 (intervalos de 45 min = 14 slots)
+// una sola vez por navegador. Idempotente: solo extiende endTimes < 19:00.
+async function ensureHours19(){
+  if(localStorage.getItem('na-hours-19-migrated')) return;
+  try{
+    const r1 = await fetch(`${API}/availability/schedule`);
+    if(!r1.ok) return;
+    const sched = await r1.json();
+    if(!sched?.id || !Array.isArray(sched.availability)) return;
+
+    let changed = false;
+    const availability = sched.availability.map(a=>{
+      const copy = {...a, days:[...(a.days||[])]};
+      if(copy.endTime && copy.endTime !== '00:00' && copy.endTime < '19:00'){
+        copy.endTime = '19:00';
+        changed = true;
+      }
+      return copy;
+    });
+    if(!changed){
+      localStorage.setItem('na-hours-19-migrated','1');
+      return;
+    }
+    const r2 = await fetch(`${API}/availability/schedule`,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({id: sched.id, availability, overrides: sched.overrides||[]})
+    });
+    if(r2.ok) localStorage.setItem('na-hours-19-migrated','1');
+  } catch(e){ console.error('ensureHours19:', e); }
 }
 
 async function fetchSlots(){
@@ -512,10 +657,49 @@ function buildSummary(){
       <div class="sum-ico">🎯</div>
       <div><div class="sum-lbl">Objetivo</div><div class="sum-val">${S.objetivo}</div></div>
     </div>` : ''}
+    ${S.tipo==='primera' && S.peso ? `<div class="sum-item">
+      <div class="sum-ico">📏</div>
+      <div><div class="sum-lbl">Peso y talla</div><div class="sum-val">${S.peso} kg · ${tallaLabel()}</div></div>
+    </div>` : ''}
+    ${S.tipo==='primera' && S.actividad ? `<div class="sum-item">
+      <div class="sum-ico">🏃</div>
+      <div><div class="sum-lbl">Actividad física</div><div class="sum-val">${S.actividad}</div></div>
+    </div>` : ''}
+    ${S.tipo==='primera' ? `<div class="sum-item">
+      <div class="sum-ico">📋</div>
+      <div><div class="sum-lbl">Ficha clínica</div><div class="sum-val">Completada · Fernanda la revisará antes de la consulta</div></div>
+    </div>` : ''}
     <div class="sum-item">
       <div class="sum-ico">💻</div>
       <div><div class="sum-lbl">Modalidad</div><div class="sum-val">Videollamada online · 45 minutos</div></div>
     </div>`;
+}
+
+function tallaLabel(){
+  const m = parseInt(S.tallaM||'0',10);
+  const cm = parseInt(S.tallaCm||'0',10);
+  if(m && cm)  return `${m} m ${cm} cm`;
+  if(m)        return `${m} m`;
+  if(cm)       return `${cm} cm`;
+  return '—';
+}
+
+function buildFichaNotes(){
+  if(S.tipo !== 'primera') return '';
+  const lines = [
+    '',
+    '── FICHA CLÍNICA (Primera consulta) ──',
+    `• Peso: ${S.peso || '—'} kg`,
+    `• Talla: ${tallaLabel()}`,
+    `• Actividad física: ${S.actividad || '—'}`,
+    `• Enfermedades: ${S.enfermedades || 'Ninguna declarada'}`,
+    `• Operaciones previas: ${S.operaciones || 'Ninguna declarada'}`,
+    `• Intolerancias: ${S.intolerancias || 'Ninguna declarada'}`,
+    '',
+    '── Recordatorio 24 horas ──',
+    S.reg24h || '—'
+  ];
+  return lines.join('\n');
 }
 
 // ── CONFIRMAR ────────────────────────────────────────────────────
@@ -525,6 +709,7 @@ async function confirmBooking(){
   btn.disabled = true;
   document.getElementById('err4').style.display = 'none';
 
+  const baseNote = `Tipo: ${S.tipo === 'primera' ? 'Primera consulta' : 'Seguimiento'}. Objetivo: ${S.objetivo || '—'}`;
   const body = {
     eventTypeId: EID,
     start: S.selTime,
@@ -533,7 +718,16 @@ async function confirmBooking(){
     telefono: S.telefono,
     objetivo: S.objetivo,
     canal: 'Web',
-    notes: `Tipo: ${S.tipo === 'primera' ? 'Primera consulta' : 'Seguimiento'}. Objetivo: ${S.objetivo}`
+    notes: baseNote + buildFichaNotes(),
+    ficha: S.tipo === 'primera' ? {
+      peso: S.peso,
+      tallaM: S.tallaM, tallaCm: S.tallaCm,
+      enfermedades: S.enfermedades,
+      operaciones: S.operaciones,
+      intolerancias: S.intolerancias,
+      actividad: S.actividad,
+      reg24h: S.reg24h
+    } : null
   };
 
   try{
@@ -578,13 +772,19 @@ function showSuccess(data){
 // ── RESET ────────────────────────────────────────────────────────
 function resetFlow(){
   S = {tipo:null, nombre:'', email:'', telefono:'', objetivo:'',
+       peso:'', tallaM:'', tallaCm:'',
+       enfermedades:'', operaciones:'', intolerancias:'',
+       actividad:'', reg24h:'',
        selDate:null, selTime:null, selTimeLabel:null, slots:{}, month:new Date()};
   document.getElementById('prog-bar').style.display = 'flex';
-  ['f-nombre','f-email','f-tel'].forEach(id=>document.getElementById(id).value='');
+  ['f-nombre','f-email','f-tel','f-peso','f-talla-m','f-talla-cm','f-enf','f-ope','f-int','f-24h']
+    .forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
   document.getElementById('f-objetivo').value = '';
+  document.getElementById('f-act').value = '';
   document.getElementById('btn1').disabled = true;
   document.getElementById('btn2').disabled = true;
   document.getElementById('btn3').disabled = true;
+  document.getElementById('btnFicha').disabled = true;
   document.getElementById('tc-primera').classList.remove('on');
   document.getElementById('tc-seguimiento').classList.remove('on');
   document.getElementById('slots-section').style.display = 'none';
