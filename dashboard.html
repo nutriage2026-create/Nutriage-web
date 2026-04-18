@@ -952,7 +952,7 @@ async function loadBookings(){
   }
   window.__lastBookings = bks;
   el.innerHTML = '<div class="tbl-wrap"><table><thead><tr>'
-    + '<th>#</th><th>Paciente</th><th>Email</th><th>Fecha</th><th>Hora</th><th>Estado</th><th>Ficha</th>'
+    + '<th>#</th><th>Paciente</th><th>Email</th><th>Fecha</th><th>Hora</th><th>Estado</th><th>Sala virtual</th><th>Ficha</th>'
     + '</tr></thead><tbody>'
     + bks.map((b,i)=>{
         const start = new Date(b.start);
@@ -965,6 +965,9 @@ async function loadBookings(){
         const fichaBtn = tieneFicha
           ? `<button class="ficha-row-btn" onclick="openFicha(${i})">📋 Ver ficha</button>`
           : `<span style="font-size:.7rem;color:var(--g3)">—</span>`;
+        const salaBtn = b.videoUrl
+          ? `<a href="${b.videoUrl}" target="_blank" rel="noopener" class="ficha-row-btn" style="background:var(--s2);color:#fff;text-decoration:none">📹 Entrar</a>`
+          : `<span style="font-size:.7rem;color:var(--g3)">—</span>`;
         return `<tr>
           <td style="color:var(--g3);font-size:.72rem;font-weight:700">${i+1}</td>
           <td class="td-name">${b.nombre||'—'}</td>
@@ -972,6 +975,7 @@ async function loadBookings(){
           <td style="font-size:.78rem;white-space:nowrap">${fecha}</td>
           <td style="font-size:.78rem;font-weight:700">${hora}</td>
           <td><span class="badge ${stCls}">${stLbl}</span></td>
+          <td>${salaBtn}</td>
           <td>${fichaBtn}</td>
         </tr>`;
       }).join('')
