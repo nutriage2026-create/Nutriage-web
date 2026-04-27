@@ -1,10 +1,12 @@
 from flask import Blueprint, request, jsonify
 from app.services.calcom import get_bookings
+from app.services.auth import require_auth
 
 bp = Blueprint("bookings", __name__, url_prefix="/bookings")
 
 
 @bp.get("/")
+@require_auth
 def list_bookings():
     """
     Lista citas agendadas desde Cal.com.

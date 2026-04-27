@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app.services.calcom import get_event_types, get_available_slots, get_schedule, update_schedule
+from app.services.auth import require_auth
 
 bp = Blueprint("availability", __name__, url_prefix="/availability")
 
@@ -36,6 +37,7 @@ def slots():
 
 
 @bp.get("/schedule")
+@require_auth
 def schedule_get():
     """Obtiene el horario semanal activo de Cal.com."""
     try:
@@ -45,6 +47,7 @@ def schedule_get():
 
 
 @bp.patch("/schedule")
+@require_auth
 def schedule_update():
     """
     Actualiza horario semanal y/o bloqueos de fechas.

@@ -2,12 +2,14 @@ from flask import Blueprint, request, jsonify
 from app.services.ai import analyze_lead
 from app.services.notion import update_lead_status, save_agent_history
 from app.services.notifications import send_email, build_lead_email
+from app.services.auth import require_auth
 from app.config import settings
 
 bp = Blueprint("analysis", __name__, url_prefix="/analysis")
 
 
 @bp.post("/leads/<page_id>")
+@require_auth
 def analyze(page_id):
     """
     Análisis post-agendamiento con IA:

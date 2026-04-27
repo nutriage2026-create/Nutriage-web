@@ -1,5 +1,12 @@
 .env
 *.env
 .env.local
+!.env.example
 **/__pycache__/
 *.pyc
+
+# Archivos con datos sensibles o credenciales
+Contraseña y cuentas.txt
+*_check.json
+bookings_check.json
+leads_check.json

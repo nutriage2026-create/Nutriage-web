@@ -39,6 +39,11 @@ class Settings:
     def GMAIL_APP_PASSWORD(self):       return _get("GMAIL_APP_PASSWORD")
 
     @property
+    def JWT_SECRET(self):               return _get("JWT_SECRET")
+    @property
+    def FERNANDA_PASSWORD(self):        return _get("FERNANDA_PASSWORD")
+
+    @property
     def APP_ENV(self):                  return _get("APP_ENV", "development")
     @property
     def TZ(self):                       return _get("TZ", "America/Santiago")

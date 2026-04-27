@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app.services.notion import create_lead, update_lead_status, get_leads
+from app.services.auth import require_auth
 
 bp = Blueprint("leads", __name__, url_prefix="/leads")
 
@@ -21,6 +22,7 @@ def new_lead():
 
 
 @bp.get("/")
+@require_auth
 def list_leads():
     """
     Lista leads con filtros opcionales.
@@ -53,6 +55,7 @@ def list_leads():
 
 
 @bp.patch("/<page_id>/status")
+@require_auth
 def update_status(page_id):
     """
     Actualiza temperatura, estatus y/o resumen de un lead.

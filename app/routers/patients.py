@@ -1,11 +1,13 @@
 from flask import Blueprint, jsonify
 from app.services.notion import get_notion_client
+from app.services.auth import require_auth
 from app.config import settings
 
 bp = Blueprint("patients", __name__, url_prefix="/patients")
 
 
 @bp.get("/")
+@require_auth
 def list_patients():
     if not settings.NOTION_DB_PACIENTES:
         return jsonify({"message": "NOTION_DB_PACIENTES no configurado aún"})

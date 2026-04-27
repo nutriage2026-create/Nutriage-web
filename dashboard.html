@@ -571,8 +571,10 @@ tr:hover td{background:var(--g5)}
 <div id="toast-container"></div>
 
 <script>
-const API = 'https://nutriage-api.onrender.com';
-const PASS = 'admin2026';
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+  ? 'http://localhost:8000'
+  : 'https://nutriage-api.onrender.com';
+const TOKEN_KEY = 'nutriage_token';
 let allLeads      = [];
 let currentFilter = '';
 let bookingsMap   = {};   // bookingId(str) → {videoUrl, nombre, start}
@@ -585,21 +587,69 @@ let lastUpdated   = null; // timestamp último refresh
 let autoRefreshTimer = null;
 
 // ── AUTH ────────────────────────────────────────────────────────
-function doLogin(){
+function getToken(){ return localStorage.getItem(TOKEN_KEY); }
+function setToken(t){ localStorage.setItem(TOKEN_KEY, t); }
+function clearToken(){ localStorage.removeItem(TOKEN_KEY); }
+function authHeaders(extra){
+  const h = Object.assign({}, extra || {});
+  const t = getToken();
+  if(t) h['Authorization'] = 'Bearer ' + t;
+  return h;
+}
+
+function showLoginError(msg){
+  const el = document.getElementById('login-err');
+  if(msg) el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(()=>{ el.style.display='none'; }, 2500);
+}
+
+async function doLogin(){
   const p = document.getElementById('login-pass').value;
-  if(p === PASS){
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('dashboard').classList.add('on');
-    setDate(); loadAll();
-  } else {
-    document.getElementById('login-err').style.display='block';
-    setTimeout(()=>document.getElementById('login-err').style.display='none',2500);
+  const btn = document.querySelector('.login-btn');
+  if(btn) btn.disabled = true;
+  try{
+    const r = await fetch(API+'/auth/login', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({password: p})
+    });
+    const d = await r.json();
+    if(!r.ok || !d.token){
+      showLoginError(d.error === 'Credenciales invalidas' ? 'Contraseña incorrecta' : 'Error al iniciar sesión');
+      return;
+    }
+    setToken(d.token);
+    enterDashboard();
+  } catch(e){
+    console.error('login error:', e);
+    showLoginError('Sin conexión al servidor');
+  } finally {
+    if(btn) btn.disabled = false;
   }
 }
+
+function enterDashboard(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('dashboard').classList.add('on');
+  setDate(); loadAll();
+}
+
 function logout(){
+  clearToken();
   document.getElementById('dashboard').classList.remove('on');
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('login-pass').value='';
+}
+
+async function tryRestoreSession(){
+  if(!getToken()) return false;
+  try{
+    const r = await fetch(API+'/auth/verify', { headers: authHeaders() });
+    if(r.ok){ enterDashboard(); return true; }
+  } catch(e){ /* sin red, mostrar login */ }
+  clearToken();
+  return false;
 }
 
 // ── NAVIGATION ──────────────────────────────────────────────────
@@ -637,7 +687,8 @@ function showToast(msg, type='info', duration=3500){
 // ── FETCH HELPER ────────────────────────────────────────────────
 async function apiFetch(path){
   try{
-    const r = await fetch(API+path);
+    const r = await fetch(API+path, { headers: authHeaders() });
+    if(r.status === 401){ logout(); return null; }
     if(!r.ok) throw new Error('HTTP '+r.status);
     return await r.json();
   } catch(e){ console.error('API error:',path,e); return null; }
@@ -1083,9 +1134,10 @@ async function applyScheduleAutoCorrections(){
   try{
     const r = await fetch(API+'/availability/schedule',{
       method:'PATCH',
-      headers:{'Content-Type':'application/json'},
+      headers: authHeaders({'Content-Type':'application/json'}),
       body: JSON.stringify({id:scheduleData.id, availability, overrides})
     });
+    if(r.status === 401){ logout(); return; }
     const d = await r.json();
     if(r.ok && d.data){ scheduleData = d.data; }
     else { scheduleData.overrides = overrides; scheduleData.availability = availability; }
@@ -1159,9 +1211,10 @@ async function saveSchedule(){
   try{
     const r = await fetch(API+'/availability/schedule',{
       method:'PATCH',
-      headers:{'Content-Type':'application/json'},
+      headers: authHeaders({'Content-Type':'application/json'}),
       body: JSON.stringify({id: scheduleData?.id, availability: avail, overrides})
     });
+    if(r.status === 401){ logout(); return; }
     const d = await r.json();
     if(!r.ok) throw new Error(d.error||'Error');
     scheduleData = d.data || scheduleData;
@@ -1265,9 +1318,10 @@ async function toggleDateBlock(ds, block){
   try{
     const r = await fetch(API+'/availability/schedule',{
       method:'PATCH',
-      headers:{'Content-Type':'application/json'},
+      headers: authHeaders({'Content-Type':'application/json'}),
       body: JSON.stringify({id:scheduleData.id, availability:scheduleData.availability, overrides})
     });
+    if(r.status === 401){ logout(); return; }
     const d = await r.json();
     if(!r.ok) throw new Error(d.error||'Error');
     if(d.data) scheduleData = d.data;
@@ -1322,6 +1376,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const modal = document.getElementById('ficha-modal');
   if(modal) modal.addEventListener('click', e => { if(e.target === modal) closeFicha(); });
   document.addEventListener('keydown', e => { if(e.key === 'Escape') closeFicha(); });
+  tryRestoreSession();
 });
 
 // ── FICHA CLÍNICA MODAL ─────────────────────────────────────────
