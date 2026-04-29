@@ -120,6 +120,8 @@ tr:hover td{background:var(--g5)}
 .badge-pendiente{background:#f1f5f9;color:#64748b}
 .badge-proceso{background:#fef3c7;color:#d97706}
 .badge-agendada{background:#dcfce7;color:#16a34a}
+.badge-finalizada{background:var(--s5);color:var(--s1);border:1px solid var(--s3)}
+.cerrada-tag{display:inline-flex;align-items:center;gap:.25rem;font-size:.7rem;font-weight:700;color:var(--s1);background:var(--s5);border:1px solid var(--s3);padding:.28rem .7rem;border-radius:6px;white-space:nowrap}
 .badge-contestado{background:#ffedd5;color:#ea580c}
 .badge-interes{background:#fee2e2;color:#dc2626}
 .badge-cerrado{background:var(--p5);color:var(--p2)}
@@ -183,6 +185,25 @@ tr:hover td{background:var(--g5)}
 .ficha-empty{padding:1.5rem;text-align:center;color:var(--g3);font-size:.85rem;background:var(--g5);border-radius:var(--r);border:1px dashed var(--g4)}
 .ficha-row-btn{border:1px solid var(--p4);background:var(--p5);color:var(--p2);font-family:'Nunito',sans-serif;font-size:.7rem;font-weight:700;padding:.28rem .7rem;border-radius:6px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .ficha-row-btn:hover{background:var(--p2);color:#fff;border-color:var(--p2)}
+.row-actions{display:inline-flex;gap:.35rem;flex-wrap:wrap;justify-content:center}
+.cerrar-btn{background:var(--s5);border-color:var(--s3);color:var(--s1)}
+.cerrar-btn:hover{background:var(--s2);color:#fff;border-color:var(--s2)}
+
+/* ── CERRAR CONSULTA FORM ── */
+.cc-field{margin-bottom:1rem}
+.cc-label{display:block;font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:700;color:var(--p1);margin-bottom:.35rem}
+.cc-label .cc-req{color:#b91c1c;margin-left:.2rem}
+.cc-label small{display:block;font-weight:500;color:var(--g3);font-size:.7rem;margin-top:.1rem}
+.cc-textarea,.cc-input{width:100%;border:1.5px solid var(--g4);border-radius:var(--r);padding:.6rem .75rem;font-family:'Nunito',sans-serif;font-size:.85rem;color:var(--g1);background:var(--wh);transition:border-color .15s;box-sizing:border-box}
+.cc-textarea{resize:vertical;min-height:80px;line-height:1.5}
+.cc-textarea:focus,.cc-input:focus{outline:none;border-color:var(--p2)}
+.cc-actions{display:flex;gap:.6rem;justify-content:flex-end;margin-top:1.2rem;border-top:1px solid var(--g4);padding-top:1rem}
+.cc-btn{font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:700;padding:.55rem 1.1rem;border-radius:var(--r);cursor:pointer;transition:all .15s;border:1.5px solid transparent}
+.cc-btn-secondary{background:var(--wh);border-color:var(--g4);color:var(--g2)}
+.cc-btn-secondary:hover{background:var(--g5);border-color:var(--g3)}
+.cc-btn-primary{background:linear-gradient(135deg,var(--s1),var(--s2));color:#fff}
+.cc-btn-primary:hover{filter:brightness(1.08)}
+.cc-pat-name{font-weight:700;color:var(--p2)}
 
 /* ── EMPTY STATE ── */
 .empty{text-align:center;padding:2.5rem 1rem;color:var(--g3)}
@@ -694,6 +715,19 @@ async function apiFetch(path){
   } catch(e){ console.error('API error:',path,e); return null; }
 }
 
+async function apiPost(path, body){
+  const r = await fetch(API+path, {
+    method: 'POST',
+    headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify(body || {}),
+  });
+  if(r.status === 401){ logout(); throw new Error('Sesión expirada'); }
+  let data = null;
+  try { data = await r.json(); } catch(e){}
+  if(!r.ok){ throw new Error((data && data.error) || ('HTTP '+r.status)); }
+  return data;
+}
+
 // ── API STATUS ────────────────────────────────────────────────────
 function setApiStatus(ok){
   const dot = document.getElementById('api-dot');
@@ -1003,14 +1037,15 @@ async function loadBookings(){
   }
   window.__lastBookings = bks;
   el.innerHTML = '<div class="tbl-wrap"><table><thead><tr>'
-    + '<th>#</th><th>Paciente</th><th>Email</th><th>Fecha</th><th>Hora</th><th>Estado</th><th>Sala virtual</th><th>Ficha</th>'
+    + '<th>#</th><th>Paciente</th><th>Email</th><th>Fecha</th><th>Hora</th><th>Estado</th><th>Sesión</th><th>Ficha</th>'
     + '</tr></thead><tbody>'
     + bks.map((b,i)=>{
         const start = new Date(b.start);
         const fecha = start.toLocaleDateString('es-CL',{weekday:'short',day:'numeric',month:'short',year:'numeric',timeZone:'America/Santiago'});
         const hora  = start.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',timeZone:'America/Santiago'});
-        const stCls = b.status==='accepted'?'badge-agendada':'badge-pendiente';
-        const stLbl = b.status==='accepted'?'Confirmada':'Pendiente';
+        const cerrada = isCitaCerrada(b.id || b.uid);
+        const stCls = cerrada ? 'badge-finalizada' : (b.status==='accepted'?'badge-agendada':'badge-pendiente');
+        const stLbl = cerrada ? 'Finalizada' : (b.status==='accepted'?'Confirmada':'Pendiente');
         const ld = b.email ? leadsByEmail[b.email.toLowerCase()] : null;
         const tieneFicha = !!(b.ficha || (b.notes && /FICHA CLÍNICA/i.test(b.notes)) || (ld && ld.notas && /FICHA CLÍNICA/i.test(ld.notas)));
         const fichaBtn = tieneFicha
@@ -1019,6 +1054,9 @@ async function loadBookings(){
         const salaBtn = b.videoUrl
           ? `<a href="${b.videoUrl}" target="_blank" rel="noopener" class="ficha-row-btn" style="background:var(--s2);color:#fff;text-decoration:none">📹 Entrar</a>`
           : `<span style="font-size:.7rem;color:var(--g3)">—</span>`;
+        const cerrarBtn = cerrada
+          ? `<span class="cerrada-tag" title="Sesión cerrada">✓ Cerrada</span>`
+          : `<button class="ficha-row-btn cerrar-btn" onclick="openCerrarConsulta(${i})">✅ Cerrar</button>`;
         return `<tr>
           <td style="color:var(--g3);font-size:.72rem;font-weight:700">${i+1}</td>
           <td class="td-name">${b.nombre||'—'}</td>
@@ -1026,7 +1064,7 @@ async function loadBookings(){
           <td style="font-size:.78rem;white-space:nowrap">${fecha}</td>
           <td style="font-size:.78rem;font-weight:700">${hora}</td>
           <td><span class="badge ${stCls}">${stLbl}</span></td>
-          <td>${salaBtn}</td>
+          <td><div class="row-actions">${salaBtn}${cerrarBtn}</div></td>
           <td>${fichaBtn}</td>
         </tr>`;
       }).join('')
@@ -1375,7 +1413,11 @@ document.addEventListener('DOMContentLoaded',()=>{
   startLastUpdatedTick();
   const modal = document.getElementById('ficha-modal');
   if(modal) modal.addEventListener('click', e => { if(e.target === modal) closeFicha(); });
-  document.addEventListener('keydown', e => { if(e.key === 'Escape') closeFicha(); });
+  const cerrarMod = document.getElementById('cerrar-modal');
+  if(cerrarMod) cerrarMod.addEventListener('click', e => { if(e.target === cerrarMod) closeCerrarConsulta(); });
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape'){ closeFicha(); closeCerrarConsulta(); }
+  });
   tryRestoreSession();
 });
 
@@ -1441,6 +1483,91 @@ function closeFicha(){
   const m = document.getElementById('ficha-modal');
   if(m) m.classList.remove('on');
 }
+
+// ── CERRAR CONSULTA ──────────────────────────────────────────────
+const CERRADAS_LS_KEY = 'nutriage_consultas_cerradas';
+let currentCerrarBookingIdx = null;
+
+function getConsultasCerradas(){
+  try { return JSON.parse(localStorage.getItem(CERRADAS_LS_KEY) || '{}'); }
+  catch(e){ return {}; }
+}
+function isCitaCerrada(bookingId){
+  if(!bookingId) return false;
+  return !!getConsultasCerradas()[String(bookingId)];
+}
+function marcarCitaCerrada(bookingId, info){
+  if(!bookingId) return;
+  const all = getConsultasCerradas();
+  all[String(bookingId)] = info || { cerradaEn: new Date().toISOString() };
+  try { localStorage.setItem(CERRADAS_LS_KEY, JSON.stringify(all)); } catch(e){}
+}
+
+function openCerrarConsulta(idx){
+  const bks = window.__lastBookings || [];
+  const b = bks[idx];
+  if(!b){ showToast('No se encontró la cita','err'); return; }
+  currentCerrarBookingIdx = idx;
+  document.getElementById('cc-pat-name').textContent = b.nombre || 'Paciente';
+  const fechaCita = b.start ? new Date(b.start).toLocaleDateString('es-CL',{day:'2-digit',month:'short',year:'numeric',timeZone:'America/Santiago'}) : '—';
+  document.getElementById('cc-pat-fecha').textContent = fechaCita;
+  document.getElementById('cc-hablado').value = '';
+  document.getElementById('cc-plan').value = '';
+  const d = new Date(); d.setDate(d.getDate()+30);
+  document.getElementById('cc-seguimiento').value = d.toISOString().slice(0,10);
+  document.getElementById('cerrar-modal').classList.add('on');
+  setTimeout(()=>document.getElementById('cc-hablado').focus(), 80);
+}
+
+function closeCerrarConsulta(){
+  document.getElementById('cerrar-modal').classList.remove('on');
+  currentCerrarBookingIdx = null;
+}
+
+async function submitCerrarConsulta(ev){
+  if(ev) ev.preventDefault();
+  const hablado = document.getElementById('cc-hablado').value.trim();
+  const plan    = document.getElementById('cc-plan').value.trim();
+  const segui   = document.getElementById('cc-seguimiento').value;
+  if(!hablado){ showToast('Falta "qué se habló"','err'); document.getElementById('cc-hablado').focus(); return false; }
+  const bks = window.__lastBookings || [];
+  const b = bks[currentCerrarBookingIdx] || {};
+  if(!b.email){ showToast('La cita no tiene email del paciente','err'); return false; }
+  const payload = {
+    bookingId: b.id || b.uid || null,
+    paciente: b.nombre || null,
+    email: b.email,
+    fechaCita: b.start || null,
+    hablado, plan,
+    seguimiento: segui || null,
+    cerradaEn: new Date().toISOString()
+  };
+
+  const submitBtn = document.querySelector('#cerrar-modal .cc-btn-primary');
+  if(submitBtn){ submitBtn.disabled = true; submitBtn.textContent = 'Guardando...'; }
+
+  try {
+    const resp = await apiPost('/consultas/cerrar', payload);
+    const bookingKey = b.id || b.uid;
+    if(bookingKey){
+      marcarCitaCerrada(bookingKey, {
+        cerradaEn: payload.cerradaEn,
+        seguimiento: payload.seguimiento,
+        paciente: payload.paciente,
+        leadId: resp && resp.leadId
+      });
+    }
+    showToast('✓ Consulta guardada en Notion','ok',3500);
+    closeCerrarConsulta();
+    if(typeof loadBookings === 'function') loadBookings();
+  } catch(e){
+    console.error('[CerrarConsulta] error:', e);
+    showToast('Error: ' + (e.message || 'no se pudo guardar'),'err',5000);
+  } finally {
+    if(submitBtn){ submitBtn.disabled = false; submitBtn.textContent = 'Guardar'; }
+  }
+  return false;
+}
 </script>
 
 <!-- ── FICHA CLÍNICA MODAL ── -->
@@ -1451,6 +1578,45 @@ function closeFicha(){
       <button class="ficha-mclose" onclick="closeFicha()" title="Cerrar">&times;</button>
     </div>
     <div class="ficha-mbody" id="ficha-mbody"></div>
+  </div>
+</div>
+
+<!-- ── CERRAR CONSULTA MODAL ── -->
+<div class="ficha-modal" id="cerrar-modal">
+  <div class="ficha-mbox" style="max-width:520px">
+    <div class="ficha-mhead">
+      <div class="ficha-mtitle">
+        ✅ Cerrar consulta
+        <small><span class="cc-pat-name" id="cc-pat-name">Paciente</span> · <span id="cc-pat-fecha">—</span></small>
+      </div>
+      <button class="ficha-mclose" onclick="closeCerrarConsulta()" title="Cerrar">&times;</button>
+    </div>
+    <div class="ficha-mbody">
+      <form onsubmit="return submitCerrarConsulta(event)">
+        <div class="cc-field">
+          <label class="cc-label" for="cc-hablado">¿Qué se habló hoy?<span class="cc-req">*</span>
+            <small>Lo más importante de la consulta — síntomas, avances, cómo se sintió la paciente</small>
+          </label>
+          <textarea class="cc-textarea" id="cc-hablado" rows="3" placeholder="Ej: Bajó 1.5kg, durmiendo mejor, ansiedad puntual los miércoles..."></textarea>
+        </div>
+        <div class="cc-field">
+          <label class="cc-label" for="cc-plan">Plan / indicaciones
+            <small>Opcional — qué se le indicó hacer hasta el próximo control</small>
+          </label>
+          <textarea class="cc-textarea" id="cc-plan" rows="3" placeholder="Ej: Mantener cena liviana, agregar fruta en colación 16:00, registrar 3 días de comidas..."></textarea>
+        </div>
+        <div class="cc-field">
+          <label class="cc-label" for="cc-seguimiento">Próximo seguimiento sugerido
+            <small>Default: en 30 días — podés cambiarlo o dejarlo vacío</small>
+          </label>
+          <input type="date" class="cc-input" id="cc-seguimiento">
+        </div>
+        <div class="cc-actions">
+          <button type="button" class="cc-btn cc-btn-secondary" onclick="closeCerrarConsulta()">Cancelar</button>
+          <button type="submit" class="cc-btn cc-btn-primary">Guardar</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>
 </body>

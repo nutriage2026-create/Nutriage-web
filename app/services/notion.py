@@ -91,6 +91,79 @@ def get_leads(estatus: str = None, temperatura: str = None) -> list:
 
 # ── HISTORIAL DEL AGENTE ──────────────────────────────────────────────────────
 
+# ── CONSULTAS (notas post-sesión, bloques en la página del lead) ─────────────
+
+def find_lead_by_email(email: str) -> dict | None:
+    """Busca el primer lead en NOTION_DB_LEADS que coincida con el email dado."""
+    if not email:
+        return None
+    body = {
+        "filter": {"property": "Email", "email": {"equals": email}},
+        "page_size": 1,
+    }
+    with httpx.Client(timeout=20) as c:
+        r = c.post(f"{BASE}/databases/{settings.NOTION_DB_LEADS}/query",
+                   headers=_h(), json=body)
+        if not r.is_success:
+            raise Exception(f"Notion {r.status_code}: {r.text[:400]}")
+        results = r.json().get("results", [])
+        return results[0] if results else None
+
+
+def _paragraph_block(text: str) -> dict:
+    return {
+        "object": "block",
+        "type": "paragraph",
+        "paragraph": {"rich_text": [{"type": "text", "text": {"content": text[:1900]}}]},
+    }
+
+
+def append_consulta_blocks(page_id: str, hablado: str, plan: str = "",
+                           seguimiento: str = "", fecha_cierre: str = "") -> dict:
+    """
+    Appendea al body de la página (lead) un bloque de consulta cerrada:
+      ──────────
+      📝 Consulta · DD/MM/YYYY
+      Qué se habló: ...
+      Plan: ...
+      Próximo seguimiento: DD/MM/YYYY
+    """
+    fecha_str = fecha_cierre or date.today().isoformat()
+    try:
+        y, m, d = fecha_str[:10].split("-")
+        fecha_humana = f"{d}/{m}/{y}"
+    except Exception:
+        fecha_humana = fecha_str
+
+    children = [
+        {"object": "block", "type": "divider", "divider": {}},
+        {
+            "object": "block",
+            "type": "heading_3",
+            "heading_3": {
+                "rich_text": [{"type": "text", "text": {"content": f"📝 Consulta · {fecha_humana}"}}]
+            },
+        },
+        _paragraph_block(f"Qué se habló: {hablado}"),
+    ]
+    if plan:
+        children.append(_paragraph_block(f"Plan: {plan}"))
+    if seguimiento:
+        try:
+            ys, ms, ds = seguimiento[:10].split("-")
+            seg_humano = f"{ds}/{ms}/{ys}"
+        except Exception:
+            seg_humano = seguimiento
+        children.append(_paragraph_block(f"Próximo seguimiento: {seg_humano}"))
+
+    with httpx.Client(timeout=20) as c:
+        r = c.patch(f"{BASE}/blocks/{page_id}/children",
+                    headers=_h(), json={"children": children})
+        if not r.is_success:
+            raise Exception(f"Notion {r.status_code}: {r.text[:400]}")
+        return r.json()
+
+
 def save_agent_history(titulo: str, tipo: str, paciente: str, contenido: str) -> dict:
     props = {
         "Título":         {"title":     [{"text": {"content": titulo}}]},

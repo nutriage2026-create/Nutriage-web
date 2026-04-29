@@ -9,6 +9,7 @@ from app.routers.analysis      import bp as analysis_bp
 from app.routers.webhooks      import bp as webhooks_bp
 from app.routers.bookings      import bp as bookings_bp
 from app.routers.auth          import bp as auth_bp
+from app.routers.consultas     import bp as consultas_bp
 
 app = Flask(__name__)
 CORS(app)
@@ -20,6 +21,7 @@ app.register_blueprint(analysis_bp)
 app.register_blueprint(webhooks_bp)
 app.register_blueprint(bookings_bp)
 app.register_blueprint(auth_bp)
+app.register_blueprint(consultas_bp)
 
 
 @app.get("/")
@@ -37,6 +39,7 @@ def root():
             "POST /appointments/":                 "Agendar en Cal.com + crear lead en Notion",
             "POST /analysis/leads/<id>":           "Análisis IA + email + historial Notion",
             "POST /webhooks/make":                 "Recibir eventos de Make.com",
+            "POST /consultas/cerrar":              "Cerrar consulta + appendear bloques en lead",
         },
     })
 
