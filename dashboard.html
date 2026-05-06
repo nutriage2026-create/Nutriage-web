@@ -223,7 +223,13 @@ tr:hover td{background:var(--g5)}
 
 /* ── SCHEDULE EDITOR ── */
 .sched-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-.day-row{display:flex;align-items:center;gap:.75rem;padding:.7rem .9rem;border-radius:var(--r);border:1.5px solid var(--g4);background:var(--wh);transition:all .2s;margin-bottom:.5rem}
+.day-row{display:flex;align-items:center;gap:.75rem;padding:.7rem .9rem;border-radius:var(--r);border:1.5px solid var(--g4);background:var(--wh);transition:all .2s;margin-bottom:.5rem;flex-wrap:wrap}
+.sc-preview-wrap{flex-basis:100%;margin-top:.4rem}
+.sc-preview-label{font-size:.62rem;font-weight:800;color:var(--g3);margin-bottom:.25rem;text-transform:uppercase;letter-spacing:.3px}
+.sc-preview-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:.18rem}
+.sc-preview-slot{padding:.22rem .1rem;border:1px solid var(--g4);background:var(--wh);border-radius:4px;font-size:.58rem;font-weight:700;color:var(--g4);text-align:center;line-height:1.1}
+.sc-preview-slot.on{background:var(--s5);border-color:var(--s3);color:var(--s1)}
+.day-row.blocked .sc-preview-wrap{opacity:.4}
 .day-row.active{border-color:var(--p4);background:var(--p6)}
 .day-row.blocked{background:var(--g5);opacity:.65}
 .day-toggle{display:flex;align-items:center;gap:.5rem;min-width:100px}
@@ -272,6 +278,57 @@ tr:hover td{background:var(--g5)}
 .sc-block-btn.block:hover{background:#fecaca}
 .sc-block-btn.unblock{border-color:var(--s4);background:var(--s5);color:var(--s1)}
 .sc-block-btn.unblock:hover{background:var(--s4)}
+.sc-block-btn.revert{border-color:var(--a3);background:var(--a5);color:var(--a1)}
+.sc-block-btn.revert:hover{background:#fde8b4}
+.sc-day.custom-hours{background:var(--p5);color:var(--g1);cursor:pointer}
+.sc-day.custom-hours:hover{background:var(--p4);transform:scale(1.05)}
+.sc-day.custom-hours::before{content:'';position:absolute;top:3px;right:3px;width:5px;height:5px;border-radius:50%;background:var(--p2)}
+.sc-exc-section{margin-top:.75rem;padding-top:.65rem;border-top:1px solid var(--p4)}
+.sc-exc-title{font-size:.75rem;font-weight:800;color:var(--p1);margin-bottom:.45rem}
+.sc-exc-habitual{font-size:.73rem;color:var(--g3);margin-bottom:.45rem;font-style:italic}
+.sc-time-row{display:flex;align-items:center;gap:.4rem;margin-bottom:.35rem;flex-wrap:wrap}
+.sc-time-input{padding:.28rem .5rem;border:1.5px solid var(--p4);border-radius:6px;font-family:'Nunito',sans-serif;font-size:.8rem;color:var(--g1);background:var(--wh);outline:none;transition:border .15s;width:92px}
+.sc-time-input:focus{border-color:var(--p2)}
+.sc-time-sep{font-size:.75rem;color:var(--g3);font-weight:700}
+.sc-remove-btn{width:22px;height:22px;border-radius:50%;border:1.5px solid #fca5a5;background:#fee2e2;color:#dc2626;font-size:.75rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;flex-shrink:0;padding:0}
+.sc-remove-btn:hover{background:#fecaca}
+.sc-add-block-btn{display:inline-flex;align-items:center;gap:.25rem;padding:.28rem .7rem;border-radius:20px;font-size:.7rem;font-weight:700;border:1.5px dashed var(--p3);background:transparent;color:var(--p2);cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s;margin-top:.1rem}
+.sc-add-block-btn:hover{background:var(--p5)}
+.sc-save-exc-btn{display:flex;align-items:center;justify-content:center;gap:.35rem;width:100%;padding:.5rem;background:var(--p2);color:#fff;border:none;border-radius:var(--r);font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;transition:background .2s;margin-top:.6rem}
+.sc-save-exc-btn:hover{background:var(--p1)}
+.sc-save-exc-btn:disabled{background:var(--g4);color:var(--g3);cursor:not-allowed}
+.sc-exc-actions{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-top:.5rem}
+
+/* ── LAYOUT panel-izquierda + calendario ── */
+.sc-layout{display:flex;gap:1rem;align-items:flex-start}
+.sc-panel-col{width:300px;flex-shrink:0}
+.sc-cal-col{flex:1;min-width:0}
+.sc-day-panel-side{background:var(--p5);border-radius:var(--r);padding:.85rem 1rem;font-size:.8rem;min-height:220px;position:sticky;top:.5rem}
+.sc-day-panel-side h4{font-size:.85rem;font-weight:700;color:var(--p1);margin-bottom:.5rem}
+.sc-panel-empty{color:var(--g3);font-style:italic;font-size:.78rem;text-align:center;padding:2rem .5rem}
+
+/* ── Grilla de 16 slots de 45 min ── */
+.sc-slots-label{font-size:.72rem;font-weight:800;color:var(--p1);margin:.6rem 0 .3rem;text-transform:uppercase;letter-spacing:.3px}
+.sc-slot-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.3rem}
+.sc-slot{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.05rem;padding:.42rem .15rem;border:1.5px solid var(--g4);background:var(--wh);border-radius:6px;font-weight:700;color:var(--g3);cursor:pointer;text-align:center;transition:all .12s;font-family:'Nunito',sans-serif;line-height:1.05}
+.sc-slot-start{font-size:.72rem;font-weight:800}
+.sc-slot-end{font-size:.6rem;font-weight:600;opacity:.7}
+.sc-slot:hover{border-color:var(--p3);color:var(--p2)}
+.sc-slot.on{background:var(--s5);border-color:var(--s2);color:var(--s1)}
+.sc-slot.on:hover{background:var(--s4);color:var(--s1)}
+.sc-slot-hint{font-size:.65rem;color:var(--g3);margin-top:.3rem;font-style:italic}
+.sc-save-row{display:flex;flex-direction:column;gap:.4rem;margin-top:.7rem}
+.sc-btn-primary{display:flex;align-items:center;justify-content:center;gap:.35rem;width:100%;padding:.55rem;background:var(--p2);color:#fff;border:none;border-radius:var(--r);font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;transition:background .2s}
+.sc-btn-primary:hover{background:var(--p1)}
+.sc-btn-primary:disabled{background:var(--g4);color:var(--g3);cursor:not-allowed}
+.sc-btn-secondary{display:flex;align-items:center;justify-content:center;gap:.35rem;width:100%;padding:.5rem;background:var(--wh);color:var(--p2);border:1.5px solid var(--p3);border-radius:var(--r);font-family:'Nunito',sans-serif;font-size:.74rem;font-weight:700;cursor:pointer;transition:all .15s}
+.sc-btn-secondary:hover{background:var(--p5)}
+
+@media(max-width:900px){
+  .sc-layout{flex-direction:column-reverse}
+  .sc-panel-col{width:100%}
+  .sc-day-panel-side{position:static}
+}
 
 /* ── TODAY BANNER ── */
 .today-banner{display:none;align-items:center;gap:.75rem;background:linear-gradient(135deg,var(--p5),#e8f5e9);border:1.5px solid var(--p4);border-radius:var(--rl);padding:.85rem 1.2rem;margin-bottom:1.25rem}
@@ -290,6 +347,19 @@ tr:hover td{background:var(--g5)}
 .toast.info{background:linear-gradient(135deg,var(--p1),var(--p2))}
 @keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes toastOut{to{opacity:0;transform:translateY(12px)}}
+
+/* ── OVERVIEW ZONAS ── */
+.overview-zone{margin-bottom:2rem}
+.zone-header{margin-bottom:1.1rem}
+.zone-header h2{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:600;color:var(--p1)}
+.zone-header p{font-size:.78rem;color:var(--g3);margin-top:.15rem}
+.zone-a .zone-header h2{color:var(--p1)}
+.zone-b{border-top:2px solid var(--g4);padding-top:1.75rem}
+.zone-b .zone-header h2{color:var(--g2)}
+.kpi-card-tall{background:var(--wh);border:1px solid var(--g4);border-radius:var(--rl);padding:1.2rem 1.4rem;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center}
+.kpi-card-tall::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.kpi-card-tall.green::before{background:linear-gradient(90deg,var(--s1),var(--s3))}
+.kpi-grid-3{grid-template-columns:repeat(3,1fr)}
 
 /* ── REFRESH SPIN ── */
 @keyframes refreshSpin{to{transform:rotate(360deg)}}
@@ -348,7 +418,7 @@ tr:hover td{background:var(--g5)}
 
     <div class="sb-section">Principal</div>
     <button class="sb-item on" onclick="showSection('overview',this)">
-      <span class="ico">📊</span> Overview
+      <span class="ico">📊</span> Panel Principal
     </button>
     <button class="sb-item" onclick="showSection('leads',this)">
       <span class="ico">🎯</span> Leads
@@ -385,7 +455,7 @@ tr:hover td{background:var(--g5)}
     <!-- TOPBAR -->
     <div class="topbar">
       <div>
-        <div class="topbar-title" id="topbar-title">Overview</div>
+        <div class="topbar-title" id="topbar-title">Panel Principal</div>
         <div class="topbar-subtitle" id="topbar-date"></div>
       </div>
       <div class="topbar-right">
@@ -400,91 +470,104 @@ tr:hover td{background:var(--g5)}
 
       <!-- ══ OVERVIEW ══════════════════════════════════════════════ -->
       <div class="section on" id="section-overview">
-        <div class="section-header">
-          <h2>Vista General</h2>
-          <p>Resumen del negocio en tiempo real</p>
-        </div>
 
-        <!-- Today banner -->
-        <div class="today-banner" id="today-banner">
-          <div class="today-banner-ico">🔔</div>
-          <div class="today-banner-text">
-            <div class="today-banner-title" id="today-banner-title">Tienes citas hoy</div>
-            <div class="today-banner-sub" id="today-banner-sub"></div>
+        <!-- ── ZONA A: Panel de Hoy ───────────────────────────── -->
+        <div class="overview-zone zone-a">
+          <div class="zone-header">
+            <h2>Panel de Hoy</h2>
+            <p>Prepárate para tus consultas del día</p>
           </div>
-          <div class="today-banner-count" id="today-banner-count"></div>
-        </div>
 
-        <!-- KPIs -->
-        <div class="kpi-grid">
-          <div class="kpi-card purple">
-            <div class="kpi-label">Total Leads</div>
-            <div class="kpi-value" id="kpi-total">—</div>
-            <div class="kpi-sub">en CRM Notion</div>
-            <div class="kpi-ico">🎯</div>
+          <!-- Today banner -->
+          <div class="today-banner" id="today-banner">
+            <div class="today-banner-ico">🔔</div>
+            <div class="today-banner-text">
+              <div class="today-banner-title" id="today-banner-title">Tienes citas hoy</div>
+              <div class="today-banner-sub" id="today-banner-sub"></div>
+            </div>
+            <div class="today-banner-count" id="today-banner-count"></div>
           </div>
-          <div class="kpi-card red">
-            <div class="kpi-label">Leads Hot</div>
-            <div class="kpi-value" id="kpi-hot">—</div>
-            <div class="kpi-sub">alta probabilidad de cierre</div>
-            <div class="kpi-ico">🔥</div>
-          </div>
-          <div class="kpi-card green">
-            <div class="kpi-label">Citas Agendadas</div>
-            <div class="kpi-value" id="kpi-agendadas">—</div>
-            <div class="kpi-sub">estatus activo</div>
-            <div class="kpi-ico">📅</div>
-          </div>
-          <div class="kpi-card amber">
-            <div class="kpi-label">Tasa de Cierre</div>
-            <div class="kpi-value" id="kpi-tasa">—</div>
-            <div class="kpi-sub">leads cerrados vs total</div>
-            <div class="kpi-ico">📈</div>
+
+          <!-- KPI de citas + próximas citas -->
+          <div class="grid-3">
+            <div class="card">
+              <div class="card-head">
+                <h3><span class="ico">📅</span> Próximas Citas</h3>
+              </div>
+              <div id="upcoming-bookings">
+                <div class="loading"><div class="spinner"></div>Cargando...</div>
+              </div>
+            </div>
+            <div class="kpi-card-tall green">
+              <div class="kpi-label">Citas Agendadas</div>
+              <div class="kpi-value" id="kpi-agendadas">—</div>
+              <div class="kpi-sub">estatus activo</div>
+              <div class="kpi-ico">📅</div>
+            </div>
           </div>
         </div>
 
-        <!-- Charts row -->
-        <div class="grid-2">
-          <!-- Funnel -->
+        <!-- ── ZONA B: Métricas del Negocio ──────────────────── -->
+        <div class="overview-zone zone-b">
+          <div class="zone-header">
+            <h2>Métricas del Negocio</h2>
+            <p>Resumen analítico en tiempo real</p>
+          </div>
+
+          <!-- KPIs -->
+          <div class="kpi-grid kpi-grid-3">
+            <div class="kpi-card purple">
+              <div class="kpi-label">Prospectos Totales</div>
+              <div class="kpi-value" id="kpi-total">—</div>
+              <div class="kpi-sub">en CRM Notion</div>
+              <div class="kpi-ico">🎯</div>
+            </div>
+            <div class="kpi-card red">
+              <div class="kpi-label">Prospectos Prioritarios</div>
+              <div class="kpi-value" id="kpi-hot">—</div>
+              <div class="kpi-sub">alta probabilidad de cierre</div>
+              <div class="kpi-ico">🔥</div>
+            </div>
+            <div class="kpi-card amber">
+              <div class="kpi-label">Tasa de Conversión</div>
+              <div class="kpi-value" id="kpi-tasa">—</div>
+              <div class="kpi-sub">leads cerrados vs total</div>
+              <div class="kpi-ico">📈</div>
+            </div>
+          </div>
+
+          <!-- Charts row -->
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-head">
+                <h3><span class="ico">🔽</span> Prospección por Etapa</h3>
+              </div>
+              <div class="card-body" id="funnel-chart">
+                <div class="loading"><div class="spinner"></div>Cargando...</div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <h3><span class="ico">🌡️</span> Estado de Contacto</h3>
+              </div>
+              <div class="card-body" id="temp-chart">
+                <div class="loading"><div class="spinner"></div>Cargando...</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Últimas solicitudes -->
           <div class="card">
             <div class="card-head">
-              <h3><span class="ico">🔽</span> Pipeline de Leads</h3>
-            </div>
-            <div class="card-body" id="funnel-chart">
-              <div class="loading"><div class="spinner"></div>Cargando...</div>
-            </div>
-          </div>
-
-          <!-- Temperatura donut -->
-          <div class="card">
-            <div class="card-head">
-              <h3><span class="ico">🌡️</span> Temperatura</h3>
-            </div>
-            <div class="card-body" id="temp-chart">
-              <div class="loading"><div class="spinner"></div>Cargando...</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Leads recientes + próximas citas -->
-        <div class="grid-3">
-          <div class="card">
-            <div class="card-head">
-              <h3><span class="ico">🕐</span> Leads Recientes</h3>
+              <h3><span class="ico">🕐</span> Últimas Solicitudes</h3>
             </div>
             <div class="card-body np" id="recent-leads">
               <div class="loading"><div class="spinner"></div>Cargando...</div>
             </div>
           </div>
-          <div class="card">
-            <div class="card-head">
-              <h3><span class="ico">📅</span> Próximas Citas</h3>
-            </div>
-            <div id="upcoming-bookings">
-              <div class="loading"><div class="spinner"></div>Cargando...</div>
-            </div>
-          </div>
         </div>
+
       </div>
 
       <!-- ══ LEADS ══════════════════════════════════════════════════ -->
@@ -551,20 +634,29 @@ tr:hover td{background:var(--g5)}
               <h3><span class="ico">📅</span> Calendario de Citas</h3>
             </div>
             <div class="card-body">
-              <div class="sc-nav">
-                <button class="sc-arrow" onclick="scPrevMonth()">&#8592;</button>
-                <div class="sc-month" id="sc-month-lbl">Cargando...</div>
-                <button class="sc-arrow" onclick="scNextMonth()">&#8594;</button>
+              <div class="sc-layout">
+                <div class="sc-panel-col">
+                  <div id="sc-day-panel" class="sc-day-panel-side">
+                    <div class="sc-panel-empty">Selecciona un día del calendario para configurar su horario en bloques de 45 min</div>
+                  </div>
+                </div>
+                <div class="sc-cal-col">
+                  <div class="sc-nav">
+                    <button class="sc-arrow" onclick="scPrevMonth()">&#8592;</button>
+                    <div class="sc-month" id="sc-month-lbl">Cargando...</div>
+                    <button class="sc-arrow" onclick="scNextMonth()">&#8594;</button>
+                  </div>
+                  <div class="sc-grid" id="sc-cal-grid">
+                    <div class="loading" style="grid-column:1/-1"><div class="spinner"></div></div>
+                  </div>
+                  <div class="sc-legend">
+                    <div class="sc-leg"><div class="sc-leg-dot" style="background:var(--s5);border:1px solid var(--s4)"></div>Disponible</div>
+                    <div class="sc-leg"><div class="sc-leg-dot" style="background:var(--p5);border:1px solid var(--p4)"></div>Horario especial</div>
+                    <div class="sc-leg"><div class="sc-leg-dot" style="background:#fee2e2;border:1px solid #fca5a5"></div>Bloqueado</div>
+                    <div class="sc-leg"><div class="sc-leg-dot" style="background:var(--p2)"></div>Paciente agendado</div>
+                  </div>
+                </div>
               </div>
-              <div class="sc-grid" id="sc-cal-grid">
-                <div class="loading" style="grid-column:1/-1"><div class="spinner"></div></div>
-              </div>
-              <div class="sc-legend">
-                <div class="sc-leg"><div class="sc-leg-dot" style="background:var(--s5);border:1px solid var(--s4)"></div>Disponible</div>
-                <div class="sc-leg"><div class="sc-leg-dot" style="background:#fee2e2;border:1px solid #fca5a5"></div>Bloqueado</div>
-                <div class="sc-leg"><div class="sc-leg-dot" style="background:var(--p2)"></div>Paciente agendado</div>
-              </div>
-              <div id="sc-day-panel" class="sc-day-panel"></div>
             </div>
           </div>
 
@@ -674,7 +766,7 @@ async function tryRestoreSession(){
 }
 
 // ── NAVIGATION ──────────────────────────────────────────────────
-const titles = {overview:'Vista General',leads:'CRM · Leads',citas:'Citas',disponibilidad:'Disponibilidad',historial:'Historial IA'};
+const titles = {overview:'Panel Principal',leads:'CRM · Leads',citas:'Citas',disponibilidad:'Disponibilidad',historial:'Historial IA'};
 function showSection(id, btn){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('on'));
@@ -1210,15 +1302,34 @@ function renderWeeklyEditor(){
         <label for="chk-${d}">${esMap[d]}</label>
       </div>
       <div class="day-hours ${on?'':'disabled'}" id="dh-${d}">
-        <input type="time" id="st-${d}" value="${st}">
+        <input type="time" id="st-${d}" value="${st}" oninput="updateDayPreview('${d}')">
         <span>—</span>
-        <input type="time" id="en-${d}" value="${en}">
+        <input type="time" id="en-${d}" value="${en}" oninput="updateDayPreview('${d}')">
+      </div>
+      <div class="sc-preview-wrap">
+        <div class="sc-preview-label">Bloques de 45 min · 8:00 → 20:00</div>
+        <div class="sc-preview-grid" id="prev-${d}"></div>
       </div>
     </div>`;
   }
   html += `<button class="sched-save" onclick="saveSchedule()">💾 Guardar horario</button>
            <div class="sched-status" id="sched-status"></div>`;
   el.innerHTML = html;
+  for(const d of days) updateDayPreview(d);
+}
+
+function updateDayPreview(d){
+  const grid = document.getElementById('prev-'+d);
+  if(!grid) return;
+  const on  = document.getElementById('chk-'+d)?.checked;
+  const st  = document.getElementById('st-'+d)?.value || '09:00';
+  const en  = document.getElementById('en-'+d)?.value || '19:00';
+  const slots = (on && st && en && en > st) ? _slotsFromRanges([{startTime:st, endTime:en}]) : new Array(SLOT_COUNT).fill(false);
+  let html = '';
+  for(let i=0;i<SLOT_COUNT;i++){
+    html += `<div class="sc-preview-slot${slots[i]?' on':''}">${_hhmm(_slotMinStart(i))}</div>`;
+  }
+  grid.innerHTML = html;
 }
 
 function toggleDay(d){
@@ -1228,6 +1339,7 @@ function toggleDay(d){
   row.classList.toggle('active', on);
   row.classList.toggle('blocked', !on);
   hrs.classList.toggle('disabled', !on);
+  updateDayPreview(d);
 }
 
 async function saveSchedule(){
@@ -1259,7 +1371,16 @@ async function saveSchedule(){
     status.textContent = '✓ Horario guardado correctamente';
     status.className   = 'sched-status ok';
     showToast('Horario guardado correctamente', 'ok');
+    const prevDs = _scDs;
     renderScCalendar();
+    if(prevDs){
+      const dayEl = document.querySelector(`.sc-day[title="${prevDs}"]`);
+      if(dayEl){
+        const st = dayEl.classList.contains('blocked-day') ? 'blocked'
+                 : dayEl.classList.contains('custom-hours') ? 'custom' : 'avail';
+        scDayClick(dayEl, prevDs, st);
+      }
+    }
   } catch(e){
     status.textContent = '✗ ' + (e.message||'Error al guardar');
     status.className   = 'sched-status err';
@@ -1275,10 +1396,14 @@ function renderScCalendar(){
 
   const today     = new Date(); today.setHours(0,0,0,0);
   const avail     = scheduleData?.availability || [];
-  const overridesMap = {};
-  for(const o of (scheduleData?.overrides||[])) overridesMap[o.date] = o;
 
-  // días habilitados de la semana (nombres en inglés)
+  // Agrupar overrides por fecha (pueden ser múltiples entradas por día)
+  const overridesByDate = {};
+  for(const o of (scheduleData?.overrides||[])){
+    if(!overridesByDate[o.date]) overridesByDate[o.date] = [];
+    overridesByDate[o.date].push(o);
+  }
+
   const enabledWeekdays = new Set();
   for(const a of avail) for(const d of a.days) enabledWeekdays.add(d);
 
@@ -1292,66 +1417,239 @@ function renderScCalendar(){
     const ds    = `${y}-${String(mo+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const date  = new Date(y, mo, d);
     const wdEN  = DAY_NAMES_EN[date.getDay()];
-    const isPast     = date < today;
-    const ov = overridesMap[ds];
-    const isBlocked  = !!ov && ov.endTime === '00:00';
-    const isAvail    = !isPast && !isBlocked && enabledWeekdays.has(wdEN);
-    const hasBk      = !!bookingsByDate[ds];
+    const isPast      = date < today;
+    const ovList      = overridesByDate[ds] || [];
+    const isBlocked   = ovList.length === 1 && ovList[0].endTime === '00:00';
+    const hasCustom   = ovList.length > 0 && !isBlocked;
+    const isAvail     = !isPast && !isBlocked && !hasCustom && enabledWeekdays.has(wdEN);
+    const hasBk       = !!bookingsByDate[ds];
+
+    let state = 'avail';
+    if(isBlocked) state = 'blocked';
+    else if(hasCustom) state = 'custom';
 
     let cls = 'sc-day';
     if(isPast) cls += ' past';
     else if(isBlocked) cls += ' blocked-day';
+    else if(hasCustom) cls += ' custom-hours';
     else if(isAvail) cls += ' avail';
     if(hasBk && !isPast) cls += ' has-booking';
 
-    const click = !isPast ? `onclick="scDayClick(this,'${ds}','${isBlocked?'blocked':'avail'}')"` : '';
+    const click = !isPast ? `onclick="scDayClick(this,'${ds}','${state}')"` : '';
     const count = bookingsByDate[ds]?.length;
     const badge = (hasBk && !isPast) ? `<span style="font-size:.58rem;line-height:1;color:var(--p2);font-weight:800">${count}</span>` : '';
     html += `<div class="${cls}" ${click} title="${ds}">${d}${badge}</div>`;
   }
   document.getElementById('sc-cal-grid').innerHTML = html;
-  document.getElementById('sc-day-panel').className = 'sc-day-panel';
+  const _panel = document.getElementById('sc-day-panel');
+  if(_panel) _panel.innerHTML = '<div class="sc-panel-empty">Selecciona un día del calendario para configurar su horario en bloques de 45 min</div>';
+  _scDs = null; _scWdEN = null; _scSlots = new Array(SLOT_COUNT).fill(false);
 }
 
+// ── Helpers de slots: 8:00–20:00 en bloques de 45 min (16 slots) ──
+const SLOT_COUNT = 16;
+const SLOT_START_MIN = 8*60;
+const SLOT_LEN = 45;
+const _slotMinStart = i => SLOT_START_MIN + i*SLOT_LEN;
+const _slotMinEnd   = i => SLOT_START_MIN + (i+1)*SLOT_LEN;
+function _hhmm(min){ return `${String(Math.floor(min/60)).padStart(2,'0')}:${String(min%60).padStart(2,'0')}`; }
+function _toMin(hhmm){ const [h,m]=hhmm.split(':').map(Number); return h*60+m; }
+
+function _slotsFromRanges(blocks){
+  const arr = new Array(SLOT_COUNT).fill(false);
+  for(const b of blocks||[]){
+    if(!b.startTime || !b.endTime) continue;
+    const s = _toMin(b.startTime), e = _toMin(b.endTime);
+    if(s===0 && e===0) continue;
+    for(let i=0;i<SLOT_COUNT;i++){
+      if(_slotMinStart(i) >= s && _slotMinEnd(i) <= e) arr[i] = true;
+    }
+  }
+  return arr;
+}
+
+function _rangesFromSlots(slots){
+  const out = [];
+  let i = 0;
+  while(i < SLOT_COUNT){
+    if(!slots[i]){ i++; continue; }
+    let j = i;
+    while(j < SLOT_COUNT && slots[j]) j++;
+    out.push({startTime:_hhmm(_slotMinStart(i)), endTime:_hhmm(_slotMinEnd(j-1))});
+    i = j;
+  }
+  return out;
+}
+
+let _scSlots = new Array(SLOT_COUNT).fill(false);
+let _scDs    = null;
+let _scWdEN  = null;
+const _ES_WD = {Monday:'lunes',Tuesday:'martes',Wednesday:'miércoles',Thursday:'jueves',Friday:'viernes',Saturday:'sábado',Sunday:'domingo'};
+
 function scDayClick(el, ds, state){
-  // Mostrar panel con info del día
-  const panel  = document.getElementById('sc-day-panel');
-  const bks    = bookingsByDate[ds] || [];
-  const date   = new Date(ds+'T12:00:00');
-  const dlbl   = date.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'});
-  const isBlocked = state === 'blocked';
+  const panel = document.getElementById('sc-day-panel');
+  const date  = new Date(ds+'T12:00:00');
+  const wdEN  = DAY_NAMES_EN[date.getDay()];
+  const wdES  = _ES_WD[wdEN] || wdEN;
+  const dlbl  = date.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'});
+  const dShort= date.toLocaleDateString('es-CL',{day:'numeric',month:'short'});
+
+  _scDs = ds; _scWdEN = wdEN;
+
+  const ovList = (scheduleData?.overrides||[]).filter(o=>o.date===ds);
+  const isAllBlocked = ovList.length === 1 && ovList[0].startTime==='00:00' && ovList[0].endTime==='00:00';
+  const hasCustom    = ovList.length > 0 && !isAllBlocked;
+
+  if(isAllBlocked){
+    _scSlots = new Array(SLOT_COUNT).fill(false);
+  } else if(hasCustom){
+    _scSlots = _slotsFromRanges(ovList);
+  } else {
+    const wdRanges = (scheduleData?.availability||[]).filter(a => (a.days||[]).includes(wdEN));
+    _scSlots = _slotsFromRanges(wdRanges);
+  }
+
+  const bks = bookingsByDate[ds] || [];
 
   let html = `<h4>📅 ${dlbl.charAt(0).toUpperCase()+dlbl.slice(1)}</h4>`;
+
   if(bks.length){
+    html += `<div class="sc-slots-label">Citas agendadas</div>`;
     html += bks.map(b=>`<div class="sc-booking-item">
       <div class="sc-booking-hora">${b.hora}</div>
       <div class="sc-booking-name">${b.nombre}</div>
       <div class="sc-booking-email">${b.email}</div>
     </div>`).join('');
-  } else {
-    html += `<div style="color:var(--g3);font-size:.78rem;margin-bottom:.3rem">Sin citas agendadas</div>`;
   }
-  const btnLbl = isBlocked
-    ? `<button class="sc-block-btn unblock" onclick="toggleDateBlock('${ds}',false)">✓ Habilitar este día</button>`
-    : `<button class="sc-block-btn block" onclick="toggleDateBlock('${ds}',true)">🚫 Bloquear este día</button>`;
-  html += btnLbl;
-  panel.innerHTML = html;
-  panel.className = 'sc-day-panel show';
 
-  // Marcar seleccionado
+  if(isAllBlocked){
+    html += `<div style="color:#dc2626;font-size:.8rem;font-weight:700;margin:.7rem 0 .4rem">🚫 Día bloqueado completo</div>`;
+    html += `<div class="sc-save-row">
+      <button class="sc-btn-secondary" onclick="toggleDateBlock('${ds}',false)">✓ Habilitar este día</button>
+    </div>`;
+  } else {
+    html += `<div class="sc-slots-label">Bloques de 45 min disponibles</div>`;
+    html += `<div class="sc-slot-grid" id="sc-slot-grid">`;
+    for(let i=0;i<SLOT_COUNT;i++){
+      const ts = _hhmm(_slotMinStart(i));
+      const te = _hhmm(_slotMinEnd(i));
+      html += `<div class="sc-slot${_scSlots[i]?' on':''}" data-i="${i}" onclick="scToggleSlot(${i})"><span class="sc-slot-start">${ts}</span><span class="sc-slot-end">${te}</span></div>`;
+    }
+    html += `</div>`;
+    html += `<div class="sc-slot-hint">Haz click en cada bloque para activarlo o desactivarlo.</div>`;
+    html += `<div class="sc-save-row">
+      <button class="sc-btn-primary" onclick="saveWeekday()">♾️ Aplicar a todos los ${wdES}</button>
+      <button class="sc-btn-secondary" onclick="saveDayOverride()">📅 Solo este ${wdES} (${dShort})</button>`;
+    if(hasCustom){
+      html += `<button class="sc-btn-secondary" onclick="revertToHabitual('${ds}')">↺ Volver al horario habitual</button>`;
+    }
+    html += `<button class="sc-btn-secondary" style="border-color:#fca5a5;color:#dc2626" onclick="toggleDateBlock('${ds}',true)">🚫 Bloquear día completo</button>`;
+    html += `</div>`;
+  }
+
+  panel.innerHTML = html;
+
   document.querySelectorAll('.sc-day').forEach(d=>d.classList.remove('selected-day'));
   el.classList.add('selected-day');
 }
 
+function scToggleSlot(i){
+  _scSlots[i] = !_scSlots[i];
+  const el = document.querySelector(`.sc-slot[data-i="${i}"]`);
+  if(el) el.classList.toggle('on', _scSlots[i]);
+}
+
+function _validateAtLeastOne(){
+  if(_scSlots.some(s=>s)) return true;
+  showToast('Selecciona al menos un bloque o usa "Bloquear día completo"', 'err');
+  return false;
+}
+
+async function saveDayOverride(){
+  if(!scheduleData || !_scDs) return;
+  if(!_validateAtLeastOne()) return;
+  const ranges = _rangesFromSlots(_scSlots);
+  const ds = _scDs;
+  let overrides = (scheduleData?.overrides||[]).filter(o=>o.date!==ds);
+  for(const r of ranges) overrides.push({date:ds, startTime:r.startTime, endTime:r.endTime});
+
+  try{
+    const r = await fetch(API+'/availability/schedule',{
+      method:'PATCH',
+      headers: authHeaders({'Content-Type':'application/json'}),
+      body: JSON.stringify({id:scheduleData.id, availability:scheduleData.availability, overrides})
+    });
+    if(r.status === 401){ logout(); return; }
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.error||'Error');
+    if(d.data) scheduleData = d.data;
+    else scheduleData.overrides = overrides;
+    showToast('Horario de este día guardado', 'ok');
+    renderScCalendar();
+  }catch(e){ showToast('Error: '+(e.message||''), 'err'); }
+}
+
+async function saveWeekday(){
+  if(!scheduleData || !_scWdEN) return;
+  if(!_validateAtLeastOne()) return;
+  const ranges = _rangesFromSlots(_scSlots);
+
+  let availability = JSON.parse(JSON.stringify(scheduleData.availability||[]));
+  for(const a of availability){
+    if(Array.isArray(a.days)) a.days = a.days.filter(d => d !== _scWdEN);
+  }
+  availability = availability.filter(a => (a.days||[]).length > 0);
+  for(const r of ranges){
+    availability.push({days:[_scWdEN], startTime:r.startTime, endTime:r.endTime});
+  }
+
+  let overrides = (scheduleData?.overrides||[]).filter(o => o.date !== _scDs);
+
+  try{
+    const r = await fetch(API+'/availability/schedule',{
+      method:'PATCH',
+      headers: authHeaders({'Content-Type':'application/json'}),
+      body: JSON.stringify({id:scheduleData.id, availability, overrides})
+    });
+    if(r.status === 401){ logout(); return; }
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.error||'Error');
+    if(d.data) scheduleData = d.data;
+    else { scheduleData.availability = availability; scheduleData.overrides = overrides; }
+    const wdES = _ES_WD[_scWdEN] || _scWdEN;
+    showToast(`Horario aplicado a todos los ${wdES}`, 'ok');
+    renderWeeklyEditor();
+    renderScCalendar();
+  }catch(e){ showToast('Error: '+(e.message||''), 'err'); }
+}
+
+async function revertToHabitual(ds){
+  if(!scheduleData) return;
+  const overrides = (scheduleData?.overrides||[]).filter(o=>o.date!==ds);
+  try{
+    const r = await fetch(API+'/availability/schedule',{
+      method:'PATCH',
+      headers: authHeaders({'Content-Type':'application/json'}),
+      body: JSON.stringify({id:scheduleData.id, availability:scheduleData.availability, overrides})
+    });
+    if(r.status === 401){ logout(); return; }
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.error||'Error');
+    if(d.data) scheduleData = d.data;
+    else scheduleData.overrides = overrides;
+    showToast('Volvió al horario habitual', 'ok');
+    renderScCalendar();
+  } catch(e){
+    showToast('Error: ' + (e.message||''), 'err');
+  }
+}
+
 async function toggleDateBlock(ds, block){
   if(!scheduleData) return;
-  let overrides = [...(scheduleData.overrides||[])];
-  if(block){
-    if(!overrides.find(o=>o.date===ds)) overrides.push({date:ds, startTime:'00:00', endTime:'00:00'});
-  } else {
-    overrides = overrides.filter(o=>o.date!==ds);
-  }
+  let overrides = (scheduleData.overrides||[]).filter(o=>o.date!==ds);
+  if(block) overrides.push({date:ds, startTime:'00:00', endTime:'00:00'});
   const panel = document.getElementById('sc-day-panel');
+  const prevContent = panel.innerHTML;
   panel.innerHTML = '<div style="text-align:center;padding:.5rem"><span class="spinner dark"></span></div>';
   try{
     const r = await fetch(API+'/availability/schedule',{
@@ -1367,7 +1665,7 @@ async function toggleDateBlock(ds, block){
     showToast(block ? 'Día bloqueado' : 'Día habilitado', 'ok');
     renderScCalendar();
   } catch(e){
-    panel.innerHTML = `<div style="color:#dc2626;font-size:.78rem">Error: ${e.message}</div>`;
+    panel.innerHTML = prevContent;
     showToast('Error: ' + (e.message||''), 'err');
   }
 }

@@ -792,6 +792,14 @@ function resetFlow(){
 }
 
 document.addEventListener('DOMContentLoaded', ()=> goStep(1));
+
+// Refresca la disponibilidad cuando la pestaña vuelve a estar visible
+function _isOnCalendarStep(){ return document.getElementById('step3')?.style.display === 'block'; }
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState === 'visible' && _isOnCalendarStep()) loadSlots();
+});
+// Polling silencioso cada 60s mientras está en la pantalla del calendario
+setInterval(()=>{ if(document.visibilityState === 'visible' && _isOnCalendarStep()) loadSlots(); }, 60000);
 </script>
 </body>
 </html>
