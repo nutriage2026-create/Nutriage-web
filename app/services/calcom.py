@@ -78,3 +78,20 @@ def create_booking(event_type_id: str, start: str, name: str, email: str, notes:
         if not r.is_success:
             raise Exception(f"Cal.com {r.status_code}: {r.text[:400]}")
         return r.json()
+
+
+def reschedule_booking(uid: str, new_start: str, reason: str = "") -> dict:
+    """
+    Reagenda una cita existente a un nuevo horario.
+    Cal.com valida automáticamente que el slot esté libre y respete el schedule.
+    uid: identificador (string) del booking en Cal.com
+    new_start: ISO-8601 ej '2026-05-22T14:00:00Z'
+    """
+    payload = {"start": new_start}
+    if reason:
+        payload["reschedulingReason"] = reason
+    with httpx.Client(timeout=15) as c:
+        r = c.post(f"{BASE}/bookings/{uid}/reschedule", headers=_headers(), json=payload)
+        if not r.is_success:
+            raise Exception(f"Cal.com {r.status_code}: {r.text[:400]}")
+        return r.json()

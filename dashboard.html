@@ -149,6 +149,20 @@ tr:hover td{background:var(--g5)}
 .booking-name{font-size:.82rem;font-weight:700;color:var(--g1)}
 .booking-meta{font-size:.72rem;color:var(--g3);margin-top:.15rem}
 .booking-badge{font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:4px;background:var(--p5);color:var(--p2)}
+.booking-actions{display:flex;flex-direction:column;gap:.3rem;align-items:flex-end}
+.booking-resch{display:inline-flex;align-items:center;gap:.25rem;font-size:.68rem;font-weight:700;padding:.3rem .55rem;border-radius:6px;background:var(--p5);color:var(--p2);border:1px solid var(--p4);cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s;white-space:nowrap}
+.booking-resch:hover{background:var(--p2);color:#fff;border-color:var(--p2)}
+
+/* ── RESCHEDULE MODAL ── */
+.rs-current{background:var(--p6);border:1px solid var(--p4);border-radius:var(--r);padding:.7rem .9rem;margin-bottom:1rem;font-size:.82rem;color:var(--g2)}
+.rs-current b{color:var(--p1)}
+.rs-date-row{display:flex;gap:.5rem;align-items:flex-end;margin-bottom:.5rem;flex-wrap:wrap}
+.rs-date-row .cc-field{flex:1;margin-bottom:0;min-width:160px}
+.rs-search-btn{padding:.55rem 1rem;background:var(--p2);color:#fff;border:none;border-radius:var(--r);font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:700;cursor:pointer;height:38px}
+.rs-search-btn:hover{background:var(--p1)}
+.rs-slots-wrap{margin-top:.75rem;min-height:60px}
+.rs-slot-msg{font-size:.78rem;color:var(--g3);padding:.6rem 0;text-align:center}
+.rs-slot-btn.selected{background:var(--p2);color:#fff;border-color:var(--p2)}
 
 /* ── AGENT HISTORY ── */
 .hist-item{display:flex;gap:.8rem;padding:.8rem 1.2rem;border-bottom:1px solid var(--g4)}
@@ -1164,6 +1178,7 @@ async function loadBookings(){
 }
 
 // ── PRÓXIMAS CITAS (overview) ─────────────────────────────────────
+let upcomingMap = {}; // uid → booking original
 async function loadUpcomingBookings(){
   const el = document.getElementById('upcoming-bookings');
   const data = await apiFetch('/bookings/?status=upcoming&limit=5');
@@ -1176,12 +1191,18 @@ async function loadUpcomingBookings(){
     el.innerHTML='<div class="empty" style="padding:1.5rem"><div class="empty-ico">📅</div><p>No hay citas agendadas</p></div>';
     return;
   }
+  upcomingMap = {};
   el.innerHTML = bks.map(b=>{
     const start  = new Date(b.start);
     const dayNum = start.toLocaleDateString('es-CL',{day:'numeric',timeZone:'America/Santiago'});
     const month  = start.toLocaleDateString('es-CL',{month:'short',timeZone:'America/Santiago'}).toUpperCase();
     const hora   = start.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',timeZone:'America/Santiago'});
     const dow    = start.toLocaleDateString('es-CL',{weekday:'long',timeZone:'America/Santiago'});
+    const uid    = b.uid || '';
+    if(uid) upcomingMap[uid] = b;
+    const reschBtn = uid
+      ? `<button class="booking-resch" onclick="openReschedule('${uid}')" title="Reagendar esta cita">✏️ Reagendar</button>`
+      : '';
     return `<div class="booking-item">
       <div class="booking-date">
         <div class="booking-day">${dayNum}</div>
@@ -1191,9 +1212,102 @@ async function loadUpcomingBookings(){
         <div class="booking-name">${b.nombre||'Paciente'}</div>
         <div class="booking-meta">${dow} · ${hora} · Consulta Virtual</div>
       </div>
-      <span class="booking-badge">${hora}</span>
+      <div class="booking-actions">
+        <span class="booking-badge">${hora}</span>
+        ${reschBtn}
+      </div>
     </div>`;
   }).join('');
+}
+
+// ── REAGENDAR CITA ───────────────────────────────────────────────
+let reschedSelected = null; // ISO del slot elegido
+let reschedUid = null;
+
+function openReschedule(uid){
+  const b = upcomingMap[uid];
+  if(!b){ showToast('No se encontró la cita','err'); return; }
+  reschedUid = uid;
+  reschedSelected = null;
+  const start = new Date(b.start);
+  const fechaTxt = start.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long',timeZone:'America/Santiago'});
+  const horaTxt  = start.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',timeZone:'America/Santiago'});
+  document.getElementById('rs-pat-name').textContent = b.nombre || 'Paciente';
+  document.getElementById('rs-current-txt').innerHTML = `Hoy agendada: <b>${fechaTxt} · ${horaTxt}</b>`;
+  // por defecto: mañana
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
+  document.getElementById('rs-date').value = tomorrow.toISOString().slice(0,10);
+  document.getElementById('rs-date').min   = new Date().toISOString().slice(0,10);
+  document.getElementById('rs-slots').innerHTML = '<div class="rs-slot-msg">Elegí una fecha y buscá horarios disponibles</div>';
+  document.getElementById('rs-confirm').disabled = true;
+  document.getElementById('rs-reason').value = '';
+  document.getElementById('reagendar-modal').classList.add('on');
+}
+
+function closeReschedule(){
+  document.getElementById('reagendar-modal').classList.remove('on');
+  reschedSelected = null;
+  reschedUid = null;
+}
+
+async function searchReschedSlots(){
+  const b = upcomingMap[reschedUid];
+  if(!b){ return; }
+  const eventTypeId = b.eventTypeId;
+  if(!eventTypeId){ showToast('No se pudo identificar el tipo de cita','err'); return; }
+  const date = document.getElementById('rs-date').value;
+  if(!date){ showToast('Elegí una fecha','err'); return; }
+  const wrap = document.getElementById('rs-slots');
+  wrap.innerHTML = '<div class="rs-slot-msg">Buscando horarios...</div>';
+  const start = `${date}T00:00:00.000Z`;
+  const end   = `${date}T23:59:59.999Z`;
+  const data = await apiFetch(`/availability/slots?eventTypeId=${eventTypeId}&start=${start}&end=${end}`);
+  if(!data || data.error){
+    wrap.innerHTML = '<div class="rs-slot-msg">No se pudo cargar horarios</div>';
+    return;
+  }
+  // Cal.com v2 devuelve { data: { "YYYY-MM-DD": [{start: "ISO"}, ...] } }
+  const inner = data.data || data || {};
+  const dayList = inner[date] || [];
+  if(!dayList.length){
+    wrap.innerHTML = '<div class="rs-slot-msg">Sin horarios disponibles ese día (revisá tu disponibilidad o probá otra fecha)</div>';
+    return;
+  }
+  wrap.innerHTML = '<div class="slots-grid">' + dayList.map(s=>{
+    const iso = s.start || s.time || s;
+    const h = new Date(iso).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',timeZone:'America/Santiago'});
+    return `<button type="button" class="slot-btn rs-slot-btn" data-iso="${iso}" onclick="pickReschedSlot('${iso}', this)">${h}</button>`;
+  }).join('') + '</div>';
+  document.getElementById('rs-confirm').disabled = true;
+}
+
+function pickReschedSlot(iso, btn){
+  reschedSelected = iso;
+  document.querySelectorAll('.rs-slot-btn').forEach(b=>b.classList.remove('selected'));
+  if(btn) btn.classList.add('selected');
+  document.getElementById('rs-confirm').disabled = false;
+}
+
+async function confirmReschedule(){
+  if(!reschedUid || !reschedSelected){ showToast('Elegí un horario','err'); return; }
+  const btn = document.getElementById('rs-confirm');
+  btn.disabled = true; btn.textContent = 'Reagendando...';
+  try{
+    const reason = (document.getElementById('rs-reason').value || '').trim();
+    await apiPost(`/bookings/${reschedUid}/reschedule`, {
+      start: reschedSelected,
+      reason: reason || 'Reagendada por la nutricionista',
+    });
+    showToast('Cita reagendada — Cal.com envió el aviso al paciente','ok',4500);
+    closeReschedule();
+    await loadUpcomingBookings();
+    if(typeof loadBookings === 'function' && document.getElementById('citas')?.classList.contains('on')) loadBookings();
+  } catch(e){
+    showToast('Error: ' + (e.message || 'no se pudo reagendar'), 'err', 5000);
+    btn.disabled = false;
+  } finally {
+    btn.textContent = 'Reagendar';
+  }
 }
 
 // ── DISPONIBILIDAD ───────────────────────────────────────────────
@@ -1876,6 +1990,46 @@ async function submitCerrarConsulta(ev){
       <button class="ficha-mclose" onclick="closeFicha()" title="Cerrar">&times;</button>
     </div>
     <div class="ficha-mbody" id="ficha-mbody"></div>
+  </div>
+</div>
+
+<!-- ── REAGENDAR CITA MODAL ── -->
+<div class="ficha-modal" id="reagendar-modal">
+  <div class="ficha-mbox" style="max-width:560px">
+    <div class="ficha-mhead">
+      <div class="ficha-mtitle">
+        ✏️ Reagendar cita
+        <small><span class="cc-pat-name" id="rs-pat-name">Paciente</span></small>
+      </div>
+      <button class="ficha-mclose" onclick="closeReschedule()" title="Cerrar">&times;</button>
+    </div>
+    <div class="ficha-mbody">
+      <div class="rs-current" id="rs-current-txt">—</div>
+      <div class="cc-field" style="margin-bottom:.6rem">
+        <label class="cc-label">Nueva fecha
+          <small>Solo se muestran horarios que respetan tu disponibilidad y no chocan con otros pacientes</small>
+        </label>
+        <div class="rs-date-row">
+          <div class="cc-field" style="margin:0">
+            <input type="date" class="cc-input" id="rs-date">
+          </div>
+          <button type="button" class="rs-search-btn" onclick="searchReschedSlots()">Buscar horarios</button>
+        </div>
+      </div>
+      <div class="rs-slots-wrap" id="rs-slots">
+        <div class="rs-slot-msg">Elegí una fecha y buscá horarios disponibles</div>
+      </div>
+      <div class="cc-field" style="margin-top:1rem">
+        <label class="cc-label" for="rs-reason">Motivo (opcional)
+          <small>Se envía al paciente con el correo de Cal.com</small>
+        </label>
+        <input type="text" class="cc-input" id="rs-reason" placeholder="Ej: Cambio en mi agenda">
+      </div>
+      <div class="cc-actions">
+        <button type="button" class="cc-btn cc-btn-secondary" onclick="closeReschedule()">Cancelar</button>
+        <button type="button" class="cc-btn cc-btn-primary" id="rs-confirm" disabled onclick="confirmReschedule()">Reagendar</button>
+      </div>
+    </div>
   </div>
 </div>
 
