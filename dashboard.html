@@ -1266,8 +1266,8 @@ async function searchReschedSlots(){
     wrap.innerHTML = '<div class="rs-slot-msg">No se pudo cargar horarios</div>';
     return;
   }
-  // Cal.com v2 devuelve { data: { "YYYY-MM-DD": [{start: "ISO"}, ...] } }
-  const inner = data.data || data || {};
+  // Cal.com v2 devuelve { data: { slots: { "YYYY-MM-DD": [{time: "ISO"}, ...] } } }
+  const inner = (data.data && data.data.slots) || data.slots || data.data || data || {};
   const dayList = inner[date] || [];
   if(!dayList.length){
     wrap.innerHTML = '<div class="rs-slot-msg">Sin horarios disponibles ese día (revisá tu disponibilidad o probá otra fecha)</div>';
