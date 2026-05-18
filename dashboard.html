@@ -152,6 +152,12 @@ tr:hover td{background:var(--g5)}
 .booking-actions{display:flex;flex-direction:column;gap:.3rem;align-items:flex-end}
 .booking-resch{display:inline-flex;align-items:center;gap:.25rem;font-size:.68rem;font-weight:700;padding:.3rem .55rem;border-radius:6px;background:var(--p5);color:var(--p2);border:1px solid var(--p4);cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s;white-space:nowrap}
 .booking-resch:hover{background:var(--p2);color:#fff;border-color:var(--p2)}
+.booking-cancel{display:inline-flex;align-items:center;gap:.25rem;font-size:.68rem;font-weight:700;padding:.3rem .55rem;border-radius:6px;background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .15s;white-space:nowrap;margin-left:.3rem}
+.booking-cancel:hover{background:#dc2626;color:#fff;border-color:#dc2626}
+.cc-btn-danger{background:linear-gradient(135deg,#b91c1c,#dc2626);color:#fff}
+.cc-btn-danger:hover{filter:brightness(1.08)}
+.cn-warn{background:#fef2f2;border:1px solid #fca5a5;border-radius:var(--r);padding:.7rem .9rem;margin-bottom:1rem;font-size:.82rem;color:#7f1d1d}
+.cn-warn b{color:#b91c1c}
 
 /* ── RESCHEDULE MODAL ── */
 .rs-current{background:var(--p6);border:1px solid var(--p4);border-radius:var(--r);padding:.7rem .9rem;margin-bottom:1rem;font-size:.82rem;color:var(--g2)}
@@ -1224,6 +1230,9 @@ async function loadUpcomingBookings(){
     const reschBtn = uid
       ? `<button class="booking-resch" onclick="openReschedule('${uid}')" title="Reagendar esta cita">✏️ Reagendar</button>`
       : '';
+    const cancelBtn = uid
+      ? `<button class="booking-cancel" onclick="openCancel('${uid}')" title="Cancelar y liberar el horario">🗑️ Cancelar</button>`
+      : '';
     return `<div class="booking-item">
       <div class="booking-date">
         <div class="booking-day">${dayNum}</div>
@@ -1235,7 +1244,7 @@ async function loadUpcomingBookings(){
       </div>
       <div class="booking-actions">
         <span class="booking-badge">${hora}</span>
-        ${reschBtn}
+        <div style="display:flex;gap:.25rem;margin-top:.3rem">${reschBtn}${cancelBtn}</div>
       </div>
     </div>`;
   }).join('');
@@ -1328,6 +1337,49 @@ async function confirmReschedule(){
     btn.disabled = false;
   } finally {
     btn.textContent = 'Reagendar';
+  }
+}
+
+// ── CANCELAR CITA ────────────────────────────────────────────────
+let cancelUid = null;
+
+function openCancel(uid){
+  const b = upcomingMap[uid];
+  if(!b){ showToast('No se encontró la cita','err'); return; }
+  cancelUid = uid;
+  const start = new Date(b.start);
+  const fechaTxt = start.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long',timeZone:'America/Santiago'});
+  const horaTxt  = start.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',timeZone:'America/Santiago'});
+  document.getElementById('cn-pat-name').textContent = b.nombre || 'Paciente';
+  document.getElementById('cn-pat-fecha').textContent = `${fechaTxt} · ${horaTxt}`;
+  document.getElementById('cn-reason').value = '';
+  document.getElementById('cancelar-modal').classList.add('on');
+}
+
+function closeCancel(){
+  document.getElementById('cancelar-modal').classList.remove('on');
+  cancelUid = null;
+}
+
+async function confirmCancel(){
+  if(!cancelUid){ return; }
+  const btn = document.getElementById('cn-confirm');
+  btn.disabled = true; btn.textContent = 'Cancelando...';
+  try{
+    const reason = (document.getElementById('cn-reason').value || '').trim();
+    await apiPost(`/bookings/${cancelUid}/cancel`, {
+      reason: reason || 'Cancelada por la nutricionista',
+    });
+    showToast('Cita cancelada — el horario quedó libre para otros pacientes','ok',4500);
+    closeCancel();
+    await loadUpcomingBookings();
+    if(typeof loadBookings === 'function' && document.getElementById('citas')?.classList.contains('on')) loadBookings();
+    if(typeof loadDisponibilidad === 'function' && document.getElementById('disponibilidad')?.classList.contains('on')) loadDisponibilidad();
+  } catch(e){
+    showToast('Error: ' + (e.message || 'no se pudo cancelar'), 'err', 5000);
+    btn.disabled = false;
+  } finally {
+    btn.textContent = 'Sí, cancelar cita';
   }
 }
 
@@ -2094,6 +2146,34 @@ async function submitCerrarConsulta(ev){
       <div class="cc-actions">
         <button type="button" class="cc-btn cc-btn-secondary" onclick="closeReschedule()">Cancelar</button>
         <button type="button" class="cc-btn cc-btn-primary" id="rs-confirm" disabled onclick="confirmReschedule()">Reagendar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CANCELAR CITA MODAL ── -->
+<div class="ficha-modal" id="cancelar-modal">
+  <div class="ficha-mbox" style="max-width:480px">
+    <div class="ficha-mhead">
+      <div class="ficha-mtitle">
+        🗑️ Cancelar cita
+        <small><span class="cc-pat-name" id="cn-pat-name">Paciente</span> · <span id="cn-pat-fecha">—</span></small>
+      </div>
+      <button class="ficha-mclose" onclick="closeCancel()" title="Cerrar">&times;</button>
+    </div>
+    <div class="ficha-mbody">
+      <div class="cn-warn">
+        Al confirmar, la cita se elimina y <b>el horario queda disponible</b> para que otro paciente lo agende. Cal.com envía un correo al paciente avisando la cancelación.
+      </div>
+      <div class="cc-field">
+        <label class="cc-label" for="cn-reason">Motivo (opcional)
+          <small>Se incluye en el correo que recibe el paciente</small>
+        </label>
+        <input type="text" class="cc-input" id="cn-reason" placeholder="Ej: Tuve un imprevisto, conversamos por WhatsApp">
+      </div>
+      <div class="cc-actions">
+        <button type="button" class="cc-btn cc-btn-secondary" onclick="closeCancel()">Mejor no</button>
+        <button type="button" class="cc-btn cc-btn-danger" id="cn-confirm" onclick="confirmCancel()">Sí, cancelar cita</button>
       </div>
     </div>
   </div>

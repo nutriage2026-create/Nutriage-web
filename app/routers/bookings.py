@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from app.services.calcom import get_bookings, reschedule_booking
+from app.services.calcom import get_bookings, reschedule_booking, cancel_booking
 from app.services.auth import require_auth
 
 bp = Blueprint("bookings", __name__, url_prefix="/bookings")
@@ -57,6 +57,22 @@ def reschedule(uid):
         return jsonify({"error": "Se requiere 'start' (ISO-8601)"}), 400
     try:
         result = reschedule_booking(uid=uid, new_start=new_start, reason=data.get("reason", ""))
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 502
+
+
+@bp.post("/<uid>/cancel")
+@require_auth
+def cancel(uid):
+    """
+    Cancela una cita. Cal.com libera el slot automaticamente, asi que vuelve
+    a estar disponible en /availability/slots para nuevas reservas.
+    Body JSON: reason (str, opcional)
+    """
+    data = request.get_json(silent=True) or {}
+    try:
+        result = cancel_booking(uid=uid, reason=data.get("reason", ""))
         return jsonify(result)
     except Exception as e:
         return jsonify({"error": str(e)}), 502

@@ -95,3 +95,18 @@ def reschedule_booking(uid: str, new_start: str, reason: str = "") -> dict:
         if not r.is_success:
             raise Exception(f"Cal.com {r.status_code}: {r.text[:400]}")
         return r.json()
+
+
+def cancel_booking(uid: str, reason: str = "") -> dict:
+    """
+    Cancela una cita existente. Cal.com libera automaticamente el slot,
+    asi que vuelve a estar disponible para nuevas reservas.
+    """
+    payload = {}
+    if reason:
+        payload["cancellationReason"] = reason
+    with httpx.Client(timeout=15) as c:
+        r = c.post(f"{BASE}/bookings/{uid}/cancel", headers=_headers(), json=payload)
+        if not r.is_success:
+            raise Exception(f"Cal.com {r.status_code}: {r.text[:400]}")
+        return r.json()
