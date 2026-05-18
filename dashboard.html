@@ -197,6 +197,8 @@ tr:hover td{background:var(--g5)}
 .ficha-mbody{padding:1.2rem 1.4rem 1.6rem}
 .ficha-mbody pre{background:var(--g5);border:1px solid var(--g4);border-radius:var(--r);padding:1rem;font-family:'Nunito',sans-serif;font-size:.84rem;color:var(--g1);white-space:pre-wrap;word-wrap:break-word;line-height:1.6}
 .ficha-empty{padding:1.5rem;text-align:center;color:var(--g3);font-size:.85rem;background:var(--g5);border-radius:var(--r);border:1px dashed var(--g4)}
+.ficha-chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.9rem}
+.ficha-chip{display:inline-flex;align-items:center;gap:.3rem;background:var(--p5);color:var(--p1);border:1px solid var(--p4);font-size:.78rem;font-weight:700;padding:.32rem .65rem;border-radius:20px}
 .ficha-row-btn{border:1px solid var(--p4);background:var(--p5);color:var(--p2);font-family:'Nunito',sans-serif;font-size:.7rem;font-weight:700;padding:.28rem .7rem;border-radius:6px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .ficha-row-btn:hover{background:var(--p2);color:#fff;border-color:var(--p2)}
 .row-actions{display:inline-flex;gap:.35rem;flex-wrap:wrap;justify-content:center}
@@ -1853,6 +1855,38 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 
 // ── FICHA CLÍNICA MODAL ─────────────────────────────────────────
+// Extrae los campos de la ficha desde el texto plano que guarda el lead en Notion.
+// Reconoce viñetas tipo "• Edad: 34 años" sin importar saltos/espacios.
+function parseFichaFromNotes(notes){
+  if(!notes || !/FICHA CLÍNICA/i.test(notes)) return null;
+  const grab = (label) => {
+    const re = new RegExp('[•\\-*]?\\s*' + label + '\\s*:\\s*([^\\n\\r]+)', 'i');
+    const m = notes.match(re);
+    return m ? m[1].trim() : '';
+  };
+  const edadRaw = grab('Edad').replace(/años?/i,'').trim();
+  let tallaM = '', tallaCm = '';
+  const tallaTxt = grab('Talla');
+  const tm = tallaTxt.match(/(\d+)\s*m/i);
+  const tc = tallaTxt.match(/(\d+)\s*cm/i);
+  if(tm) tallaM = tm[1];
+  if(tc) tallaCm = tc[1];
+  let reg24h = '';
+  const reg = notes.match(/──\s*Recordatorio 24 horas\s*──\s*([\s\S]+?)(?:\n──|$)/i);
+  if(reg) reg24h = reg[1].trim();
+  return {
+    edad: edadRaw,
+    genero: grab('Género') || grab('Genero'),
+    peso: (grab('Peso').match(/[\d.,]+/) || [''])[0],
+    tallaM, tallaCm,
+    actividad: grab('Actividad física') || grab('Actividad fisica'),
+    enfermedades: grab('Enfermedades'),
+    operaciones: grab('Operaciones previas') || grab('Operaciones'),
+    intolerancias: grab('Intolerancias'),
+    reg24h,
+  };
+}
+
 function openFicha(key){
   let b = null, lead = null;
   if(typeof key === 'number'){
@@ -1880,10 +1914,15 @@ function openFicha(key){
   }
   document.getElementById('ficha-mtitle').innerHTML = cab;
 
-  const ficha = (b && (b.ficha || b.metadata?.ficha)) || null;
+  let ficha = (b && (b.ficha || b.metadata?.ficha)) || null;
   let notes = (b && (b.notes || b.description || b.additionalNotes)) || '';
   if((!notes || !/FICHA CLÍNICA/i.test(notes)) && lead && lead.notas){
     notes = lead.notas;
+  }
+  // Si no llega ficha estructurada, intentar reconstruirla desde las notas.
+  if(!ficha){
+    const parsed = parseFichaFromNotes(notes);
+    if(parsed) ficha = parsed;
   }
   const body = document.getElementById('ficha-mbody');
 
@@ -1891,8 +1930,16 @@ function openFicha(key){
     const talla = ficha.tallaM && ficha.tallaCm
       ? `${ficha.tallaM} m ${ficha.tallaCm} cm`
       : (ficha.tallaM ? `${ficha.tallaM} m` : (ficha.tallaCm ? `${ficha.tallaCm} cm` : '—'));
+    const generoIco = ficha.genero === 'Femenino' ? '♀️' : (ficha.genero === 'Masculino' ? '♂️' : '');
+    const chips = [];
+    if(ficha.edad)   chips.push(`<span class="ficha-chip">👤 ${ficha.edad} años</span>`);
+    if(ficha.genero) chips.push(`<span class="ficha-chip">${generoIco} ${ficha.genero}</span>`);
+    const chipsHtml = chips.length ? `<div class="ficha-chips">${chips.join('')}</div>` : '';
     body.innerHTML = `
+      ${chipsHtml}
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem">
+        <div><div style="font-size:.68rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.5px">Edad</div><div style="font-size:.95rem;font-weight:700;color:var(--g1);margin-top:.2rem">${ficha.edad ? ficha.edad+' años' : '—'}</div></div>
+        <div><div style="font-size:.68rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.5px">Género</div><div style="font-size:.95rem;font-weight:700;color:var(--g1);margin-top:.2rem">${ficha.genero || '—'}</div></div>
         <div><div style="font-size:.68rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.5px">Peso</div><div style="font-size:.95rem;font-weight:700;color:var(--g1);margin-top:.2rem">${ficha.peso || '—'} kg</div></div>
         <div><div style="font-size:.68rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.5px">Talla</div><div style="font-size:.95rem;font-weight:700;color:var(--g1);margin-top:.2rem">${talla}</div></div>
         <div style="grid-column:1/-1"><div style="font-size:.68rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.5px">Actividad física</div><div style="font-size:.9rem;font-weight:600;color:var(--g1);margin-top:.2rem">${ficha.actividad || '—'}</div></div>
