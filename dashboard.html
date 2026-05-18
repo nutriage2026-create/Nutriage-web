@@ -389,7 +389,26 @@ tr:hover td{background:var(--g5)}
 .status-dot.err{background:#ef4444}
 
 /* ── RESPONSIVE ── */
+/* Notebook estandar (~1366px o menos): apilamos el editor semanal sobre el
+   calendario para que ambos respiren, achicamos sidebar y compactamos KPIs. */
+@media(max-width:1400px){
+  :root{--sidebar-w:200px}
+  .content{padding:1.25rem 1.4rem}
+  .sched-grid{grid-template-columns:1fr}
+  .grid-3{grid-template-columns:1fr}
+  .kpi-grid{gap:.7rem}
+  .kpi-value{font-size:1.75rem}
+  .kpi-card{padding:1rem 1.1rem}
+  .topbar{padding:.75rem 1.4rem}
+  th,td{padding:.6rem .8rem}
+}
+@media(max-width:1180px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .kpi-grid-3{grid-template-columns:repeat(2,1fr)}
+  .grid-2{grid-template-columns:1fr}
+}
 @media(max-width:900px){
+  :root{--sidebar-w:200px}
   .kpi-grid{grid-template-columns:1fr 1fr}
   .grid-2,.grid-3{grid-template-columns:1fr}
   .sched-grid{grid-template-columns:1fr}
