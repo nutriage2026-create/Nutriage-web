@@ -6,6 +6,22 @@ from app.services.auth import generate_token, require_auth
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 
+@bp.get("/notify-config")
+@require_auth
+def notify_config():
+    """
+    Devuelve si los avisos de nueva reserva estan configurados.
+    Solo lectura — la edicion se hace en las env vars de Render.
+    """
+    emails = settings.NUTRICIONISTA_EMAILS
+    return jsonify({
+        "emails":         emails,
+        "whatsapp":       settings.NUTRICIONISTA_WHATSAPP or "",
+        "whatsapp_ready": bool(settings.NUTRICIONISTA_WHATSAPP and settings.CALLMEBOT_API_KEY),
+        "email_ready":    bool(emails and settings.GMAIL_USER and settings.GMAIL_APP_PASSWORD),
+    })
+
+
 @bp.post("/login")
 def login():
     data = request.get_json(silent=True) or {}

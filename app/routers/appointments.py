@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app.services.calcom import create_booking
 from app.services.notion import create_lead, save_agent_history
+from app.services.notifications import notify_nueva_cita
 
 bp = Blueprint("appointments", __name__, url_prefix="/appointments")
 
@@ -71,6 +72,21 @@ def book_appointment():
         )
     except Exception:
         pass  # historial no debe bloquear la respuesta
+
+    # 4. Notificar a la nutricionista (correo + WhatsApp). No bloquea la respuesta.
+    try:
+        notify_nueva_cita({
+            "nombre":    data["name"],
+            "email":     data["email"],
+            "telefono":  data.get("telefono", ""),
+            "start":     data["start"],
+            "tipo":      "Primera consulta" if data.get("ficha") else "Seguimiento",
+            "objetivo":  data.get("objetivo", ""),
+            "video_url": booking_url,
+            "ficha":     data.get("ficha") or {},
+        })
+    except Exception as e:
+        print(f"[appointments] notificacion fallo: {e}")
 
     return jsonify({
         "booking": {

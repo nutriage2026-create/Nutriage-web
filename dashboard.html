@@ -55,6 +55,16 @@ body{font-family:'Nunito',sans-serif;background:var(--g5);color:var(--g1);min-he
 .sb-urole{font-size:.66rem;color:rgba(255,255,255,.45)}
 .sb-logout{display:flex;align-items:center;gap:.4rem;padding:.45rem .6rem;border-radius:var(--r);font-size:.75rem;color:rgba(255,255,255,.45);cursor:pointer;transition:color .2s;background:none;border:none;font-family:'Nunito',sans-serif;margin-top:.25rem;width:100%}
 .sb-logout:hover{color:rgba(255,255,255,.8)}
+.sb-notify{margin:.6rem .8rem;padding:.7rem .85rem;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:var(--r)}
+.sb-notify-ttl{font-size:.66rem;font-weight:800;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:.35rem;margin-bottom:.4rem}
+.sb-notify-row{display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:rgba(255,255,255,.85);margin-bottom:.25rem;line-height:1.3;word-break:break-all}
+.sb-notify-row:last-child{margin-bottom:0}
+.sb-notify-ico{flex-shrink:0;font-size:.85rem;width:14px;text-align:center}
+.sb-notify-state{font-size:.6rem;font-weight:800;padding:1px 6px;border-radius:8px;margin-left:auto}
+.sb-notify-state.ok{background:rgba(74,140,84,.35);color:#bdebc4}
+.sb-notify-state.off{background:rgba(239,68,68,.3);color:#fecaca}
+.sb-notify-edit{display:block;margin-top:.5rem;font-size:.66rem;font-weight:700;color:rgba(255,255,255,.55);text-decoration:none;text-align:center;padding:.3rem;border-radius:6px;border:1px dashed rgba(255,255,255,.18);transition:all .2s}
+.sb-notify-edit:hover{background:rgba(255,255,255,.08);color:#fff}
 
 /* ── MAIN ── */
 .main{margin-left:var(--sidebar-w);flex:1;min-height:100vh;display:flex;flex-direction:column}
@@ -472,6 +482,21 @@ tr:hover td{background:var(--g5)}
     <button class="sb-item" onclick="showSection('disponibilidad',this)">
       <span class="ico">🕐</span> Disponibilidad
     </button>
+
+    <div class="sb-notify" id="sb-notify-box">
+      <div class="sb-notify-ttl">🔔 Avisos al agendar</div>
+      <div class="sb-notify-row" id="sb-notify-email-row">
+        <span class="sb-notify-ico">✉️</span>
+        <span id="sb-notify-email">Cargando...</span>
+        <span class="sb-notify-state off" id="sb-notify-email-state">off</span>
+      </div>
+      <div class="sb-notify-row" id="sb-notify-wa-row">
+        <span class="sb-notify-ico">💬</span>
+        <span id="sb-notify-wa">Cargando...</span>
+        <span class="sb-notify-state off" id="sb-notify-wa-state">off</span>
+      </div>
+      <a class="sb-notify-edit" href="https://dashboard.render.com" target="_blank" rel="noopener">Editar en Render →</a>
+    </div>
 
     <div class="sb-section">Sistema</div>
     <button class="sb-item" onclick="showSection('historial',this)">
@@ -932,7 +957,7 @@ async function loadAll(){
     else { sbBk.style.display = 'none'; }
   }
 
-  await Promise.all([loadLeads(), loadUpcomingBookings()]);
+  await Promise.all([loadLeads(), loadUpcomingBookings(), loadNotifyConfig()]);
 
   // Update last-updated timestamp
   lastUpdated = Date.now();
@@ -945,6 +970,26 @@ async function loadAll(){
 function scheduleAutoRefresh(){
   if(autoRefreshTimer) clearTimeout(autoRefreshTimer);
   autoRefreshTimer = setTimeout(()=>{ loadAll(); }, 5 * 60 * 1000); // 5 min
+}
+
+// ── AVISOS AL AGENDAR (sidebar) ──────────────────────────────────
+async function loadNotifyConfig(){
+  const d = await apiFetch('/auth/notify-config');
+  if(!d) return;
+  const emEl    = document.getElementById('sb-notify-email');
+  const emState = document.getElementById('sb-notify-email-state');
+  const waEl    = document.getElementById('sb-notify-wa');
+  const waState = document.getElementById('sb-notify-wa-state');
+  if(emEl){
+    emEl.textContent = (d.emails && d.emails.length) ? d.emails.join(', ') : 'No configurado';
+    emState.textContent = d.email_ready ? 'ok' : 'off';
+    emState.className = 'sb-notify-state ' + (d.email_ready ? 'ok' : 'off');
+  }
+  if(waEl){
+    waEl.textContent = d.whatsapp ? `+${d.whatsapp}` : 'No configurado';
+    waState.textContent = d.whatsapp_ready ? 'ok' : 'off';
+    waState.className = 'sb-notify-state ' + (d.whatsapp_ready ? 'ok' : 'off');
+  }
 }
 
 // ── PARSE CITA DESDE NOTAS ───────────────────────────────────────

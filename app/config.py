@@ -48,5 +48,19 @@ class Settings:
     @property
     def TZ(self):                       return _get("TZ", "America/Santiago")
 
+    # Notificaciones a la nutricionista cuando un paciente reserva.
+    # NUTRICIONISTA_EMAILS: lista separada por coma. Ej:
+    #   "nutricionistafernandaugarte@gmail.com,nutriage2026@gmail.com"
+    # NUTRICIONISTA_WHATSAPP: numero con codigo pais sin "+", ej "56971246200"
+    # CALLMEBOT_API_KEY: clave que entrega callmebot tras registrar el numero.
+    @property
+    def NUTRICIONISTA_EMAILS(self):
+        raw = _get("NUTRICIONISTA_EMAILS")
+        return [e.strip() for e in raw.split(",") if e.strip()]
+    @property
+    def NUTRICIONISTA_WHATSAPP(self):    return _get("NUTRICIONISTA_WHATSAPP")
+    @property
+    def CALLMEBOT_API_KEY(self):         return _get("CALLMEBOT_API_KEY")
+
 
 settings = Settings()
