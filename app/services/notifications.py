@@ -143,23 +143,20 @@ def notify_nueva_cita(payload: dict) -> None:
         print(f"[notifications] correo nueva_cita fallo: {e}")
 
     # ── WhatsApp texto plano ──────────────────────────────────────
+    # Importante: SOLO datos basicos (nombre + fecha + tipo + link sala).
+    # No mandamos telefono, objetivo ni ficha clinica por WhatsApp porque
+    # CallMeBot no tiene contrato formal de tratamiento de datos y la
+    # Ley 19.628/20.584 trata esa info como dato sensible de salud.
+    # La ficha completa va solo por correo (Gmail SMTP con compliance).
     wa_lines = [
         f"🥗 *Nueva reserva NutriAge*",
         f"👤 {nombre}",
         f"📅 {fecha}",
         f"🩺 {tipo}",
     ]
-    if objetivo and objetivo != "—":
-        wa_lines.append(f"🎯 {objetivo}")
-    if tel and tel != "—":
-        wa_lines.append(f"📞 {tel}")
-    if ficha.get("edad") or ficha.get("genero"):
-        partes = []
-        if ficha.get("edad"):   partes.append(f"{ficha['edad']} años")
-        if ficha.get("genero"): partes.append(ficha["genero"])
-        wa_lines.append("👥 " + " · ".join(partes))
     if video:
         wa_lines.append(f"🎥 {video}")
+    wa_lines.append("📋 Revisa la ficha completa en tu dashboard")
     try:
         send_whatsapp_callmebot("\n".join(wa_lines))
     except Exception as e:
