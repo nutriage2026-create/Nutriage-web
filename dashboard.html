@@ -222,6 +222,47 @@ tr:hover td{background:var(--g5)}
 .ficha-empty{padding:1.5rem;text-align:center;color:var(--g3);font-size:.85rem;background:var(--g5);border-radius:var(--r);border:1px dashed var(--g4)}
 .ficha-chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.9rem}
 .ficha-chip{display:inline-flex;align-items:center;gap:.3rem;background:var(--p5);color:var(--p1);border:1px solid var(--p4);font-size:.78rem;font-weight:700;padding:.32rem .65rem;border-radius:20px}
+/* ── FICHA MEJORADA .fc- ── */
+.fc-hero{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem}
+.fc-hero-chip{display:inline-flex;align-items:center;gap:.4rem;font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:800;padding:.45rem .9rem;border-radius:24px;border:1.5px solid transparent}
+.fc-hero-chip.demo{background:var(--p5);color:var(--p1);border-color:var(--p4)}
+.fc-hero-chip.imc-normal{background:#dcfce7;color:#166534;border-color:#86efac}
+.fc-hero-chip.imc-bajo{background:#fef3c7;color:#92400e;border-color:#fcd34d}
+.fc-hero-chip.imc-sobre{background:#fef3c7;color:#92400e;border-color:#fcd34d}
+.fc-hero-chip.imc-ob1,.fc-hero-chip.imc-ob2{background:#fee2e2;color:#991b1b;border-color:#fca5a5}
+.fc-hero-chip.imc-ob3{background:#fecaca;color:#7f1d1d;border-color:#f87171}
+.fc-hero-chip.obj{background:var(--s5);color:var(--s1);border-color:var(--s3)}
+.fc-hero-chip.act{background:#e0f2fe;color:#0369a1;border-color:#7dd3fc}
+.fc-flags{margin-bottom:1rem;border-radius:var(--r);padding:.75rem 1rem;display:flex;flex-direction:column;gap:.4rem}
+.fc-flags.danger{background:#fef2f2;border:1.5px solid #fca5a5}
+.fc-flags.warn{background:#fffbeb;border:1.5px solid #fcd34d}
+.fc-flags.both{background:#fef2f2;border:1.5px solid #fca5a5}
+.fc-flag-item{font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:700;color:#374151;display:flex;align-items:flex-start;gap:.4rem}
+.fc-flags-title{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#9ca3af;margin-bottom:.3rem}
+.fc-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem}
+@media(max-width:500px){.fc-grid{grid-template-columns:1fr}}
+.fc-card{border-radius:var(--r);padding:1rem;border:1px solid var(--g4)}
+.fc-card.antro{border-left:3px solid var(--p3);background:var(--g5)}
+.fc-card.med{border-left:3px solid #dc2626;background:#fef2f2}
+.fc-card.vida{border-left:3px solid #0ea5e9;background:#f0f9ff}
+.fc-card.reg24{border-left:3px solid var(--s2);background:#f0fdf4;grid-column:1/-1}
+.fc-card-title{font-family:'Nunito',sans-serif;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--g3);margin-bottom:.6rem;display:flex;align-items:center;gap:.3rem}
+.fc-row{margin-bottom:.45rem}
+.fc-label{font-size:.65rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.4px}
+.fc-val{font-size:.9rem;font-weight:700;color:var(--g1);margin-top:.1rem}
+.fc-val.muted{font-size:.82rem;font-weight:500;color:var(--g3);font-style:italic}
+.fc-imc-bar{height:6px;border-radius:3px;margin-top:.35rem;background:var(--g4);position:relative;overflow:hidden}
+.fc-imc-fill{height:100%;border-radius:3px;transition:width .4s}
+.fc-act-bar{display:flex;gap:3px;margin-top:.4rem}
+.fc-act-dot{width:10px;height:10px;border-radius:50%;background:var(--g4)}
+.fc-act-dot.on{background:#0ea5e9}
+.fc-timeline{display:flex;flex-direction:column;gap:0}
+.fc-tl-item{display:flex;gap:.7rem;position:relative}
+.fc-tl-item:not(:last-child)::after{content:'';position:absolute;left:30px;top:22px;bottom:-4px;width:2px;background:var(--s4)}
+.fc-tl-dot{width:20px;height:20px;border-radius:50%;background:var(--s3);border:2px solid var(--s2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.fc-tl-time{font-family:'Nunito',sans-serif;font-size:.72rem;font-weight:800;color:var(--s1);min-width:38px;margin-top:3px}
+.fc-tl-text{font-size:.82rem;color:var(--g1);line-height:1.5;padding-bottom:.6rem}
+.fc-plain-reg{font-family:'Nunito',sans-serif;font-size:.84rem;color:var(--g1);white-space:pre-wrap;word-wrap:break-word;line-height:1.6}
 .ficha-row-btn{border:1px solid var(--p4);background:var(--p5);color:var(--p2);font-family:'Nunito',sans-serif;font-size:.7rem;font-weight:700;padding:.28rem .7rem;border-radius:6px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .ficha-row-btn:hover{background:var(--p2);color:#fff;border-color:var(--p2)}
 .row-actions{display:inline-flex;gap:.35rem;flex-wrap:wrap;justify-content:center}
@@ -2228,28 +2269,109 @@ function openFicha(key){
   const body = document.getElementById('ficha-mbody');
 
   if(ficha){
-    const talla = ficha.tallaM && ficha.tallaCm
-      ? `${ficha.tallaM} m ${ficha.tallaCm} cm`
-      : (ficha.tallaM ? `${ficha.tallaM} m` : (ficha.tallaCm ? `${ficha.tallaCm} cm` : '—'));
+    // ── IMC ──
+    const tallaM = parseFloat(ficha.tallaM) || 0;
+    const tallaCm = parseFloat(ficha.tallaCm) || 0;
+    const tallaTotal = tallaM + tallaCm / 100;
+    const peso = parseFloat(ficha.peso) || 0;
+    let imcVal = null, imcLabel = '', imcClass = '', imcPct = 0;
+    if(peso > 0 && tallaTotal > 0){
+      imcVal = peso / (tallaTotal * tallaTotal);
+      if(imcVal < 18.5){ imcLabel='Bajo peso'; imcClass='imc-bajo'; imcPct=Math.min(imcVal/40*100,100); }
+      else if(imcVal < 25){ imcLabel='Normal'; imcClass='imc-normal'; imcPct=Math.min(imcVal/40*100,100); }
+      else if(imcVal < 30){ imcLabel='Sobrepeso'; imcClass='imc-sobre'; imcPct=Math.min(imcVal/40*100,100); }
+      else if(imcVal < 35){ imcLabel='Obesidad I'; imcClass='imc-ob1'; imcPct=Math.min(imcVal/40*100,100); }
+      else if(imcVal < 40){ imcLabel='Obesidad II'; imcClass='imc-ob2'; imcPct=Math.min(imcVal/40*100,100); }
+      else { imcLabel='Obesidad III'; imcClass='imc-ob3'; imcPct=100; }
+    }
+    const imcFillColor = imcClass==='imc-normal'?'#22c55e': (imcClass==='imc-ob3'?'#991b1b': (['imc-ob1','imc-ob2'].includes(imcClass)?'#dc2626':'#f59e0b'));
+
+    // ── HERO CHIPS ──
     const generoIco = ficha.genero === 'Femenino' ? '♀️' : (ficha.genero === 'Masculino' ? '♂️' : '');
-    const chips = [];
-    if(ficha.edad)   chips.push(`<span class="ficha-chip">👤 ${ficha.edad} años</span>`);
-    if(ficha.genero) chips.push(`<span class="ficha-chip">${generoIco} ${ficha.genero}</span>`);
-    const chipsHtml = chips.length ? `<div class="ficha-chips">${chips.join('')}</div>` : '';
+    const heroChips = [];
+    if(ficha.edad || ficha.genero){
+      const parts = [];
+      if(generoIco) parts.push(generoIco);
+      if(ficha.edad) parts.push(`${ficha.edad} años`);
+      if(ficha.genero) parts.push(ficha.genero);
+      heroChips.push(`<span class="fc-hero-chip demo">${parts.join(' · ')}</span>`);
+    }
+    if(imcVal !== null){
+      heroChips.push(`<span class="fc-hero-chip ${imcClass}">⚖️ IMC ${imcVal.toFixed(1)} · ${imcLabel}</span>`);
+    }
+    if(b && b.objetivo){ heroChips.push(`<span class="fc-hero-chip obj">🎯 ${b.objetivo}</span>`); }
+    if(ficha.actividad){ heroChips.push(`<span class="fc-hero-chip act">🏃 ${ficha.actividad}</span>`); }
+    const heroHtml = heroChips.length ? `<div class="fc-hero">${heroChips.join('')}</div>` : '';
+
+    // ── BANDERAS ROJAS ──
+    const textoCombinado = [ficha.enfermedades||'', ficha.operaciones||'', ficha.intolerancias||'', ficha.reg24h||''].join(' ').toLowerCase();
+    const flags = [];
+    const kCritico = [{rx:/diabet/,ico:'🚨',txt:'Diabetes'},{rx:/hipertens/,ico:'🚨',txt:'Hipertensión'},{rx:/tiroid/,ico:'🚨',txt:'Tiroides'},{rx:/colesterol/,ico:'🚨',txt:'Colesterol'},{rx:/cardio/,ico:'🚨',txt:'Cardiopatía'},{rx:/ri[ñn]on|renal/,ico:'🚨',txt:'Enfermedad renal'},{rx:/c[áa]ncer/,ico:'🚨',txt:'Cáncer'},{rx:/bypass/,ico:'🚨',txt:'Bypass'},{rx:/manga g[áa]strica/,ico:'🚨',txt:'Manga gástrica'},{rx:/epilep/,ico:'🚨',txt:'Epilepsia'},{rx:/vih/,ico:'🚨',txt:'VIH'},{rx:/lupus/,ico:'🚨',txt:'Lupus'}];
+    const kAlerta = [{rx:/alergi/,ico:'⚠️',txt:'Alergia'},{rx:/intoler/,ico:'⚠️',txt:'Intolerancia'},{rx:/celiac/,ico:'⚠️',txt:'Celiaquía'},{rx:/gluten/,ico:'⚠️',txt:'Gluten'},{rx:/lactosa/,ico:'⚠️',txt:'Lactosa'}];
+    const kEmb = [{rx:/embaraz/,ico:'🤰',txt:'Embarazo/lactancia'},{rx:/lactanc/,ico:'🤰',txt:'Lactancia'},{rx:/gestac/,ico:'🤰',txt:'Gestación'}];
+    const kMed = [{rx:/medicament/,ico:'💊',txt:'Medicamentos'},{rx:/pastilla/,ico:'💊',txt:'Pastillas'},{rx:/insulin/,ico:'💊',txt:'Insulina'}];
+    let hasCritico = false;
+    [...kCritico,...kAlerta,...kEmb,...kMed].forEach(k=>{
+      if(k.rx.test(textoCombinado) && !flags.find(f=>f.txt===k.txt)){
+        flags.push(k);
+        if(k.ico==='🚨') hasCritico = true;
+      }
+    });
+    let flagsHtml = '';
+    if(flags.length){
+      const cls = hasCritico ? 'both' : 'warn';
+      flagsHtml = `<div class="fc-flags ${cls}"><div class="fc-flags-title">Alertas clínicas detectadas</div>${flags.map(f=>`<div class="fc-flag-item">${f.ico} ${f.txt}</div>`).join('')}</div>`;
+    }
+
+    // ── TALLA display ──
+    const tallaDisp = tallaM && tallaCm ? `${tallaM} m ${tallaCm} cm` : (tallaM ? `${tallaM} m` : (tallaCm ? `${tallaCm} cm` : '—'));
+
+    // ── BARRA ACTIVIDAD ──
+    const actLevels = ['Sedentario','Liviano','Moderado','Intenso','Muy intenso'];
+    const actIdx = actLevels.findIndex(a => (ficha.actividad||'').toLowerCase().includes(a.toLowerCase()));
+    const actDots = actLevels.map((_,i)=>`<div class="fc-act-dot${actIdx>=0&&i<=actIdx?' on':''}"></div>`).join('');
+
+    // ── RECORDATORIO 24H: timeline o plain ──
+    const reg = (ficha.reg24h||'').trim();
+    let reg24Html = '';
+    if(reg){
+      const lines = reg.split('\n');
+      const tlLines = lines.map(l=>{ const m=l.match(/^(\d{1,2}[:.h]\d{0,2})\s*(.*)/); return m?{time:m[1].replace('h',':').replace(':','h').replace(/h$/,'h00'),text:m[2]}:null; }).filter(Boolean);
+      if(tlLines.length >= 2){
+        reg24Html = `<div class="fc-timeline">${tlLines.map(item=>`<div class="fc-tl-item"><div class="fc-tl-dot"></div><div class="fc-tl-time">${item.time}</div><div class="fc-tl-text">🍽️ ${item.text}</div></div>`).join('')}</div>`;
+      } else {
+        reg24Html = `<div class="fc-plain-reg">${reg.replace(/</g,'&lt;')}</div>`;
+      }
+    } else {
+      reg24Html = `<div class="fc-val muted">No registrado</div>`;
+    }
+
     body.innerHTML = `
-      ${chipsHtml}
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem">
-        <div><div style="font-size:.68rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.5px">Edad</div><div style="font-size:.95rem;font-weight:700;color:var(--g1);margin-top:.2rem">${ficha.edad ? ficha.edad+' años' : '—'}</div></div>
-        <div><div style="font-size:.68rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.5px">Género</div><div style="font-size:.95rem;font-weight:700;color:var(--g1);margin-top:.2rem">${ficha.genero || '—'}</div></div>
-        <div><div style="font-size:.68rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.5px">Peso</div><div style="font-size:.95rem;font-weight:700;color:var(--g1);margin-top:.2rem">${ficha.peso || '—'} kg</div></div>
-        <div><div style="font-size:.68rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.5px">Talla</div><div style="font-size:.95rem;font-weight:700;color:var(--g1);margin-top:.2rem">${talla}</div></div>
-        <div style="grid-column:1/-1"><div style="font-size:.68rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.5px">Actividad física</div><div style="font-size:.9rem;font-weight:600;color:var(--g1);margin-top:.2rem">${ficha.actividad || '—'}</div></div>
-        <div style="grid-column:1/-1"><div style="font-size:.68rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.5px">Enfermedades</div><div style="font-size:.85rem;color:var(--g1);margin-top:.2rem;line-height:1.5">${ficha.enfermedades || 'Ninguna declarada'}</div></div>
-        <div style="grid-column:1/-1"><div style="font-size:.68rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.5px">Operaciones previas</div><div style="font-size:.85rem;color:var(--g1);margin-top:.2rem;line-height:1.5">${ficha.operaciones || 'Ninguna declarada'}</div></div>
-        <div style="grid-column:1/-1"><div style="font-size:.68rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.5px">Intolerancias</div><div style="font-size:.85rem;color:var(--g1);margin-top:.2rem;line-height:1.5">${ficha.intolerancias || 'Ninguna declarada'}</div></div>
-      </div>
-      <div style="font-size:.68rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem">Recordatorio 24 horas</div>
-      <pre>${(ficha.reg24h || '—').replace(/</g,'&lt;')}</pre>`;
+      ${heroHtml}
+      ${flagsHtml}
+      <div class="fc-grid">
+        <div class="fc-card antro">
+          <div class="fc-card-title">📏 Antropometría</div>
+          <div class="fc-row"><div class="fc-label">Peso</div><div class="fc-val">${peso||'—'} kg</div></div>
+          <div class="fc-row"><div class="fc-label">Talla</div><div class="fc-val">${tallaDisp}</div></div>
+          ${imcVal!==null?`<div class="fc-row"><div class="fc-label">IMC</div><div class="fc-val">${imcVal.toFixed(1)} <span style="font-size:.75rem;font-weight:600;color:${imcFillColor}">${imcLabel}</span></div><div class="fc-imc-bar"><div class="fc-imc-fill" style="width:${imcPct.toFixed(0)}%;background:${imcFillColor}"></div></div></div>`:''}
+        </div>
+        <div class="fc-card med">
+          <div class="fc-card-title">🩺 Antecedentes médicos</div>
+          <div class="fc-row"><div class="fc-label">🦠 Enfermedades</div><div class="fc-val${!ficha.enfermedades?' muted':''}">${ficha.enfermedades||'Ninguna declarada'}</div></div>
+          <div class="fc-row"><div class="fc-label">🔧 Operaciones</div><div class="fc-val${!ficha.operaciones?' muted':''}">${ficha.operaciones||'Ninguna declarada'}</div></div>
+          <div class="fc-row"><div class="fc-label">🚫 Intolerancias</div><div class="fc-val${!ficha.intolerancias?' muted':''}">${ficha.intolerancias||'Ninguna declarada'}</div></div>
+        </div>
+        <div class="fc-card vida">
+          <div class="fc-card-title">🏃 Estilo de vida</div>
+          <div class="fc-row"><div class="fc-label">Actividad física</div><div class="fc-val">${ficha.actividad||'—'}</div></div>
+          ${ficha.actividad?`<div class="fc-act-bar">${actDots}</div><div style="display:flex;justify-content:space-between;font-size:.6rem;color:var(--g3);margin-top:.2rem"><span>Sedentario</span><span>Intenso</span></div>`:''}
+        </div>
+        <div class="fc-card reg24">
+          <div class="fc-card-title">🍽️ Recordatorio 24 horas</div>
+          ${reg24Html}
+        </div>
+      </div>`;
   } else if(notes && notes.length > 3){
     body.innerHTML = `<pre>${notes.replace(/</g,'&lt;')}</pre>`;
   } else {
