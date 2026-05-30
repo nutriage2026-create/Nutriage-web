@@ -194,12 +194,19 @@ tr:hover td{background:var(--g5)}
 .hist-meta{font-size:.7rem;color:var(--g3);margin-top:.15rem}
 
 /* ── FILTERS BAR ── */
-.filters{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1rem}
+.filters{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.4rem;align-items:center}
+.filters-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.4rem;align-items:center}
+.filters-row:last-child{margin-bottom:1rem}
+.filter-group-label{font-size:.65rem;font-weight:800;color:var(--g3);text-transform:uppercase;letter-spacing:.5px;margin-right:.15rem;flex-shrink:0}
 .filter-btn{padding:.35rem .8rem;border-radius:20px;font-size:.73rem;font-weight:700;border:1.5px solid var(--g4);background:var(--wh);color:var(--g3);cursor:pointer;font-family:'Nunito',sans-serif;transition:all .2s}
 .filter-btn:hover{border-color:var(--p3);color:var(--p2)}
 .filter-btn.on{background:var(--p2);border-color:var(--p2);color:#fff}
+.filter-btn.clear-btn{border-color:var(--g4);background:var(--g5);color:var(--g3);font-size:.7rem}
+.filter-btn.clear-btn:hover{border-color:var(--g3);color:var(--g2);background:var(--g4)}
 .filter-search{padding:.4rem .85rem;border:1.5px solid var(--g4);border-radius:20px;font-family:'Nunito',sans-serif;font-size:.78rem;color:var(--g1);outline:none;width:200px;transition:border .2s}
 .filter-search:focus{border-color:var(--p2)}
+/* ── GROUP HEADER ROW in leads table ── */
+.leads-month-row td{background:var(--p6);padding:.45rem 1rem;font-size:.72rem;font-weight:800;color:var(--p1);letter-spacing:.3px;border-bottom:2px solid var(--p4);text-transform:uppercase}
 
 /* ── FICHA MODAL ── */
 .ficha-modal{position:fixed;inset:0;background:rgba(15,23,42,.6);display:none;align-items:center;justify-content:center;z-index:200;padding:1rem}
@@ -220,6 +227,28 @@ tr:hover td{background:var(--g5)}
 .row-actions{display:inline-flex;gap:.35rem;flex-wrap:wrap;justify-content:center}
 .cerrar-btn{background:var(--s5);border-color:var(--s3);color:var(--s1)}
 .cerrar-btn:hover{background:var(--s2);color:#fff;border-color:var(--s2)}
+
+/* ── SALA VIRTUAL ── */
+.sala-modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.6);display:none;align-items:center;justify-content:center;z-index:300;padding:1rem}
+.sala-modal-overlay.on{display:flex}
+.sala-mbox{background:var(--wh);border-radius:var(--rl);max-width:520px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.3)}
+.sala-mhead{padding:1.1rem 1.4rem;border-bottom:1px solid var(--g4);display:flex;align-items:center;justify-content:space-between;background:linear-gradient(135deg,var(--p5),#e8f5e9);border-radius:var(--rl) var(--rl) 0 0}
+.sala-mtitle{font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:600;color:var(--p1)}
+.sala-mtitle small{display:block;font-family:'Nunito',sans-serif;font-size:.75rem;font-weight:600;color:var(--g3);margin-top:.1rem}
+.sala-mclose{background:none;border:none;font-size:1.8rem;color:var(--g3);cursor:pointer;padding:0 .4rem;line-height:1}
+.sala-mclose:hover{color:var(--p1)}
+.sala-mbody{padding:1.2rem 1.4rem 1.6rem}
+.sala-url-box{display:flex;align-items:center;gap:.5rem;background:var(--p6);border:1.5px solid var(--p4);border-radius:var(--r);padding:.6rem .9rem;margin-bottom:1rem;flex-wrap:wrap}
+.sala-url-text{flex:1;font-size:.82rem;font-weight:700;color:var(--p1);word-break:break-all;min-width:0}
+.sala-copy-btn{flex-shrink:0;display:inline-flex;align-items:center;gap:.3rem;padding:.4rem .8rem;background:var(--p2);color:#fff;border:none;border-radius:var(--r);font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;transition:background .15s}
+.sala-copy-btn:hover{background:var(--p1)}
+.sala-actions-row{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.75rem}
+.sala-wa-btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.6rem 1rem;background:#25d366;color:#fff;border:none;border-radius:var(--r);font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;text-decoration:none;transition:filter .15s;white-space:nowrap}
+.sala-wa-btn:hover{filter:brightness(1.08)}
+.sala-email-btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.6rem 1rem;background:var(--p2);color:#fff;border:none;border-radius:var(--r);font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;text-decoration:none;transition:filter .15s;white-space:nowrap}
+.sala-email-btn:hover{filter:brightness(1.08)}
+.sala-general-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1.1rem;background:var(--p2);color:#fff;border:none;border-radius:var(--r);font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:700;cursor:pointer;transition:background .15s;white-space:nowrap}
+.sala-general-btn:hover{background:var(--p1)}
 
 /* ── CERRAR CONSULTA FORM ── */
 .cc-field{margin-bottom:1rem}
@@ -406,6 +435,34 @@ tr:hover td{background:var(--g5)}
 .status-dot.warn{background:#f59e0b}
 .status-dot.err{background:#ef4444}
 
+/* ── CRONÓMETRO SALA ── */
+.sala-timer-display{text-align:center;padding:1rem 0 .5rem;border-bottom:1px solid var(--g4);margin-bottom:1rem}
+.sala-timer-num{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:600;color:var(--p1);line-height:1;letter-spacing:.05em}
+.sala-timer-label{font-size:.7rem;font-weight:700;color:var(--g3);text-transform:uppercase;letter-spacing:.5px;margin-top:.25rem}
+.sala-timer-closed{text-align:center;padding:.75rem 0;font-size:.9rem;font-weight:700;color:var(--s1);background:var(--s5);border-radius:var(--r);margin-bottom:.75rem}
+.sala-close-btn{width:100%;padding:.7rem;background:linear-gradient(135deg,#b91c1c,#dc2626);color:#fff;border:none;border-radius:var(--r);font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;margin-bottom:.75rem;display:flex;align-items:center;justify-content:center;gap:.5rem;transition:filter .15s}
+.sala-close-btn:hover{filter:brightness(1.08)}
+.sala-nombre-input{width:100%;padding:.65rem .9rem;border:1.5px solid var(--g4);border-radius:var(--r);font-family:'Nunito',sans-serif;font-size:.9rem;color:var(--g1);outline:none;margin-bottom:.5rem;transition:border .2s}
+.sala-nombre-input:focus{border-color:var(--p2)}
+.sala-nombre-err{font-size:.75rem;color:#dc2626;margin-bottom:.6rem;display:none}
+.sala-crear-confirm-btn{width:100%;padding:.7rem;background:var(--p2);color:#fff;border:none;border-radius:var(--r);font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:700;cursor:pointer;margin-bottom:.5rem;transition:background .15s}
+.sala-crear-confirm-btn:hover{background:var(--p1)}
+.sala-crear-confirm-btn:disabled{background:var(--g4);color:var(--g3);cursor:not-allowed}
+
+/* ── AUTOCOMPLETE SALAS ── */
+.sala-ac-wrap{position:relative;margin-bottom:.5rem}
+.sala-ac-list{position:absolute;top:100%;left:0;right:0;background:var(--wh);border:1.5px solid var(--p4);border-radius:var(--r);box-shadow:0 8px 24px rgba(61,36,89,.12);z-index:500;max-height:220px;overflow-y:auto;margin-top:2px}
+.sala-ac-item{padding:.6rem .9rem;cursor:pointer;border-bottom:1px solid var(--g4);transition:background .12s}
+.sala-ac-item:last-child{border-bottom:none}
+.sala-ac-item:hover,.sala-ac-item.focused{background:var(--p5)}
+.sala-ac-name{font-size:.85rem;font-weight:700;color:var(--g1)}
+.sala-ac-sub{font-size:.72rem;color:var(--g3);margin-top:.1rem}
+.sala-ac-empty{padding:.7rem .9rem;font-size:.8rem;color:var(--g3);font-style:italic}
+
+/* ── SALAS TABLE ── */
+.salas-estado-on{display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;font-weight:700;color:var(--s1);background:var(--s5);border:1px solid var(--s3);padding:.2rem .6rem;border-radius:12px}
+.salas-estado-off{display:inline-flex;align-items:center;gap:.3rem;font-size:.72rem;font-weight:700;color:var(--g3);background:var(--g5);border:1px solid var(--g4);padding:.2rem .6rem;border-radius:12px}
+
 /* ── RESPONSIVE ── */
 /* Notebook estandar (~1366px o menos): apilamos el editor semanal sobre el
    calendario para que ambos respiren, achicamos sidebar y compactamos KPIs. */
@@ -499,6 +556,10 @@ tr:hover td{background:var(--g5)}
     </div>
 
     <div class="sb-section">Sistema</div>
+    <button class="sb-item" onclick="showSection('salas',this)">
+      <span class="ico">📹</span> Salas creadas
+      <span class="sb-badge" id="sb-salas-count">—</span>
+    </button>
     <button class="sb-item" onclick="showSection('historial',this)">
       <span class="ico">🤖</span> Historial IA
     </button>
@@ -542,6 +603,11 @@ tr:hover td{background:var(--g5)}
           <div class="zone-header">
             <h2>Panel de Hoy</h2>
             <p>Prepárate para tus consultas del día</p>
+          </div>
+
+          <!-- Botón general: Crear sala virtual -->
+          <div style="display:flex;justify-content:flex-end;margin-bottom:.75rem">
+            <button class="sala-general-btn" onclick="openCrearSala(null)">📹 Crear sala virtual</button>
           </div>
 
           <!-- Today banner -->
@@ -642,14 +708,30 @@ tr:hover td{background:var(--g5)}
           <h2>CRM · Leads</h2>
           <p>Gestión completa de prospectos</p>
         </div>
+        <!-- Fila 1: estatus + búsqueda -->
         <div class="filters">
-          <button class="filter-btn on" onclick="filterLeads('',this)">Todos</button>
+          <span class="filter-group-label">Estatus:</span>
+          <button class="filter-btn on" id="status-btn-all" onclick="filterLeads('',this)">Todos</button>
           <button class="filter-btn" onclick="filterLeads('Pendiente de contactar',this)">Pendiente</button>
           <button class="filter-btn" onclick="filterLeads('En proceso',this)">En proceso</button>
           <button class="filter-btn" onclick="filterLeads('Cita agendada',this)">Agendados</button>
           <button class="filter-btn" onclick="filterLeads('No contestado',this)">No contestado</button>
           <button class="filter-btn" onclick="filterLeads('Cerrado',this)">Cerrado</button>
           <input class="filter-search" type="text" id="leads-search" placeholder="🔍  Buscar nombre..." oninput="searchLeads()">
+        </div>
+        <!-- Fila 2: edad + género + limpiar -->
+        <div class="filters-row">
+          <span class="filter-group-label">Edad:</span>
+          <button class="filter-btn on" id="age-btn-all" onclick="filterAge('',this)">Todas las edades</button>
+          <button class="filter-btn" onclick="filterAge('18-30',this)">18–30</button>
+          <button class="filter-btn" onclick="filterAge('30-45',this)">30–45</button>
+          <button class="filter-btn" onclick="filterAge('45-60',this)">45–60</button>
+          <button class="filter-btn" onclick="filterAge('60+',this)">60+</button>
+          <span class="filter-group-label" style="margin-left:.5rem">Género:</span>
+          <button class="filter-btn on" id="gender-btn-all" onclick="filterGender('',this)">Todos</button>
+          <button class="filter-btn" onclick="filterGender('Femenino',this)">Femenino</button>
+          <button class="filter-btn" onclick="filterGender('Masculino',this)">Masculino</button>
+          <button class="filter-btn clear-btn" onclick="clearAllFilters()">&#8634; Limpiar filtros</button>
         </div>
         <div class="card">
           <div class="card-body np">
@@ -729,6 +811,17 @@ tr:hover td{background:var(--g5)}
         </div>
       </div>
 
+      <!-- ══ SALAS CREADAS ════════════════════════════════════════ -->
+      <div class="section" id="section-salas">
+        <div class="section-header">
+          <h2>📹 Salas creadas</h2>
+          <p>Todas las salas Jitsi creadas desde el dashboard</p>
+        </div>
+        <div id="salas-libres-wrap">
+          <div class="loading"><div class="spinner"></div>Cargando...</div>
+        </div>
+      </div>
+
       <!-- ══ HISTORIAL IA ══════════════════════════════════════════ -->
       <div class="section" id="section-historial">
         <div class="section-header">
@@ -750,12 +843,13 @@ tr:hover td{background:var(--g5)}
 <div id="toast-container"></div>
 
 <script>
-const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
-  ? 'http://localhost:8000'
-  : 'https://nutriage-api.onrender.com';
+const IS_LOCAL = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:';
+const API = IS_LOCAL ? 'http://localhost:8000' : 'https://nutriage-api.onrender.com';
 const TOKEN_KEY = 'nutriage_token';
-let allLeads      = [];
-let currentFilter = '';
+let allLeads        = [];
+let currentFilter   = '';
+let currentAgeRange = '';
+let currentGender   = '';
 let bookingsMap   = {};   // bookingId(str) → {videoUrl, nombre, start}
 let leadsByEmail  = {};   // email(lower) → lead
 let leadsByBookingId = {}; // bookingId(str) → lead
@@ -832,7 +926,7 @@ async function tryRestoreSession(){
 }
 
 // ── NAVIGATION ──────────────────────────────────────────────────
-const titles = {overview:'Panel Principal',leads:'CRM · Leads',citas:'Citas',disponibilidad:'Disponibilidad',historial:'Historial IA'};
+const titles = {overview:'Panel Principal',leads:'CRM · Leads',citas:'Citas',disponibilidad:'Disponibilidad',salas:'Salas creadas',historial:'Historial IA'};
 function showSection(id, btn){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('on'));
@@ -843,6 +937,7 @@ function showSection(id, btn){
   if(id==='historial') loadHistorial();
   if(id==='citas') loadBookings();
   if(id==='disponibilidad') loadDisponibilidad();
+  if(id==='salas') renderSalasLibresSection();
 }
 function setDate(){
   const d = new Date();
@@ -1140,62 +1235,168 @@ function renderRecentLeads(leads){
 function renderLeadsTable(leads){
   const el = document.getElementById('leads-table-wrap');
   if(!leads.length){ el.innerHTML='<div class="empty" style="padding:2rem"><div class="empty-ico">📭</div><p>No hay leads con este filtro</p></div>'; return; }
-  // Ordenar por fecha de cita (más próxima primero), los sin cita al final
-  const sorted = [...leads].sort((a,b)=>{
-    const ia = parseCitaISO(a.notas), ib = parseCitaISO(b.notas);
-    if(ia && ib) return new Date(ia)-new Date(ib);
-    if(ia) return -1;
-    if(ib) return 1;
-    return (a.fecha||'').localeCompare(b.fecha||'');
+
+  // Agrupar por mes de primer contacto (campo fecha), ordenar meses desc
+  const groups = {};
+  leads.forEach(l=>{
+    const k = monthKey(l.fecha) || '__sin_fecha__';
+    if(!groups[k]) groups[k] = [];
+    groups[k].push(l);
   });
+  // Orden: meses reales desc, luego sin fecha
+  const monthKeys = Object.keys(groups)
+    .filter(k=>k!=='__sin_fecha__')
+    .sort((a,b)=>b.localeCompare(a));
+  if(groups['__sin_fecha__']) monthKeys.push('__sin_fecha__');
+
+  // Dentro de cada grupo: ordenar por fecha de cita (próxima primero), sin cita al final
+  monthKeys.forEach(k=>{
+    groups[k].sort((a,b)=>{
+      const ia = parseCitaISO(a.notas), ib = parseCitaISO(b.notas);
+      if(ia && ib) return new Date(ia)-new Date(ib);
+      if(ia) return -1;
+      if(ib) return 1;
+      return (a.fecha||'').localeCompare(b.fecha||'');
+    });
+  });
+
+  const COLS = 9;
+  let counter = 0;
+  const rows = [];
+  monthKeys.forEach(k=>{
+    const label = k === '__sin_fecha__' ? 'Sin fecha' : monthLabel(k);
+    const count = groups[k].length;
+    rows.push(`<tr class="leads-month-row"><td colspan="${COLS}">${label.charAt(0).toUpperCase()+label.slice(1)} &middot; ${count} lead${count!==1?'s':''}</td></tr>`);
+    groups[k].forEach(l=>{
+      counter++;
+      const cita = formatCita(l.notas);
+      const tel  = l.telefono ? `<a href="tel:${l.telefono}" style="color:var(--p2);text-decoration:none">${l.telefono}</a>` : '<span style="color:var(--g4)">—</span>';
+      const bkId = parseBookingId(l.notas);
+      const bk   = bkId ? bookingsMap[bkId] : null;
+      const tieneFicha = !!(
+        (bk && (bk.ficha || (bk.notes && /FICHA CLÍNICA/i.test(bk.notes)))) ||
+        (l.notas && /FICHA CLÍNICA/i.test(l.notas))
+      );
+      const fichaKey = bkId || `email:${(l.email||'').toLowerCase()}`;
+      const fichaCell = tieneFicha
+        ? `<button class="ficha-row-btn" onclick="openFicha('${fichaKey}')">📋 Ver ficha</button>`
+        : `<span style="color:var(--g4);font-size:.72rem">—</span>`;
+      const salaActiva = l.id ? getSalaActivaPorLead(l.id) : null;
+      const salaUrl    = salaActiva ? salaActiva.url : null;
+      let salaCell;
+      if(salaActiva){
+        const minutos = Math.round((Date.now() - salaActiva.timestampInicio) / 60000);
+        salaCell = `<div class="row-actions">
+          <button class="ficha-row-btn" style="background:var(--s5);color:var(--s1);border-color:var(--s3)" onclick="openCrearSala(${JSON.stringify(l)})">🟢 ${minutos} min</button>
+          <button class="ficha-row-btn" style="background:#fee2e2;color:#b91c1c;border-color:#fca5a5" onclick="_cerrarSalaLead('${l.id}')">Cerrar</button>
+        </div>`;
+      } else {
+        const salaCerrada = l.id ? _loadSalas().filter(s=>s.leadId===l.id&&s.horaFin).sort((a,b)=>b.timestampFin-a.timestampFin)[0] : null;
+        salaCell = salaCerrada
+          ? `<div class="row-actions">
+               <span style="font-size:.7rem;color:var(--g3)">Cerrada ${salaCerrada.duracionMin} min</span>
+               <button class="ficha-row-btn" onclick="openCrearSala(${JSON.stringify(l)})">📹 Nueva sala</button>
+             </div>`
+          : `<button class="ficha-row-btn" onclick="openCrearSala(${JSON.stringify(l)})">📹 Crear sala</button>`;
+      }
+      rows.push(`<tr>
+        <td style="color:var(--g3);font-size:.72rem;font-weight:700">${counter}</td>
+        <td class="td-name">${l.nombre||'—'}</td>
+        <td style="font-size:.78rem">${l.email||'—'}</td>
+        <td style="font-size:.78rem">${tel}</td>
+        <td>${tempBadge(l.temperatura)}</td>
+        <td>${statusBadge(l.estatus)}</td>
+        <td style="font-size:.75rem;color:var(--g2);white-space:nowrap">${cita||'<span style="color:var(--g4)">—</span>'}</td>
+        <td><div class="row-actions">${salaCell}</div></td>
+        <td>${fichaCell}</td>
+      </tr>`);
+    });
+  });
+
   el.innerHTML = '<div class="tbl-wrap"><table><thead><tr>'
     + '<th>#</th><th>Nombre</th><th>Email</th><th>Teléfono</th>'
-    + '<th>Temperatura</th><th>Estatus</th><th>Cita agendada</th><th>Ficha</th>'
+    + '<th>Temperatura</th><th>Estatus</th><th>Cita agendada</th><th>Sala</th><th>Ficha</th>'
     + '</tr></thead><tbody>'
-    + sorted.map((l,i)=>{
-        const cita = formatCita(l.notas);
-        const tel  = l.telefono ? `<a href="tel:${l.telefono}" style="color:var(--p2);text-decoration:none">${l.telefono}</a>` : '<span style="color:var(--g4)">—</span>';
-        const bkId = parseBookingId(l.notas);
-        const bk   = bkId ? bookingsMap[bkId] : null;
-        const tieneFicha = !!(
-          (bk && (bk.ficha || (bk.notes && /FICHA CLÍNICA/i.test(bk.notes)))) ||
-          (l.notas && /FICHA CLÍNICA/i.test(l.notas))
-        );
-        const fichaKey = bkId || `email:${(l.email||'').toLowerCase()}`;
-        const fichaCell = tieneFicha
-          ? `<button class="ficha-row-btn" onclick="openFicha('${fichaKey}')">📋 Ver ficha</button>`
-          : `<span style="color:var(--g4);font-size:.72rem">—</span>`;
-        return `<tr>
-          <td style="color:var(--g3);font-size:.72rem;font-weight:700">${i+1}</td>
-          <td class="td-name">${l.nombre||'—'}</td>
-          <td style="font-size:.78rem">${l.email||'—'}</td>
-          <td style="font-size:.78rem">${tel}</td>
-          <td>${tempBadge(l.temperatura)}</td>
-          <td>${statusBadge(l.estatus)}</td>
-          <td style="font-size:.75rem;color:var(--g2);white-space:nowrap">${cita||'<span style="color:var(--g4)">—</span>'}</td>
-          <td>${fichaCell}</td>
-        </tr>`;
-      }).join('')
+    + rows.join('')
     + '</tbody></table></div>';
 }
 
 function filterLeads(estatus, btn){
   currentFilter = estatus;
-  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.filters .filter-btn').forEach(b=>b.classList.remove('on'));
   if(btn) btn.classList.add('on');
-  const q = document.getElementById('leads-search').value.toLowerCase();
-  applyFilters(q, estatus);
+  applyFilters();
+}
+
+function filterAge(range, btn){
+  currentAgeRange = range;
+  document.querySelectorAll('.filters-row .filter-btn[onclick^="filterAge"]').forEach(b=>b.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  applyFilters();
+}
+
+function filterGender(gender, btn){
+  currentGender = gender;
+  document.querySelectorAll('.filters-row .filter-btn[onclick^="filterGender"]').forEach(b=>b.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  applyFilters();
+}
+
+function clearAllFilters(){
+  currentFilter   = '';
+  currentAgeRange = '';
+  currentGender   = '';
+  document.getElementById('leads-search').value = '';
+  document.getElementById('status-btn-all').click();
+  document.getElementById('age-btn-all').click();
+  document.getElementById('gender-btn-all').click();
 }
 
 function searchLeads(){
-  const q = document.getElementById('leads-search').value.toLowerCase();
-  applyFilters(q, currentFilter);
+  applyFilters();
 }
 
-function applyFilters(q, estatus){
+function ageInRange(edad, range){
+  if(range === '') return true;
+  if(edad === null || edad === undefined || edad === '') return false;
+  const n = Number(edad);
+  if(isNaN(n)) return false;
+  if(range === '18-30') return n >= 18 && n < 30;
+  if(range === '30-45') return n >= 30 && n < 45;
+  if(range === '45-60') return n >= 45 && n < 60;
+  if(range === '60+')   return n >= 60;
+  return true;
+}
+
+function parseFechaSafe(fechaStr){
+  if(!fechaStr) return null;
+  const parts = String(fechaStr).slice(0,10).split('-');
+  if(parts.length < 3) return null;
+  const y = parseInt(parts[0],10), m = parseInt(parts[1],10)-1, d = parseInt(parts[2],10);
+  if(isNaN(y)||isNaN(m)||isNaN(d)) return null;
+  return new Date(y, m, d);
+}
+
+function monthKey(fechaStr){
+  const dt = parseFechaSafe(fechaStr);
+  if(!dt) return null;
+  return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`;
+}
+
+function monthLabel(key){
+  if(!key) return 'Sin fecha';
+  const [y,m] = key.split('-');
+  const dt = new Date(parseInt(y,10), parseInt(m,10)-1, 1);
+  return dt.toLocaleDateString('es-CL',{month:'long',year:'numeric'});
+}
+
+function applyFilters(){
+  const q = (document.getElementById('leads-search').value||'').toLowerCase();
   let filtered = allLeads;
-  if(estatus) filtered = filtered.filter(l=>l.estatus===estatus);
-  if(q) filtered = filtered.filter(l=>(l.nombre||'').toLowerCase().includes(q) || (l.email||'').toLowerCase().includes(q));
+  if(currentFilter) filtered = filtered.filter(l=>l.estatus===currentFilter);
+  if(currentAgeRange) filtered = filtered.filter(l=>ageInRange(l.edad, currentAgeRange));
+  if(currentGender) filtered = filtered.filter(l=>(l.genero||'')===currentGender);
+  if(q) filtered = filtered.filter(l=>(l.nombre||'').toLowerCase().includes(q)||(l.email||'').toLowerCase().includes(q));
   renderLeadsTable(filtered);
 }
 
@@ -1941,12 +2142,15 @@ function statusBadge(s){
 document.addEventListener('DOMContentLoaded',()=>{
   setDate();
   startLastUpdatedTick();
+  _updateSalasBadge();
   const modal = document.getElementById('ficha-modal');
   if(modal) modal.addEventListener('click', e => { if(e.target === modal) closeFicha(); });
   const cerrarMod = document.getElementById('cerrar-modal');
   if(cerrarMod) cerrarMod.addEventListener('click', e => { if(e.target === cerrarMod) closeCerrarConsulta(); });
+  const salaMod = document.getElementById('sala-modal');
+  if(salaMod) salaMod.addEventListener('click', e => { if(e.target === salaMod) closeSalaModal(); });
   document.addEventListener('keydown', e => {
-    if(e.key === 'Escape'){ closeFicha(); closeCerrarConsulta(); }
+    if(e.key === 'Escape'){ closeFicha(); closeCerrarConsulta(); closeSalaModal(); }
   });
   tryRestoreSession();
 });
@@ -2099,6 +2303,432 @@ function closeCerrarConsulta(){
   currentCerrarBookingIdx = null;
 }
 
+// ── SALA VIRTUAL ─────────────────────────────────────────────────
+// Modelo de datos: array de objetos bajo SALAS_LS_KEY.
+// TODO: cuando exista el endpoint, reemplazar leer/escribir localStorage
+//       por GET /salas y POST /salas + PATCH /salas/:id.
+
+const SALAS_LS_KEY = 'nutriage_salas_virtuales';
+
+function _loadSalas(){
+  try{
+    const raw = JSON.parse(localStorage.getItem(SALAS_LS_KEY));
+    if(!raw) return [];
+    // Migración: formato antiguo era { leadId: url }
+    if(!Array.isArray(raw)){
+      const now = Date.now();
+      const migrados = Object.entries(raw).map(([leadId, url], i) => {
+        const ts = now - i * 1000;
+        return {
+          id: 'sala-' + ts,
+          nombre: 'Sin nombre',
+          leadId: leadId,
+          url: url,
+          fechaCreada: new Date(ts).toISOString().slice(0,10),
+          horaInicio: new Date(ts).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'}),
+          horaFin: null,
+          duracionMin: null,
+          timestampInicio: ts,
+          timestampFin: null,
+        };
+      });
+      _saveSalas(migrados);
+      return migrados;
+    }
+    return raw;
+  }catch(e){ return []; }
+}
+
+function _saveSalas(arr){
+  try{ localStorage.setItem(SALAS_LS_KEY, JSON.stringify(arr)); }catch(e){}
+}
+
+function getSalaVirtual(leadId){
+  if(!leadId) return null;
+  const salas = _loadSalas();
+  // Devuelve la URL de la sala en curso más reciente del lead, o null
+  const activa = salas.filter(s => s.leadId === leadId && !s.horaFin)
+    .sort((a,b) => b.timestampInicio - a.timestampInicio)[0];
+  return activa ? activa.url : null;
+}
+
+function getSalaActivaPorLead(leadId){
+  if(!leadId) return null;
+  const salas = _loadSalas();
+  return salas.filter(s => s.leadId === leadId && !s.horaFin)
+    .sort((a,b) => b.timestampInicio - a.timestampInicio)[0] || null;
+}
+
+function _crearObjSala(nombre, leadId){
+  const ts  = Date.now();
+  const id  = 'sala-' + ts;
+  const now = new Date(ts);
+  const slug = leadId
+    ? 'nutriage-' + String(leadId).replace(/[^a-zA-Z0-9]/g,'').slice(-8) + '-' + ts
+    : 'nutriage-libre-' + ts;
+  return {
+    id, nombre: nombre || 'Sin nombre', leadId: leadId || null,
+    url: `https://meet.jit.si/${slug}`,
+    fechaCreada: now.toISOString().slice(0,10),
+    horaInicio:  now.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'}),
+    horaFin: null, duracionMin: null,
+    timestampInicio: ts, timestampFin: null,
+  };
+}
+
+function _cerrarSala(salaId){
+  const salas = _loadSalas();
+  const idx = salas.findIndex(s => s.id === salaId);
+  if(idx === -1) return null;
+  const now = Date.now();
+  salas[idx].timestampFin  = now;
+  salas[idx].horaFin       = new Date(now).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+  salas[idx].duracionMin   = Math.round((now - salas[idx].timestampInicio) / 60000);
+  _saveSalas(salas);
+  return salas[idx];
+}
+
+// ── Estado del modal de sala ──
+let _salaLead        = null;
+let _salaCurrent     = null; // objeto sala activo en el modal
+let _salaTimerInterval = null;
+
+function _clearSalaTimer(){
+  if(_salaTimerInterval){ clearInterval(_salaTimerInterval); _salaTimerInterval = null; }
+}
+
+function _renderSalaModalContent(sala, lead){
+  // Genera el HTML interior del modal según estado de la sala
+  const nombre   = sala.nombre;
+  const url      = sala.url;
+  const cerrada  = !!sala.horaFin;
+  const telefono = lead && lead.telefono ? lead.telefono.replace(/\D/g,'') : '';
+  const email    = lead && lead.email ? lead.email : '';
+  const saludoNombre = nombre && nombre !== 'Sin nombre' ? ` ${nombre.split(' ')[0]}` : '';
+  const waMsgRaw = `Hola${saludoNombre}! Te comparto el link para nuestra videoconsulta:\n${url}\nEstará disponible a la hora de tu cita. 🌿`;
+  const waUrl    = telefono
+    ? `https://wa.me/${telefono}?text=${encodeURIComponent(waMsgRaw)}`
+    : `https://wa.me/?text=${encodeURIComponent(waMsgRaw)}`;
+  const mailSubject = 'Tu sala virtual - NutriAge';
+  const mailBody = `Hola${saludoNombre},\n\nTe comparto el link para ingresar a nuestra videoconsulta:\n${url}\n\nEstará disponible a la hora de tu cita. Cualquier consulta escríbeme.\n\nSaludos,\nFernanda Ugarte · Nutricionista`;
+  const mailUrl  = `mailto:${email}?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
+
+  // Título modal
+  const titulo = nombre && nombre !== 'Sin nombre' ? `Sala de ${nombre.split(' ')[0]}` : 'Sala libre';
+  const subtxt = cerrada
+    ? `Cerrada ${sala.horaFin} · ${sala.fechaCreada}`
+    : `En curso desde ${sala.horaInicio} · ${sala.fechaCreada}`;
+  document.getElementById('sala-mtitle').textContent    = `📹 ${titulo}`;
+  document.getElementById('sala-msubtitle').textContent = subtxt;
+
+  // Cuerpo del modal
+  const body = document.getElementById('sala-mbody');
+
+  let timerHtml = '';
+  if(cerrada){
+    timerHtml = `<div class="sala-timer-closed">Consulta cerrada · ${sala.duracionMin} min</div>`;
+  } else {
+    timerHtml = `<div class="sala-timer-display">
+      <div class="sala-timer-num" id="sala-timer-num">00:00</div>
+      <div class="sala-timer-label">Tiempo en consulta</div>
+    </div>
+    <button class="sala-close-btn" onclick="cerrarSalaDesdeModal()">Cerrar consulta</button>`;
+  }
+
+  const waDisplay   = (telefono || !lead) ? '' : 'display:none';
+  const mailDisplay = email ? '' : 'display:none';
+
+  body.innerHTML = `
+    <p style="font-size:.82rem;color:var(--g3);margin-bottom:.75rem">Link generado con Jitsi Meet — sin instalación, sin costo.</p>
+    ${timerHtml}
+    <div class="sala-url-box">
+      <span class="sala-url-text" id="sala-url-text">${url}</span>
+      <button class="sala-copy-btn" onclick="copiarSalaUrl()">📋 Copiar</button>
+    </div>
+    <div style="margin-bottom:.75rem">
+      <a id="sala-open-link" href="${url}" target="_blank" rel="noopener" style="font-size:.78rem;color:var(--p2);font-weight:700;text-decoration:none">↗ Abrir sala ahora</a>
+    </div>
+    <div class="sala-actions-row">
+      <a class="sala-wa-btn" id="sala-wa-btn" href="${waUrl}" target="_blank" rel="noopener" style="${waDisplay}">💬 Enviar por WhatsApp</a>
+      <a class="sala-email-btn" id="sala-mail-btn" href="${mailUrl}" target="_blank" rel="noopener" style="${mailDisplay}">✉️ Enviar por correo</a>
+    </div>
+    <div style="margin-top:1.1rem;border-top:1px solid var(--g4);padding-top:.9rem;display:flex;justify-content:flex-end">
+      <button class="cc-btn cc-btn-secondary" onclick="closeSalaModal()">Cerrar</button>
+    </div>`;
+
+  // Arrancar o detener cronómetro
+  _clearSalaTimer();
+  if(!cerrada){
+    _tickSalaTimer(sala.timestampInicio);
+    _salaTimerInterval = setInterval(()=>_tickSalaTimer(sala.timestampInicio), 1000);
+  }
+}
+
+function _tickSalaTimer(tsInicio){
+  const el = document.getElementById('sala-timer-num');
+  if(!el){ _clearSalaTimer(); return; }
+  const diff = Math.floor((Date.now() - tsInicio) / 1000);
+  const mm = String(Math.floor(diff / 60)).padStart(2,'0');
+  const ss = String(diff % 60).padStart(2,'0');
+  el.textContent = `${mm}:${ss}`;
+}
+
+function cerrarSalaDesdeModal(){
+  if(!_salaCurrent) return;
+  const sala = _cerrarSala(_salaCurrent.id);
+  if(sala){
+    _salaCurrent = sala;
+    showToast(`Consulta cerrada · ${sala.duracionMin} min`,'ok',3500);
+    _renderSalaModalContent(sala, _salaLead);
+    if(allLeads.length) renderLeadsTable(allLeads);
+    _updateSalasBadge();
+  }
+}
+
+let _salaAcSelected = null; // lead seleccionado via autocomplete
+
+function openCrearSala(lead){
+  _salaLead = lead;
+  _salaAcSelected = null;
+
+  if(!lead){
+    document.getElementById('sala-mtitle').textContent    = '📹 Nueva sala virtual';
+    document.getElementById('sala-msubtitle').textContent = 'Busca el paciente en tu base';
+    const body = document.getElementById('sala-mbody');
+    body.innerHTML = `
+      <p style="font-size:.82rem;color:var(--g3);margin-bottom:.75rem">Selecciona el paciente para quien creas esta sala.</p>
+      <div class="sala-ac-wrap">
+        <input class="sala-nombre-input" id="sala-nombre-inp" type="text" placeholder="Escribe el nombre del paciente..." maxlength="80" autocomplete="off" oninput="_salaAcFilter(this.value)" onkeydown="_salaAcKeydown(event)">
+        <div class="sala-ac-list" id="sala-ac-list" style="display:none"></div>
+      </div>
+      <div class="sala-nombre-err" id="sala-nombre-err">Selecciona un paciente de la lista</div>
+      <button class="sala-crear-confirm-btn" id="sala-crear-btn" disabled onclick="_confirmarSalaLibre()">Crear sala</button>
+      <div style="display:flex;justify-content:flex-end">
+        <button class="cc-btn cc-btn-secondary" onclick="closeSalaModal()">Cancelar</button>
+      </div>`;
+    document.getElementById('sala-modal').classList.add('on');
+    setTimeout(()=>{ const el=document.getElementById('sala-nombre-inp'); if(el)el.focus(); }, 80);
+    return;
+  }
+
+  const activaExistente = getSalaActivaPorLead(lead.id);
+  if(activaExistente){
+    const ok = confirm(`${lead.nombre || 'Este paciente'} ya tiene una sala activa.\n\n${activaExistente.url}\n\n¿Crear una sala nueva?`);
+    if(!ok){
+      _salaCurrent = activaExistente;
+      document.getElementById('sala-modal').classList.add('on');
+      _renderSalaModalContent(activaExistente, lead);
+      return;
+    }
+  }
+
+  const sala = _crearObjSala(lead.nombre, lead.id);
+  const salas = _loadSalas();
+  salas.push(sala);
+  _saveSalas(salas);
+  _salaCurrent = sala;
+  document.getElementById('sala-modal').classList.add('on');
+  _renderSalaModalContent(sala, lead);
+  _updateSalasBadge();
+  if(allLeads.length) renderLeadsTable(allLeads);
+}
+
+let _salaAcFocusIdx = -1;
+
+function _salaAcFilter(q){
+  _salaAcSelected = null;
+  const btn = document.getElementById('sala-crear-btn');
+  if(btn) btn.disabled = true;
+  const list = document.getElementById('sala-ac-list');
+  if(!list) return;
+  const term = q.trim().toLowerCase();
+  if(!term){ list.style.display = 'none'; list.innerHTML = ''; _salaAcFocusIdx = -1; return; }
+  const matches = allLeads.filter(l => (l.nombre||'').toLowerCase().includes(term)).slice(0, 8);
+  if(!matches.length){
+    list.innerHTML = `<div class="sala-ac-empty">Este paciente no existe en tu base, agrégalo primero al CRM</div>`;
+    list.style.display = 'block';
+    _salaAcFocusIdx = -1;
+    return;
+  }
+  list.innerHTML = matches.map((l, i) => {
+    const sub = l.email || l.telefono || '';
+    return `<div class="sala-ac-item" data-idx="${i}" onmousedown="_salaAcPick(${i})" data-lead-id="${l.id}">
+      <div class="sala-ac-name">${l.nombre}</div>
+      ${sub ? `<div class="sala-ac-sub">${sub}</div>` : ''}
+    </div>`;
+  }).join('');
+  list._matches = matches;
+  list.style.display = 'block';
+  _salaAcFocusIdx = -1;
+}
+
+function _salaAcPick(idx){
+  const list = document.getElementById('sala-ac-list');
+  if(!list || !list._matches) return;
+  const lead = list._matches[idx];
+  if(!lead) return;
+  _salaAcSelected = lead;
+  const inp = document.getElementById('sala-nombre-inp');
+  if(inp) inp.value = lead.nombre;
+  list.style.display = 'none';
+  const btn = document.getElementById('sala-crear-btn');
+  if(btn) btn.disabled = false;
+  const err = document.getElementById('sala-nombre-err');
+  if(err) err.style.display = 'none';
+}
+
+function _salaAcKeydown(e){
+  const list = document.getElementById('sala-ac-list');
+  if(!list || list.style.display === 'none') return;
+  const items = list.querySelectorAll('.sala-ac-item');
+  if(!items.length) return;
+  if(e.key === 'ArrowDown'){
+    e.preventDefault();
+    _salaAcFocusIdx = Math.min(_salaAcFocusIdx + 1, items.length - 1);
+    items.forEach((it, i) => it.classList.toggle('focused', i === _salaAcFocusIdx));
+  } else if(e.key === 'ArrowUp'){
+    e.preventDefault();
+    _salaAcFocusIdx = Math.max(_salaAcFocusIdx - 1, 0);
+    items.forEach((it, i) => it.classList.toggle('focused', i === _salaAcFocusIdx));
+  } else if(e.key === 'Enter'){
+    e.preventDefault();
+    if(_salaAcFocusIdx >= 0) _salaAcPick(_salaAcFocusIdx);
+  } else if(e.key === 'Escape'){
+    list.style.display = 'none';
+  }
+}
+
+function openSalaById(salaId){
+  const salas = _loadSalas();
+  const sala  = salas.find(s => s.id === salaId);
+  if(!sala) return;
+  _salaCurrent = sala;
+  _salaLead    = null;
+  document.getElementById('sala-modal').classList.add('on');
+  _renderSalaModalContent(sala, null);
+}
+
+function _cerrarSalaLead(leadId){
+  const sala = getSalaActivaPorLead(leadId);
+  if(!sala) return;
+  const cerrada = _cerrarSala(sala.id);
+  const mins = cerrada ? cerrada.duracionMin : Math.round((Date.now()-sala.timestampInicio)/60000);
+  showToast(`Sala cerrada · ${mins} min`, 'ok', 3000);
+  _updateSalasBadge();
+  if(allLeads.length) renderLeadsTable(allLeads);
+}
+
+function _confirmarSalaLibre(){
+  const err = document.getElementById('sala-nombre-err');
+  if(!_salaAcSelected){
+    if(err) err.style.display = 'block';
+    const inp = document.getElementById('sala-nombre-inp');
+    if(inp) inp.focus();
+    return;
+  }
+  if(err) err.style.display = 'none';
+  const lead = _salaAcSelected;
+
+  const activaExistente = getSalaActivaPorLead(lead.id);
+  if(activaExistente){
+    const ok = confirm(`${lead.nombre} ya tiene una sala activa.\n\n${activaExistente.url}\n\n¿Crear una sala nueva?`);
+    if(!ok){
+      _salaLead    = lead;
+      _salaCurrent = activaExistente;
+      _renderSalaModalContent(activaExistente, lead);
+      _updateSalasBadge();
+      return;
+    }
+  }
+
+  const sala  = _crearObjSala(lead.nombre, lead.id);
+  const salas = _loadSalas();
+  salas.push(sala);
+  _saveSalas(salas);
+  _salaLead    = lead;
+  _salaCurrent = sala;
+  _renderSalaModalContent(sala, lead);
+  _updateSalasBadge();
+  if(allLeads.length) renderLeadsTable(allLeads);
+}
+
+function closeSalaModal(){
+  _clearSalaTimer();
+  document.getElementById('sala-modal').classList.remove('on');
+  _salaLead        = null;
+  _salaCurrent     = null;
+  _salaAcSelected  = null;
+  if(allLeads.length) renderLeadsTable(allLeads);
+}
+
+function copiarSalaUrl(){
+  const el = document.getElementById('sala-url-text');
+  const url = el ? el.textContent : '';
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(url).then(()=>{ showToast('Link copiado al portapapeles','ok',2200); })
+      .catch(()=>_fallbackCopy(url));
+  } else { _fallbackCopy(url); }
+}
+function _fallbackCopy(text){
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); showToast('Link copiado','ok',2200); }
+  catch(e){ showToast('No se pudo copiar — copia manualmente','err',3000); }
+  document.body.removeChild(ta);
+}
+
+// ── SALAS LIBRES SECTION ─────────────────────────────────────────
+function _updateSalasBadge(){
+  const salas = _loadSalas();
+  const el = document.getElementById('sb-salas-count');
+  if(el) el.textContent = salas.length ? salas.length : '—';
+}
+
+function renderSalasLibresSection(){
+  const salas = _loadSalas()
+    .sort((a,b) => b.timestampInicio - a.timestampInicio);
+  const wrap = document.getElementById('salas-libres-wrap');
+  if(!wrap) return;
+
+  if(!salas.length){
+    wrap.innerHTML = '<div class="empty" style="padding:2.5rem"><div class="empty-ico">📹</div><p>Aún no hay salas creadas</p></div>';
+    return;
+  }
+
+  const rows = salas.map(s => {
+    const lead = s.leadId ? allLeads.find(l => l.id === s.leadId) : null;
+    const pacienteNombre = lead ? lead.nombre : (s.nombre && s.nombre !== 'Sin nombre' ? s.nombre : '—');
+    const pacienteCell = `<td class="td-name" style="font-size:.78rem">${pacienteNombre}</td>`;
+    const estado = s.horaFin
+      ? `<span class="salas-estado-off">Cerrada · ${s.duracionMin} min</span>`
+      : `<span class="salas-estado-on">En curso</span>`;
+    const duracion = s.horaFin ? `${s.duracionMin} min` : '—';
+    const linkEl = `<a href="${s.url}" target="_blank" rel="noopener" style="font-size:.72rem;color:var(--p2);font-weight:700">↗ Abrir</a>`;
+    return `<tr>
+      ${pacienteCell}
+      <td style="font-size:.78rem">${s.fechaCreada}</td>
+      <td style="font-size:.78rem;font-weight:700">${s.horaInicio}</td>
+      <td style="font-size:.78rem">${s.horaFin || '—'}</td>
+      <td style="font-size:.78rem">${duracion}</td>
+      <td>${estado}</td>
+      <td style="text-align:center">${linkEl}</td>
+      <td style="text-align:center">
+        <button class="ficha-row-btn" onclick="openSalaById('${s.id}')">
+          ${s.horaFin ? '📋 Ver' : '⏱️ Ver sala'}
+        </button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  wrap.innerHTML = `<div class="card"><div class="card-body np"><div class="tbl-wrap">
+    <table><thead><tr>
+      <th>Paciente</th><th>Fecha</th><th>Hora inicio</th><th>Hora fin</th>
+      <th>Duración</th><th>Estado</th><th>Link</th><th>Acción</th>
+    </tr></thead><tbody>${rows}</tbody></table>
+  </div></div></div>`;
+}
+
 async function submitCerrarConsulta(ev){
   if(ev) ev.preventDefault();
   const hablado = document.getElementById('cc-hablado').value.trim();
@@ -2144,6 +2774,20 @@ async function submitCerrarConsulta(ev){
   return false;
 }
 </script>
+
+<!-- ── SALA VIRTUAL MODAL ── -->
+<div class="sala-modal-overlay" id="sala-modal">
+  <div class="sala-mbox">
+    <div class="sala-mhead">
+      <div class="sala-mtitle">
+        <span id="sala-mtitle">📹 Sala virtual</span>
+        <small id="sala-msubtitle"></small>
+      </div>
+      <button class="sala-mclose" onclick="closeSalaModal()" title="Cerrar">&times;</button>
+    </div>
+    <div class="sala-mbody" id="sala-mbody"></div>
+  </div>
+</div>
 
 <!-- ── FICHA CLÍNICA MODAL ── -->
 <div class="ficha-modal" id="ficha-modal">

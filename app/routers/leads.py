@@ -39,6 +39,9 @@ def list_leads():
             notas_rt = props.get("Notas", {}).get("rich_text") or []
             notas    = notas_rt[0].get("plain_text", "") if notas_rt else ""
             fecha_d  = (props.get("Primer contacto", {}).get("date") or {})
+            edad_p   = props.get("Edad", {}).get("number")
+            genero_p = props.get("Género") or props.get("Genero") or props.get("Sexo") or {}
+            genero   = (genero_p.get("select") or {}).get("name", "") if genero_p else ""
             leads.append({
                 "id":          r["id"],
                 "nombre":      titulo[0].get("plain_text", "") if titulo else "",
@@ -48,6 +51,8 @@ def list_leads():
                 "telefono":    props.get("Telefono", {}).get("phone_number") or "",
                 "notas":       notas,
                 "fecha":       fecha_d.get("start", ""),
+                "edad":        edad_p,
+                "genero":      genero,
             })
         return jsonify({"total": len(leads), "leads": leads})
     except Exception as e:
