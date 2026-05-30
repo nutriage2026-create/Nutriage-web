@@ -5,6 +5,9 @@
 **/__pycache__/
 *.pyc
 
+# Config local de Claude Code (no se versiona)
+.claude/
+
 # Archivos con datos sensibles o credenciales
 Contraseña y cuentas.txt
 *_check.json

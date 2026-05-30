@@ -123,7 +123,15 @@ function handleGetAvailability_(e, cb) {
 
   data.forEach(function(row) {
     var dateKey   = toDateKey_(row[0]);
-    var hora      = String(row[2] || '').trim();
+    // FIX: Si la celda Hora es un objeto Date (tipo TIME en Sheets), formatear con
+    // Utilities.formatDate para evitar el string "Sat Dec 30 1899 HH:MM:SS GMT-0442"
+    var horaRaw   = row[2];
+    var hora;
+    if (horaRaw instanceof Date) {
+      hora = Utilities.formatDate(horaRaw, TIMEZONE, 'HH:mm');
+    } else {
+      hora = String(horaRaw || '').trim();
+    }
     var disponible = String(row[3] || '').trim().toLowerCase();
 
     if (!dateKey || !hora) return;
@@ -480,7 +488,11 @@ function getAvailabilityFromSheet_(ss) {
 
   data.forEach(function(row) {
     var dateKey   = toDateKey_(row[0]);
-    var hora      = String(row[2] || '').trim();
+    // FIX: manejar celdas TIME de Sheets que llegan como Date objects
+    var horaRaw   = row[2];
+    var hora = (horaRaw instanceof Date)
+      ? Utilities.formatDate(horaRaw, TIMEZONE, 'HH:mm')
+      : String(horaRaw || '').trim();
     var disponible = String(row[3] || '').trim().toLowerCase();
     if (!dateKey || !hora) return;
 

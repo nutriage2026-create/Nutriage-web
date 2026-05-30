@@ -23,19 +23,27 @@ Se integrará un asistente IA que ayude a la nutricionista a:
 - Sugerir seguimiento o próxima consulta
 - Generar resúmenes automáticos
 
-### Stack objetivo
-- **Frontend:** HTML + CSS + JS vanilla en un solo `index.html` (mantener simplicidad)
-- **Base de datos:** Notion API
-- **Videollamadas:** Jitsi Meet (sin costo, sin instalación)
-- **IA:** Claude API (Anthropic) con acceso a las fichas en Notion
-- **Hosting:** Netlify (arrastrar archivo)
+### Stack actual (en producción en Render)
+- **Frontend:** `dashboard.html` (panel nutricionista) y `booking.html` (reserva paciente), HTML + CSS + JS vanilla — servidos por Flask
+- **Backend:** Flask (`main.py` + `app/`) desplegado en Render como `nutriage-api`
+- **Base de datos:** Notion API (módulo `app/services/notion.py`)
+- **Agenda:** Cal.com (`app/services/calcom.py`)
+- **Videollamadas:** Jitsi Meet
+- **IA:** Claude API (`app/services/ai.py`)
+- **Correo:** Gmail SMTP (`app/services/notifications.py`)
+- **Hosting:** Render.com (push a `main` redeployó automáticamente)
 
 ---
 
-## Estado actual (v7 — funcional en localStorage)
+## Estado actual
 
-El archivo activo es **`1.5nutri-v6.html`** o **`1.8nutri-v6 (7).html`** (última versión estable).
-Contiene todo el sistema (~1.720 líneas) en un solo archivo.
+**Archivos activos en producción** (ver `main.py` rutas `/dashboard` y `/booking`):
+- `dashboard.html` — panel de la nutricionista
+- `booking.html` — formulario de reserva del paciente
+- `main.py`, `wsgi.py`, `app/` — backend Flask
+- `render.yaml`, `requirements.txt`, `Procfile`, `runtime.txt` — config Render
+
+**Versiones antiguas archivadas en `actualizaciones_antiguas/`** (no se sirven en Render): `index.html`, `1.8nutri-v6 (7).html`, `nutri-app.html`, versiones varias, GAS legacy, etc.
 
 ### Funcionalidades ya implementadas
 - Formulario clínico de 33 campos
@@ -81,16 +89,15 @@ Contiene todo el sistema (~1.720 líneas) en un solo archivo.
 ## Flujo de trabajo
 
 1. Editar archivos localmente en VS Code
-2. Al entregar una versión nueva, guardar una copia con nombre versionado:
-   - Formato: `NutriAge_GAS_v8_150426.gs` o `index_v8_150426.html`
+2. Para probar cambios sin tocar producción, usar copia local (ej: `dashboard_local_pruebas.html`)
 3. **No usar git add/commit/push ni crear PRs** salvo que el usuario lo pida explícitamente
-4. El archivo principal siempre se llama `index.html` para producción
+4. Los archivos de producción son `dashboard.html` y `booking.html` (servidos por Flask en Render)
 
 ---
 
 ## Reglas para Claude
 
-- El archivo activo de trabajo es `index.html` en producción; en desarrollo usar nombres versionados
+- Los archivos activos en producción son `dashboard.html` (panel nutricionista) y `booking.html` (reserva paciente); para pruebas usar copias locales tipo `dashboard_local_pruebas.html`
 - Al entregar código JS, validar que no haya funciones truncadas
 - Todo archivo HTML debe terminar con `</html>`
 - Usar `DOMContentLoaded` para todas las inicializaciones del DOM
@@ -98,3 +105,45 @@ Contiene todo el sistema (~1.720 líneas) en un solo archivo.
 - No agregar frameworks ni dependencias NPM — mantener todo vanilla
 - No agregar comentarios innecesarios ni docstrings a código no modificado
 - Respuestas cortas y directas; no resumir al final lo que ya se hizo
+
+---
+
+## Perfil de necesidades del usuario (Fernanda)
+
+Patrones que se repiten en cada pedido — anticípalos y resuélvelos sin que los pida:
+
+### 1. Todo lo que mejore la vida de la nutricionista
+Cada feature apunta a que Fernanda tenga **más información del paciente, más rápido, en menos clicks**. Ficha clínica visible, link de reunión a un click, datos del paciente en la fila. Si una mejora obliga a navegar más, está mal pensada.
+
+### 2. Botones de acción visibles en las tablas
+Prefiere botones inline en cada fila (📋 Ver ficha, 📹 Entrar a sala, 📞 Llamar) en vez de menús ocultos o vistas de detalle. Patrón estándar: ícono + texto corto + color suave.
+
+### 3. Verificar TODO en producción real
+No le basta "ya está hecho". Después de cualquier cambio, espera:
+1. Ejecutar tests (`node .claude/test_all.js`)
+2. Hacer commit + push
+3. Verificar que Render redeployó
+4. Probar con datos reales (incluso ejecutar una reserva de prueba end-to-end)
+5. Confirmar que aparece online
+
+### 4. Stack en Render.com (ya productivo)
+- **API:** `https://nutriage-api.onrender.com` (Flask + gunicorn)
+- **Frontend:** `https://nutriage-frontend.onrender.com` (sitio estático)
+- **Configuración:** `render.yaml` — push a `main` redeployó ambos servicios
+- Notion como BD, Cal.com como agenda, Gmail SMTP para correos
+- Cuando agregue una integración nueva, asumir que también vive en Render
+
+### 5. Confirma antes de cualquier acción externa
+Hacer commits/push, crear PRs, llamar APIs externas, mandar correos → SIEMPRE confirmar antes. Ella responde "si"/"confirmar"/"perfecto" y ahí ejecutas.
+
+### 6. Mensajes cortos en español, con errores tipográficos
+Escribe rápido y con typos ("reserba", "siginfica", "filas" cuando quiere decir "columna"). Interpretar la intención, no la literalidad. Responder siempre en español.
+
+### 7. Conocimiento técnico básico-medio
+Pregunta cosas como "qué significa el verde en VS Code" o "a quién se envía el correo". No asumir vocabulario técnico avanzado. Usar tablas, ejemplos concretos y emojis discretos cuando ayuden a la claridad. Si una respuesta es informativa, explicar el "qué" y el "por qué", no solo el comando.
+
+### 8. Iteración: pedido pequeño → entrega + verificación → siguiente pedido
+No le gustan refactors grandes ni "vamos a planear todo". Prefiere ciclos cortos: pide algo concreto, lo entregás, lo verifica, sigue con lo siguiente. Mantener cambios chicos y commits descriptivos.
+
+### 9. Pre-cita: la nutricionista debe llegar preparada
+Una de las prioridades del producto es que ella vea la ficha del paciente **antes** de entrar a la videollamada. Cualquier mejora que le ahorre tiempo en esa fase de preparación es bienvenida.
