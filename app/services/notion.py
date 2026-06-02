@@ -53,12 +53,15 @@ def create_lead(data: dict) -> dict:
         props["Resumen del paciente"] = {"rich_text": [{"text": {"content": data["resumen"]}}]}
     if data.get("presupuesto"):
         props["Presupuesto"] = {"select": {"name": data["presupuesto"]}}
+    if data.get("estado_pago"):
+        props["Estado de pago"] = {"select": {"name": data["estado_pago"]}}
 
     return _post("/pages", {"parent": {"database_id": settings.NOTION_DB_LEADS}, "properties": props})
 
 
 def update_lead_status(page_id: str, temperatura: str = None,
-                       estatus: str = None, resumen: str = None) -> dict:
+                       estatus: str = None, resumen: str = None,
+                       estado_pago: str = None) -> dict:
     props = {}
     if temperatura:
         props["Temperatura"] = {"select": {"name": temperatura}}
@@ -66,6 +69,8 @@ def update_lead_status(page_id: str, temperatura: str = None,
         props["Estatus"] = {"select": {"name": estatus}}
     if resumen:
         props["Resumen del paciente"] = {"rich_text": [{"text": {"content": resumen}}]}
+    if estado_pago:
+        props["Estado de pago"] = {"select": {"name": estado_pago}}
     return _patch(f"/pages/{page_id}", {"properties": props})
 
 
@@ -162,6 +167,50 @@ def append_consulta_blocks(page_id: str, hablado: str, plan: str = "",
         if not r.is_success:
             raise Exception(f"Notion {r.status_code}: {r.text[:400]}")
         return r.json()
+
+
+def get_lead(page_id: str) -> dict:
+    """Devuelve la página (lead) completa por su id."""
+    with httpx.Client(timeout=20) as c:
+        r = c.get(f"{BASE}/pages/{page_id}", headers=_h(), timeout=20)
+        if not r.is_success:
+            raise Exception(f"Notion {r.status_code}: {r.text[:400]}")
+        return r.json()
+
+
+def upload_file_to_lead(page_id: str, filename: str, content: bytes,
+                        content_type: str, prop: str = "Comprobante") -> dict:
+    """
+    Sube un archivo a Notion (API de file_uploads en 3 pasos) y lo adjunta
+    a la propiedad de tipo 'files' indicada del lead.
+    """
+    # 1. Crear el file upload
+    create = _post("/file_uploads", {
+        "filename": filename,
+        "content_type": content_type,
+    })
+    upload_id  = create["id"]
+    upload_url = create["upload_url"]
+
+    # 2. Enviar el contenido del archivo (multipart, sin Content-Type JSON)
+    headers = {
+        "Authorization": f"Bearer {settings.NOTION_TOKEN}",
+        "Notion-Version": "2022-06-28",
+    }
+    with httpx.Client(timeout=60) as c:
+        r = c.post(upload_url, headers=headers,
+                   files={"file": (filename, content, content_type)})
+        if not r.is_success:
+            raise Exception(f"Notion upload {r.status_code}: {r.text[:400]}")
+
+    # 3. Adjuntar el archivo a la propiedad del lead
+    return _patch(f"/pages/{page_id}", {"properties": {
+        prop: {"files": [{
+            "name": filename,
+            "type": "file_upload",
+            "file_upload": {"id": upload_id},
+        }]}
+    }})
 
 
 def save_agent_history(titulo: str, tipo: str, paciente: str, contenido: str) -> dict:

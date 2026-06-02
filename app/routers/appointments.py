@@ -50,6 +50,7 @@ def book_appointment():
             "objetivo":    data.get("objetivo", ""),
             "canal":       data.get("canal", "Web"),
             "estatus":     "Cita agendada",
+            "estado_pago": "Pendiente",
             "temperatura": "Warm",
             "notas":       f"Cita: {data['start']} | Booking ID: {booking_id} | {data.get('notes','')}",
         })

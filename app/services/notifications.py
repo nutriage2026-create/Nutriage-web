@@ -58,9 +58,14 @@ def _fmt_fecha_hora_cl(iso_start: str) -> str:
     if not iso_start:
         return "—"
     try:
-        from datetime import datetime, timezone, timedelta
+        from datetime import datetime, timezone
+        from zoneinfo import ZoneInfo
         dt_utc = datetime.fromisoformat(iso_start.replace("Z", "+00:00"))
-        dt_cl  = dt_utc.astimezone(timezone(timedelta(hours=-4)))
+        if dt_utc.tzinfo is None:
+            dt_utc = dt_utc.replace(tzinfo=timezone.utc)
+        # Zona horaria real de Chile: ajusta solo verano (-3) / invierno (-4),
+        # igual que el dashboard (timeZone:'America/Santiago' en JS).
+        dt_cl  = dt_utc.astimezone(ZoneInfo("America/Santiago"))
         dias  = ["lun", "mar", "mié", "jue", "vie", "sáb", "dom"]
         meses = ["enero","febrero","marzo","abril","mayo","junio",
                  "julio","agosto","septiembre","octubre","noviembre","diciembre"]

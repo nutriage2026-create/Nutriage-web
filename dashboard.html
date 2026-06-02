@@ -1022,6 +1022,19 @@ async function apiPost(path, body){
   return data;
 }
 
+async function apiPatch(path, body){
+  const r = await fetch(API+path, {
+    method: 'PATCH',
+    headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify(body || {}),
+  });
+  if(r.status === 401){ logout(); throw new Error('Sesión expirada'); }
+  let data = null;
+  try { data = await r.json(); } catch(e){}
+  if(!r.ok){ throw new Error((data && data.error) || ('HTTP '+r.status)); }
+  return data;
+}
+
 // ── API STATUS ────────────────────────────────────────────────────
 function setApiStatus(ok){
   const dot = document.getElementById('api-dot');
@@ -1347,6 +1360,7 @@ function renderLeadsTable(leads){
         <td style="font-size:.78rem">${tel}</td>
         <td>${tempBadge(l.temperatura)}</td>
         <td>${statusBadge(l.estatus)}</td>
+        <td>${pagoSelect(l)}</td>
         <td style="font-size:.75rem;color:var(--g2);white-space:nowrap">${cita||'<span style="color:var(--g4)">—</span>'}</td>
         <td><div class="row-actions">${salaCell}</div></td>
         <td>${fichaCell}</td>
@@ -1356,7 +1370,7 @@ function renderLeadsTable(leads){
 
   el.innerHTML = '<div class="tbl-wrap"><table><thead><tr>'
     + '<th>#</th><th>Nombre</th><th>Email</th><th>Teléfono</th>'
-    + '<th>Temperatura</th><th>Estatus</th><th>Cita agendada</th><th>Sala</th><th>Ficha</th>'
+    + '<th>Temperatura</th><th>Estatus</th><th>Pago</th><th>Cita agendada</th><th>Sala</th><th>Ficha</th>'
     + '</tr></thead><tbody>'
     + rows.join('')
     + '</tbody></table></div>';
@@ -2177,6 +2191,42 @@ function statusBadge(s){
     'Cerrado':'badge-cerrado',
   };
   return `<span class="badge ${map[s]||'badge-pendiente'}">${s||'—'}</span>`;
+}
+
+// ── ESTADO DE PAGO (editable inline en la tabla) ──────────────────
+function pagoColor(e){
+  return {
+    'Pendiente':     {bg:'#fef9c3',fg:'#a16207',bd:'#fde68a'},
+    'Por verificar': {bg:'#ffedd5',fg:'#ea580c',bd:'#fed7aa'},
+    'Pagado':        {bg:'#dcfce7',fg:'#15803d',bd:'#bbf7d0'},
+    'Efectivo':      {bg:'#dbeafe',fg:'#1d4ed8',bd:'#bfdbfe'},
+  }[e] || {bg:'#f1f5f9',fg:'#64748b',bd:'#e2e8f0'};
+}
+function pagoSelect(l){
+  if(!l.id) return '<span style="color:var(--g4);font-size:.72rem">—</span>';
+  const c = pagoColor(l.estadoPago);
+  const labels = {'':'— Sin estado','Pendiente':'🟡 Pendiente','Por verificar':'🟠 Por verificar','Pagado':'🟢 Pagado','Efectivo':'💵 Efectivo'};
+  const opts = ['','Pendiente','Por verificar','Pagado','Efectivo']
+    .map(v=>`<option value="${v}" ${v===(l.estadoPago||'')?'selected':''}>${labels[v]}</option>`).join('');
+  return `<select class="pago-select" data-id="${l.id}" data-prev="${l.estadoPago||''}" onchange="changeEstadoPago(this)"
+    style="font-size:.72rem;font-weight:700;border-radius:12px;padding:.2rem .4rem;cursor:pointer;background:${c.bg};color:${c.fg};border:1px solid ${c.bd}">${opts}</select>`;
+}
+async function changeEstadoPago(sel){
+  const id = sel.dataset.id, val = sel.value, prev = sel.dataset.prev || '';
+  sel.disabled = true;
+  try{
+    await apiPatch(`/leads/${id}/status`, { estadoPago: val });
+    const lead = allLeads.find(l=>l.id===id);
+    if(lead) lead.estadoPago = val;
+    const c = pagoColor(val);
+    sel.style.background=c.bg; sel.style.color=c.fg; sel.style.borderColor=c.bd;
+    sel.dataset.prev = val;
+  }catch(e){
+    alert('No se pudo guardar el estado de pago: '+e.message);
+    sel.value = prev;
+  }finally{
+    sel.disabled = false;
+  }
 }
 
 // ── INIT ─────────────────────────────────────────────────────────

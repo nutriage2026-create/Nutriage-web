@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NutriAge · Pago de tu consulta</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --p1:#3d2459;--p2:#6b4a9a;--p3:#a47cc5;--p4:#d4bbec;--p5:#f0e8fa;
+  --s1:#2d5e34;--s2:#4a8c54;--s3:#7ab882;--s4:#b8d9bc;--s5:#edf6ee;
+  --g1:#0f172a;--g2:#334155;--g3:#64748b;--g4:#e2e8f0;--g5:#f8fafc;
+  --wh:#fff;--cr:#faf7f2;--r:10px;--rl:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Nunito',sans-serif;background:var(--cr);color:var(--g1);min-height:100vh}
+
+/* ── HEADER ── */
+.hdr{background:linear-gradient(135deg,var(--p1),var(--p2));padding:1.1rem 1.5rem;display:flex;align-items:center;justify-content:center;gap:.75rem}
+.hdr-circle{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--p3),var(--s3));display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:16px;color:#fff;flex-shrink:0;box-shadow:0 2px 10px rgba(0,0,0,.2)}
+.hdr-info{text-align:center}
+.hdr-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:600;color:#fff;line-height:1}
+.hdr-sub{font-size:.72rem;color:rgba(255,255,255,.6);margin-top:.25rem;letter-spacing:.3px}
+
+/* ── CONTAINER ── */
+.wrap{max-width:560px;margin:0 auto;padding:1.6rem 1rem 4rem}
+
+/* ── CARD ── */
+.card{background:var(--wh);border-radius:var(--rl);border:1px solid var(--g4);padding:1.6rem;box-shadow:0 2px 16px rgba(0,0,0,.06);margin-bottom:1.2rem;animation:rise .4s ease both}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.card-eyebrow{display:inline-flex;align-items:center;gap:.4rem;font-size:.66rem;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:var(--p2);background:var(--p5);padding:.3rem .65rem;border-radius:20px;margin-bottom:.9rem}
+.card-ttl{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:600;color:var(--p1);margin-bottom:.3rem;line-height:1.1}
+.card-sub{font-size:.82rem;color:var(--g3);line-height:1.55}
+
+/* ── RESUMEN CONSULTA ── */
+.consulta-box{background:linear-gradient(135deg,var(--p5),var(--s5));border:1px solid var(--p4);border-radius:var(--rl);padding:1.3rem 1.4rem;margin-top:.4rem}
+.cb-row{display:flex;align-items:center;gap:.7rem;padding:.5rem 0}
+.cb-row+.cb-row{border-top:1px dashed rgba(107,74,154,.18)}
+.cb-ico{width:34px;height:34px;border-radius:10px;background:var(--wh);display:flex;align-items:center;justify-content:center;font-size:1.05rem;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.cb-lbl{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--g3)}
+.cb-val{font-size:.95rem;font-weight:700;color:var(--g1)}
+.cb-val.precio{font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--p1)}
+
+/* ── DATOS TRANSFERENCIA ── */
+.tx-list{margin-top:.4rem}
+.tx-item{display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.7rem .9rem;border:1.5px solid var(--g4);border-radius:var(--r);margin-bottom:.55rem;transition:border .2s,background .2s}
+.tx-item:hover{border-color:var(--p3);background:var(--g5)}
+.tx-info{min-width:0}
+.tx-lbl{font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--g3)}
+.tx-val{font-size:.95rem;font-weight:700;color:var(--g1);word-break:break-word}
+.copy-btn{flex-shrink:0;border:none;background:var(--p5);color:var(--p2);font-family:'Nunito',sans-serif;font-size:.72rem;font-weight:800;padding:.45rem .7rem;border-radius:8px;cursor:pointer;transition:all .18s;display:inline-flex;align-items:center;gap:.3rem}
+.copy-btn:hover{background:var(--p2);color:#fff}
+.copy-btn.ok{background:var(--s2);color:#fff}
+.tx-note{display:flex;gap:.55rem;align-items:flex-start;background:var(--s5);border:1px solid var(--s4);border-radius:var(--r);padding:.8rem .95rem;font-size:.78rem;color:var(--s1);line-height:1.5;margin-top:.6rem}
+
+/* ── UPLOAD ── */
+.drop{border:2px dashed var(--p3);border-radius:var(--rl);background:var(--p5);padding:2rem 1.2rem;text-align:center;cursor:pointer;transition:all .2s;margin-top:.4rem}
+.drop:hover,.drop.drag{background:#e9ddf7;border-color:var(--p2)}
+.drop-ico{font-size:2.4rem;display:block;margin-bottom:.5rem}
+.drop-ttl{font-size:.92rem;font-weight:800;color:var(--p1);margin-bottom:.25rem}
+.drop-sub{font-size:.74rem;color:var(--g3)}
+.preview{margin-top:1rem;display:none;align-items:center;gap:.9rem;border:1.5px solid var(--s3);background:var(--s5);border-radius:var(--r);padding:.8rem .9rem}
+.preview.show{display:flex}
+.preview img{width:54px;height:54px;object-fit:cover;border-radius:8px;flex-shrink:0;border:1px solid var(--g4)}
+.preview .pv-doc{width:54px;height:54px;border-radius:8px;background:var(--wh);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;border:1px solid var(--g4)}
+.pv-info{min-width:0;flex:1}
+.pv-name{font-size:.85rem;font-weight:700;color:var(--g1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pv-size{font-size:.72rem;color:var(--g3)}
+.pv-x{border:none;background:none;color:var(--g3);font-size:1.3rem;cursor:pointer;line-height:1;padding:.2rem}
+.pv-x:hover{color:#b91c1c}
+
+/* ── BOTONES ── */
+.btn{width:100%;padding:.95rem 1.6rem;border-radius:var(--r);font-family:'Nunito',sans-serif;font-size:.95rem;font-weight:800;cursor:pointer;transition:all .2s;border:none;display:inline-flex;align-items:center;justify-content:center;gap:.5rem;margin-top:1.2rem}
+.btn-primary{background:var(--p2);color:#fff}
+.btn-primary:hover:not(:disabled){background:var(--p1);transform:translateY(-1px);box-shadow:0 6px 18px rgba(61,36,89,.25)}
+.btn-primary:disabled{background:var(--g4);color:var(--g3);cursor:not-allowed}
+
+/* ── ESTADOS / SUCCESS ── */
+.state{text-align:center;padding:1rem .5rem}
+.state-ico{width:78px;height:78px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2.4rem;margin:0 auto 1rem}
+.state-ok{background:var(--s5);border:2px solid var(--s3)}
+.state-wait{background:#fff7ed;border:2px solid #fed7aa}
+.state-ttl{font-family:'Cormorant Garamond',serif;font-size:1.65rem;font-weight:600;color:var(--p1);margin-bottom:.5rem}
+.state-txt{font-size:.88rem;color:var(--g2);line-height:1.6;max-width:400px;margin:0 auto}
+.badge-pill{display:inline-flex;align-items:center;gap:.35rem;font-size:.74rem;font-weight:800;padding:.35rem .8rem;border-radius:20px;margin-top:1rem}
+.bp-wait{background:#ffedd5;color:#ea580c}
+.bp-ok{background:var(--s5);color:var(--s1)}
+
+.hide{display:none!important}
+.foot{text-align:center;font-size:.72rem;color:var(--g3);margin-top:1.5rem;line-height:1.6}
+.foot a{color:var(--p2);text-decoration:none;font-weight:700}
+.spinner{width:18px;height:18px;border:2.5px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-circle">NA</div>
+  <div class="hdr-info">
+    <div class="hdr-title">NutriAge</div>
+    <div class="hdr-sub">Pago de tu consulta</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ESTADO: cargando -->
+  <div id="loading" class="card">
+    <div class="state">
+      <div class="state-ico state-wait"><div class="spinner" style="border-color:var(--p4);border-top-color:var(--p2)"></div></div>
+      <div class="state-txt">Cargando tu consulta…</div>
+    </div>
+  </div>
+
+  <!-- FLUJO DE PAGO -->
+  <div id="flujo" class="hide">
+
+    <!-- 1. Resumen consulta -->
+    <div class="card">
+      <span class="card-eyebrow">🗓️ Tu consulta</span>
+      <h1 class="card-ttl" id="saludo">Hola</h1>
+      <p class="card-sub">Para confirmar tu hora, realiza el pago por transferencia y sube tu comprobante. Apenas se verifique, te enviaremos el link de la videollamada.</p>
+      <div class="consulta-box">
+        <div class="cb-row">
+          <div class="cb-ico">📅</div>
+          <div><div class="cb-lbl">Fecha y hora</div><div class="cb-val" id="cita-fecha">—</div></div>
+        </div>
+        <div class="cb-row">
+          <div class="cb-ico">⏱️</div>
+          <div><div class="cb-lbl">Duración</div><div class="cb-val">45 minutos · online</div></div>
+        </div>
+        <div class="cb-row">
+          <div class="cb-ico">💳</div>
+          <div><div class="cb-lbl">Total a pagar</div><div class="cb-val precio" id="cita-monto">$15.000</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Datos transferencia -->
+    <div class="card">
+      <span class="card-eyebrow">🏦 Paso 1 · Transfiere</span>
+      <h2 class="card-ttl" style="font-size:1.3rem">Datos para transferir</h2>
+      <div class="tx-list" id="tx-list"></div>
+      <div class="tx-note">
+        <span>📌</span>
+        <span>En el <strong>mensaje/comentario</strong> de la transferencia escribe tu <strong>nombre completo</strong> para identificar tu pago.</span>
+      </div>
+    </div>
+
+    <!-- 3. Subir comprobante -->
+    <div class="card">
+      <span class="card-eyebrow">📎 Paso 2 · Comprobante</span>
+      <h2 class="card-ttl" style="font-size:1.3rem">Sube tu comprobante</h2>
+      <p class="card-sub">Foto o PDF del comprobante de la transferencia.</p>
+      <div class="drop" id="drop">
+        <span class="drop-ico">📤</span>
+        <div class="drop-ttl">Toca para subir o arrastra aquí</div>
+        <div class="drop-sub">JPG, PNG o PDF · hasta 8 MB</div>
+      </div>
+      <input type="file" id="file" accept="image/*,application/pdf" class="hide">
+      <div class="preview" id="preview"></div>
+      <button class="btn btn-primary" id="submit" disabled onclick="enviar()">Enviar comprobante</button>
+    </div>
+
+  </div>
+
+  <!-- ESTADO: ya pagado -->
+  <div id="pagado" class="card hide">
+    <div class="state">
+      <div class="state-ico state-ok">✅</div>
+      <div class="state-ttl">¡Tu pago ya está confirmado!</div>
+      <div class="state-txt">Revisa tu correo: ahí te enviamos el link para entrar a tu videollamada. ¡Nos vemos en tu consulta!</div>
+      <span class="badge-pill bp-ok">🟢 Pagado</span>
+    </div>
+  </div>
+
+  <!-- ESTADO: comprobante enviado OK -->
+  <div id="enviado" class="card hide">
+    <div class="state">
+      <div class="state-ico state-wait">📨</div>
+      <div class="state-ttl">¡Comprobante recibido!</div>
+      <div class="state-txt">Gracias 💜 Apenas Fernanda verifique tu pago, te llegará el <strong>link de tu consulta por correo</strong>. Suele tardar poco.</div>
+      <span class="badge-pill bp-wait">🟠 En verificación</span>
+    </div>
+  </div>
+
+  <!-- ESTADO: error de carga -->
+  <div id="error" class="card hide">
+    <div class="state">
+      <div class="state-ico state-wait">⚠️</div>
+      <div class="state-ttl">No encontramos tu consulta</div>
+      <div class="state-txt">Revisa que el link sea el que te enviamos por correo, o escríbele directamente a Fernanda.</div>
+    </div>
+  </div>
+
+  <div class="foot">
+    ¿Dudas? Escríbele a <a href="https://wa.me/56971246200" target="_blank">Fernanda por WhatsApp</a><br>
+    NutriAge · Nutrición que cuida tu edad
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+//  DATOS DE TRANSFERENCIA  ← rellenar cuando Fernanda los envíe
+// ════════════════════════════════════════════════════════════════
+const DATOS_TRANSFERENCIA = {
+  'Banco':        'Banco —',
+  'Tipo de cuenta':'Cuenta Corriente —',
+  'N° de cuenta': '—',
+  'RUT':          '—',
+  'Titular':      'Fernanda Ugarte',
+  'Correo':       'nutriage2026@gmail.com',
+};
+// ════════════════════════════════════════════════════════════════
+
+const IS_LOCAL = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:';
+const API = IS_LOCAL ? 'http://localhost:8000' : 'https://nutriage-api.onrender.com';
+const params = new URLSearchParams(location.search);
+const LEAD_ID = params.get('id') || '';
+let archivo = null;
+
+function fmtFechaCL(iso){
+  if(!iso) return '—';
+  try{
+    const d = new Date(iso);
+    const f = d.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long',timeZone:'America/Santiago'});
+    const h = d.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',timeZone:'America/Santiago'});
+    return f.charAt(0).toUpperCase()+f.slice(1)+' · '+h+' hrs';
+  }catch(e){ return iso; }
+}
+
+function renderTransferencia(){
+  const cont = document.getElementById('tx-list');
+  cont.innerHTML = Object.entries(DATOS_TRANSFERENCIA).map(([k,v])=>`
+    <div class="tx-item">
+      <div class="tx-info"><div class="tx-lbl">${k}</div><div class="tx-val">${v}</div></div>
+      <button class="copy-btn" onclick="copiar(this,'${String(v).replace(/'/g,"\\'")}')">⧉ Copiar</button>
+    </div>`).join('');
+}
+
+function copiar(btn, txt){
+  navigator.clipboard?.writeText(txt).then(()=>{
+    const o = btn.innerHTML; btn.innerHTML='✓ Copiado'; btn.classList.add('ok');
+    setTimeout(()=>{ btn.innerHTML=o; btn.classList.remove('ok'); },1400);
+  });
+}
+
+// ── Mostrar el estado correcto ──
+function mostrar(id){
+  ['loading','flujo','pagado','enviado','error'].forEach(x=>document.getElementById(x).classList.add('hide'));
+  document.getElementById(id).classList.remove('hide');
+}
+
+async function cargar(){
+  renderTransferencia();
+  // Sin id en la URL → modo vista previa (para revisar el diseño)
+  if(!LEAD_ID){
+    document.getElementById('saludo').textContent = 'Hola 👋 (vista previa)';
+    document.getElementById('cita-fecha').textContent = fmtFechaCL(new Date(Date.now()+86400000).toISOString().slice(0,11)+'17:00:00Z');
+    mostrar('flujo');
+    return;
+  }
+  try{
+    const r = await fetch(`${API}/pago/${LEAD_ID}`);
+    if(!r.ok) throw new Error('no encontrado');
+    const d = await r.json();
+    document.getElementById('saludo').textContent = 'Hola ' + (d.nombre? d.nombre.split(' ')[0] : '') + ' 👋';
+    document.getElementById('cita-fecha').textContent = fmtFechaCL(d.cita);
+    if(d.monto) document.getElementById('cita-monto').textContent = '$'+Number(d.monto).toLocaleString('es-CL');
+    if(d.estadoPago === 'Pagado'){ mostrar('pagado'); return; }
+    if(d.estadoPago === 'Por verificar'){ mostrar('enviado'); return; }
+    mostrar('flujo');
+  }catch(e){
+    mostrar('error');
+  }
+}
+
+// ── Upload UI ──
+const drop = document.getElementById('drop');
+const fileInput = document.getElementById('file');
+drop.addEventListener('click', ()=>fileInput.click());
+['dragover','dragenter'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag');}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('drag');}));
+drop.addEventListener('drop', e=>{ if(e.dataTransfer.files[0]) setArchivo(e.dataTransfer.files[0]); });
+fileInput.addEventListener('change', e=>{ if(e.target.files[0]) setArchivo(e.target.files[0]); });
+
+function setArchivo(f){
+  if(f.size > 8*1024*1024){ alert('El archivo es muy grande (máximo 8 MB).'); return; }
+  archivo = f;
+  const pv = document.getElementById('preview');
+  const esImg = f.type.startsWith('image/');
+  const kb = f.size<1024*1024 ? (f.size/1024).toFixed(0)+' KB' : (f.size/1048576).toFixed(1)+' MB';
+  const thumb = esImg ? `<img src="${URL.createObjectURL(f)}" alt="">` : `<div class="pv-doc">📄</div>`;
+  pv.innerHTML = `${thumb}<div class="pv-info"><div class="pv-name">${f.name}</div><div class="pv-size">${kb}</div></div>
+    <button class="pv-x" onclick="quitarArchivo()">✕</button>`;
+  pv.classList.add('show');
+  document.getElementById('submit').disabled = false;
+}
+function quitarArchivo(){
+  archivo = null; fileInput.value='';
+  const pv = document.getElementById('preview'); pv.classList.remove('show'); pv.innerHTML='';
+  document.getElementById('submit').disabled = true;
+}
+
+async function enviar(){
+  if(!archivo) return;
+  const btn = document.getElementById('submit');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Enviando…';
+  if(!LEAD_ID){ // vista previa
+    setTimeout(()=>mostrar('enviado'), 700);
+    return;
+  }
+  try{
+    const fd = new FormData();
+    fd.append('file', archivo);
+    const r = await fetch(`${API}/pago/${LEAD_ID}/comprobante`, { method:'POST', body: fd });
+    if(!r.ok){ const e = await r.json().catch(()=>({})); throw new Error(e.error||('HTTP '+r.status)); }
+    mostrar('enviado');
+  }catch(e){
+    btn.disabled = false; btn.innerHTML = 'Enviar comprobante';
+    alert('No se pudo enviar: '+e.message+'\nIntenta de nuevo o escríbele a Fernanda.');
+  }
+}
+
+cargar();
+</script>
+</body>
+</html>

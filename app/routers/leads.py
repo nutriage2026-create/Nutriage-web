@@ -53,6 +53,7 @@ def list_leads():
                 "fecha":       fecha_d.get("start", ""),
                 "edad":        edad_p,
                 "genero":      genero,
+                "estadoPago":  (props.get("Estado de pago", {}).get("select") or {}).get("name", ""),
             })
         return jsonify({"total": len(leads), "leads": leads})
     except Exception as e:
@@ -73,6 +74,7 @@ def update_status(page_id):
             temperatura=data.get("temperatura"),
             estatus=data.get("estatus"),
             resumen=data.get("resumen"),
+            estado_pago=data.get("estadoPago"),
         )
         return jsonify({"id": result["id"]})
     except Exception as e:
