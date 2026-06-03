@@ -3,12 +3,41 @@ import urllib.parse
 import httpx
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
 from app.config import settings
 
 
-def send_email(to, subject: str, body_html: str) -> bool:
+def build_email_message(sender, recipients, subject, body_html, attachments=None):
+    """
+    Arma un mensaje MIME (con adjuntos opcionales). Separado del envio para
+    poder testearlo sin tocar SMTP.
+    attachments: lista de (filename, content_bytes, content_type).
+    """
+    msg = MIMEMultipart("mixed")
+    msg["From"] = sender
+    msg["To"] = ", ".join(recipients)
+    msg["Subject"] = subject
+
+    alt = MIMEMultipart("alternative")
+    alt.attach(MIMEText(body_html, "html", "utf-8"))
+    msg.attach(alt)
+
+    for filename, content_bytes, content_type in (attachments or []):
+        maintype, _, subtype = (content_type or "application/octet-stream").partition("/")
+        part = MIMEBase(maintype or "application", subtype or "octet-stream")
+        part.set_payload(content_bytes)
+        encoders.encode_base64(part)
+        part.add_header("Content-Disposition", "attachment", filename=filename)
+        msg.attach(part)
+
+    return msg
+
+
+def send_email(to, subject: str, body_html: str, attachments=None) -> bool:
     """
     Envia email via Gmail SMTP. Acepta string o lista de destinatarios.
+    attachments: lista de (filename, content_bytes, content_type) opcional.
     Requiere GMAIL_USER y GMAIL_APP_PASSWORD.
     """
     if not settings.GMAIL_USER or not settings.GMAIL_APP_PASSWORD:
@@ -19,11 +48,7 @@ def send_email(to, subject: str, body_html: str) -> bool:
     if not recipients:
         return False
 
-    msg = MIMEMultipart("alternative")
-    msg["From"] = settings.GMAIL_USER
-    msg["To"] = ", ".join(recipients)
-    msg["Subject"] = subject
-    msg.attach(MIMEText(body_html, "html", "utf-8"))
+    msg = build_email_message(settings.GMAIL_USER, recipients, subject, body_html, attachments)
 
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
         server.login(settings.GMAIL_USER, settings.GMAIL_APP_PASSWORD)

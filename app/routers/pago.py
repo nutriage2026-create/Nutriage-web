@@ -92,16 +92,17 @@ def subir_comprobante(lead_id):
           <hr>
           <p><strong>Paciente:</strong> {nombre}</p>
           <p><strong>Consulta:</strong> {fecha}</p>
-          <p>El paciente subió su comprobante de transferencia. Revísalo en tu
-             dashboard y, si está todo bien, marca el pago como
-             <strong>Pagado</strong> para enviarle el link de la sala.</p>
+          <p>El paciente subió su comprobante de transferencia (adjunto en este
+             correo). Revísalo en tu dashboard y, si está todo bien, marca el
+             pago como <strong>Pagado</strong> para enviarle el link de la sala.</p>
           <hr>
-          <small style="color:#999">Aviso automático desde NutriAge</small>
+          <small style="color:#999">Aviso automático desde NutriAge · el comprobante va adjunto</small>
         </div>
         """
         if settings.NUTRICIONISTA_EMAILS:
             send_email(settings.NUTRICIONISTA_EMAILS,
-                       f"NutriAge · Comprobante de {nombre}", body)
+                       f"NutriAge · Comprobante de {nombre}", body,
+                       attachments=[(filename, content, ctype)])
         send_whatsapp_callmebot(
             f"🧾 *Comprobante recibido*\n👤 {nombre}\n📅 {fecha}\n"
             f"Revísalo en tu dashboard y marca 'Pagado' para enviar el link."
