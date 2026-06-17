@@ -46,6 +46,10 @@ class Settings:
     @property
     def APP_ENV(self):                  return _get("APP_ENV", "development")
     @property
+    def PUBLIC_BASE_URL(self):
+        # URL pública donde se sirve la página de pago (sin slash final).
+        return _get("PUBLIC_BASE_URL", "https://nutriage-api.onrender.com").rstrip("/")
+    @property
     def TZ(self):                       return _get("TZ", "America/Santiago")
 
     # Notificaciones a la nutricionista cuando un paciente reserva.

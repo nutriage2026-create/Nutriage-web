@@ -3,13 +3,20 @@ from flask import Blueprint, request, jsonify
 from app.services.notion import get_lead, upload_file_to_lead, update_lead_status
 from app.services.notifications import (
     send_email, send_whatsapp_callmebot, _fmt_fecha_hora_cl,
+    notify_pago_paciente,
 )
 from app.config import settings
 
 bp = Blueprint("pago", __name__, url_prefix="/pago")
 
-PRECIO_CONSULTA = 15000
+PRECIO_CONSULTA = 15000          # valor por defecto si la nutricionista no definió uno
 MAX_BYTES = 8 * 1024 * 1024  # 8 MB
+
+
+def _monto_lead(props) -> int:
+    """Valor de la consulta definido por la nutricionista; cae al precio base."""
+    v = props.get("Valor consulta", {}).get("number")
+    return int(v) if v else PRECIO_CONSULTA
 
 
 def _prop(props, name, default=""):
@@ -45,9 +52,56 @@ def info_pago(lead_id):
     return jsonify({
         "nombre":     nombre,
         "cita":       _cita_desde_notas(notas),
-        "monto":      PRECIO_CONSULTA,
+        "monto":      _monto_lead(props),
         "estadoPago": estado,
     })
+
+
+@bp.post("/<lead_id>/enviar")
+def enviar_pago(lead_id):
+    """
+    La nutricionista define el valor de la consulta y dispara el correo al
+    paciente con ese monto + el link para pagar y subir su comprobante.
+    Body JSON (opcional): { "valor": 18000 }
+    """
+    data = request.get_json(silent=True) or {}
+    valor = data.get("valor")
+
+    try:
+        page = get_lead(lead_id)
+    except Exception:
+        return jsonify({"error": "Consulta no encontrada"}), 404
+
+    props = page.get("properties", {})
+
+    # Si llega un valor nuevo, lo guardamos y dejamos el pago en "Pendiente".
+    if valor not in (None, ""):
+        try:
+            update_lead_status(lead_id, valor=int(valor), estado_pago="Pendiente")
+            props["Valor consulta"] = {"number": int(valor)}
+        except Exception as e:
+            return jsonify({"error": f"No se pudo guardar el valor: {e}"}), 502
+
+    monto = _monto_lead(props)
+    if monto <= 0:
+        return jsonify({"error": "Define un valor de consulta antes de enviar"}), 400
+
+    titulo  = (_prop(props, "Nombre").get("title") or [])
+    nombre  = titulo[0].get("plain_text", "") if titulo else ""
+    email   = _prop(props, "Email").get("email") or ""
+    notas_rt = _prop(props, "Notas").get("rich_text") or []
+    notas    = notas_rt[0].get("plain_text", "") if notas_rt else ""
+    cita_iso = _cita_desde_notas(notas)
+
+    if not email:
+        return jsonify({"error": "El paciente no tiene correo registrado"}), 400
+
+    link = f"{settings.PUBLIC_BASE_URL}/pago-pagina?id={lead_id}"
+    enviado = notify_pago_paciente(nombre, email, monto, cita_iso, link)
+    if not enviado:
+        return jsonify({"error": "No se pudo enviar el correo (revisa Gmail)"}), 502
+
+    return jsonify({"ok": True, "email": email, "monto": monto}), 200
 
 
 @bp.post("/<lead_id>/comprobante")

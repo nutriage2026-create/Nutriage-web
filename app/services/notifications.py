@@ -99,6 +99,45 @@ def _fmt_fecha_hora_cl(iso_start: str) -> str:
         return iso_start
 
 
+def notify_pago_paciente(nombre: str, email: str, monto: int, cita_iso: str, link: str) -> bool:
+    """
+    Envía al paciente el correo con el valor de la consulta (definido por la
+    nutricionista) y el link para realizar el pago y subir su comprobante.
+    """
+    if not email:
+        print("[notifications] paciente sin email — correo de pago no enviado.")
+        return False
+    primer_nombre = (nombre or "").split(" ")[0] or "paciente"
+    fecha = _fmt_fecha_hora_cl(cita_iso)
+    monto_fmt = f"${int(monto):,}".replace(",", ".")
+    body = f"""
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#0f172a">
+      <h2 style="color:#3d2459;font-family:Georgia,serif">Hola {primer_nombre} 👋</h2>
+      <p>Tu consulta nutricional con <strong>Fernanda Ugarte</strong> está casi lista.
+         Para confirmarla, te dejamos el detalle del pago:</p>
+      <div style="background:#f0e8fa;border:1px solid #d4bbec;border-radius:12px;padding:16px 18px;margin:18px 0">
+        <p style="margin:4px 0"><strong>📅 Cita:</strong> {fecha}</p>
+        <p style="margin:4px 0;font-size:1.15rem"><strong>💳 Valor de la consulta:</strong>
+           <span style="color:#2d5e34;font-weight:800">{monto_fmt}</span></p>
+      </div>
+      <p style="text-align:center;margin:26px 0">
+        <a href="{link}" style="background:#4a8c54;color:#fff;text-decoration:none;
+           padding:13px 28px;border-radius:10px;font-weight:700;display:inline-block">
+           Pagar y subir comprobante →</a>
+      </p>
+      <p style="font-size:.85rem;color:#64748b">Si el botón no funciona, copia este enlace:<br>
+         <a href="{link}" style="color:#6b4a9a">{link}</a></p>
+      <hr style="border:none;border-top:1px solid #e2e8f0;margin:20px 0">
+      <small style="color:#999">Correo automático de NutriAge · responde este correo si tienes dudas.</small>
+    </div>
+    """
+    try:
+        return send_email(email, "NutriAge · Valor y pago de tu consulta", body)
+    except Exception as e:
+        print(f"[notifications] correo de pago al paciente falló: {e}")
+        return False
+
+
 def notify_nueva_cita(payload: dict) -> None:
     """
     Envia correo (a todos los NUTRICIONISTA_EMAILS) y WhatsApp con el detalle

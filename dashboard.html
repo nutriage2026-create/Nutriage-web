@@ -143,6 +143,34 @@ tr:hover td{background:var(--g5)}
 .funnel-bar{height:100%;border-radius:4px;transition:width .6s ease}
 .funnel-count{font-size:.72rem;font-weight:700;color:var(--g3);width:24px;text-align:right;flex-shrink:0}
 
+/* ── PERFIL DE PACIENTES ── */
+.perfil-group{margin-bottom:1rem}
+.perfil-group:last-child{margin-bottom:0}
+.perfil-h{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--p2);margin-bottom:.5rem}
+.perfil-item{display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem}
+.perfil-label{font-size:.78rem;font-weight:700;color:var(--g2);width:120px;flex-shrink:0;text-transform:capitalize}
+.perfil-bar-wrap{flex:1;background:var(--g4);border-radius:5px;height:11px;overflow:hidden}
+.perfil-bar{height:100%;border-radius:5px;transition:width .6s ease}
+.perfil-count{font-size:.74rem;font-weight:800;color:var(--g2);width:38px;text-align:right;flex-shrink:0}
+
+/* ── PENDIENTES DE VALOR ── */
+.pv-wrap{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:.6rem .8rem;margin-bottom:1rem}
+.pv-title{font-size:.78rem;font-weight:800;color:#c2410c;margin-right:.3rem}
+.pv-chip{font-size:.72rem;font-weight:700;color:#9a3412;background:#ffedd5;border:1px solid #fdba74;border-radius:20px;padding:.2rem .65rem;cursor:pointer;transition:all .15s}
+.pv-chip:hover{background:#fdba74;color:#7c2d12}
+.pv-more{font-size:.72rem;font-weight:700;color:#c2410c}
+
+/* ── VALOR DE CONSULTA (celda editable) ── */
+.valor-cell{display:flex;align-items:center;gap:.35rem;white-space:nowrap}
+.valor-input-wrap{position:relative;display:inline-flex;align-items:center}
+.valor-pre{position:absolute;left:.45rem;font-size:.72rem;font-weight:700;color:var(--g3);pointer-events:none}
+.valor-input{width:78px;font-family:'Nunito',sans-serif;font-size:.74rem;font-weight:700;color:var(--g1);padding:.26rem .4rem .26rem 1.05rem;border:1px solid var(--g4);border-radius:7px;background:var(--wh);transition:border-color .15s}
+.valor-input:focus{outline:none;border-color:var(--p3);box-shadow:0 0 0 2px var(--p5)}
+.valor-send{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border:1px solid var(--s3);background:var(--s5);border-radius:7px;cursor:pointer;font-size:.82rem;transition:all .15s}
+.valor-send:hover{background:var(--s4)}
+.valor-send.done{border-color:#bbf7d0;background:#dcfce7;color:#15803d;cursor:default}
+.valor-send:disabled{opacity:.5;cursor:wait}
+
 /* ── DONUT ── */
 .donut-wrap{display:flex;align-items:center;gap:1.5rem;justify-content:center;padding:.5rem 0}
 .donut-legend{display:flex;flex-direction:column;gap:.6rem}
@@ -690,30 +718,33 @@ tr:hover td{background:var(--g5)}
           <!-- KPIs -->
           <div class="kpi-grid kpi-grid-3">
             <div class="kpi-card purple">
-              <div class="kpi-label">Prospectos Totales</div>
+              <div class="kpi-label">Pacientes Atendidos</div>
               <div class="kpi-value" id="kpi-total">—</div>
-              <div class="kpi-sub">en CRM Notion</div>
+              <div class="kpi-sub" id="kpi-total-sub">este mes vs anterior</div>
               <div class="kpi-ico">🎯</div>
             </div>
-            <div class="kpi-card red">
-              <div class="kpi-label">Prospectos Prioritarios</div>
+            <div class="kpi-card red" id="kpi-pendientes-card" onclick="irAPendientesValor()" style="cursor:pointer" title="Ver pacientes pendientes de definir valor">
+              <div class="kpi-label">Por Definir Valor</div>
               <div class="kpi-value" id="kpi-hot">—</div>
-              <div class="kpi-sub">alta probabilidad de cierre</div>
-              <div class="kpi-ico">🔥</div>
+              <div class="kpi-sub">definir valor y enviar pago</div>
+              <div class="kpi-ico">💰</div>
             </div>
             <div class="kpi-card amber">
-              <div class="kpi-label">Tasa de Conversión</div>
+              <div class="kpi-label">Crecimiento Mensual</div>
               <div class="kpi-value" id="kpi-tasa">—</div>
-              <div class="kpi-sub">leads cerrados vs total</div>
+              <div class="kpi-sub" id="kpi-tasa-sub">ingresos vs mes anterior</div>
               <div class="kpi-ico">📈</div>
             </div>
           </div>
+
+          <!-- Lista de pacientes pendientes de valor -->
+          <div id="pending-valor-list"></div>
 
           <!-- Charts row -->
           <div class="grid-2">
             <div class="card">
               <div class="card-head">
-                <h3><span class="ico">🔽</span> Prospección por Etapa</h3>
+                <h3><span class="ico">👥</span> Perfil de Pacientes</h3>
               </div>
               <div class="card-body" id="funnel-chart">
                 <div class="loading"><div class="spinner"></div>Cargando...</div>
@@ -884,13 +915,14 @@ tr:hover td{background:var(--g5)}
 <div id="toast-container"></div>
 
 <script>
-const IS_LOCAL = location.hostname === 'localhost' || location.hostname === '127.0.0.1' || location.protocol === 'file:';
+const IS_LOCAL = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 const API = IS_LOCAL ? 'http://localhost:8000' : 'https://nutriage-api.onrender.com';
 const TOKEN_KEY = 'nutriage_token';
 let allLeads        = [];
 let currentFilter   = '';
 let currentAgeRange = '';
 let currentGender   = '';
+let pendienteValorFilter = false;
 let bookingsMap   = {};   // bookingId(str) → {videoUrl, nombre, start}
 let leadsByEmail  = {};   // email(lower) → lead
 let leadsByBookingId = {}; // bookingId(str) → lead
@@ -1183,41 +1215,156 @@ function setLeadsError(){
   });
 }
 
-function updateKPIs(leads){
-  const total = leads.length;
-  const hot = leads.filter(l=>l.temperatura==='Hot').length;
-  const agendadas = leads.filter(l=>l.estatus==='Cita agendada').length;
-  const cerrados = leads.filter(l=>l.estatus==='Cerrado').length;
-  const tasa = total>0 ? Math.round((cerrados/total)*100)+'%' : '0%';
-  document.getElementById('kpi-total').textContent = total;
-  document.getElementById('kpi-hot').textContent = hot;
-  document.getElementById('kpi-agendadas').textContent = agendadas;
-  document.getElementById('kpi-tasa').textContent = tasa;
+// ── Helpers de mes / valor de consulta ───────────────────────────
+function _mesKeyDe(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+function currentMonthKey(){ return _mesKeyDe(new Date()); }
+function prevMonthKey(){ const d=new Date(); d.setDate(1); d.setMonth(d.getMonth()-1); return _mesKeyDe(d); }
+function citaMonthKey(l){
+  const iso = parseCitaISO(l.notas);
+  if(iso){ const d=new Date(iso); if(!isNaN(d)) return _mesKeyDe(d); }
+  return monthKey(l.fecha); // fallback: mes de primer contacto
+}
+function leadValor(l){
+  if(l && typeof l.valor === 'number' && l.valor>0) return l.valor;
+  if(l && l.id){ const v=_loadValores()[l.id]; if(typeof v==='number' && v>0) return v; }
+  return 0;
+}
+function needsValor(l){
+  if(!l || !l.id) return false;
+  const tieneCita = l.estatus==='Cita agendada' || !!parseCitaISO(l.notas);
+  if(!tieneCita) return false;
+  if(['Pagado','Efectivo'].includes(l.estadoPago||'')) return false;
+  return leadValor(l) <= 0;
 }
 
+function updateKPIs(leads){
+  const curK = currentMonthKey(), prevK = prevMonthKey();
+  let atendidosCur=0, atendidosPrev=0, ingresosCur=0, ingresosPrev=0;
+  leads.forEach(l=>{
+    const mk = citaMonthKey(l);
+    if(mk===curK){ atendidosCur++; ingresosCur += leadValor(l); }
+    else if(mk===prevK){ atendidosPrev++; ingresosPrev += leadValor(l); }
+  });
+
+  // KPI 1 — Pacientes atendidos este mes vs anterior
+  document.getElementById('kpi-total').textContent = atendidosCur;
+  const subT = document.getElementById('kpi-total-sub');
+  if(subT){
+    const diff = atendidosCur - atendidosPrev;
+    const arrow = diff>0?'▲':diff<0?'▼':'•';
+    const col = diff>0?'#16a34a':diff<0?'#dc2626':'var(--g3)';
+    subT.innerHTML = `mes anterior: <b>${atendidosPrev}</b> · <span style="color:${col};font-weight:800">${arrow} ${Math.abs(diff)}</span>`;
+  }
+
+  // Citas agendadas (tarjeta verde Zona A)
+  const elAg = document.getElementById('kpi-agendadas');
+  if(elAg) elAg.textContent = leads.filter(l=>l.estatus==='Cita agendada').length;
+
+  // KPI 2 — Pacientes por definir valor de consulta
+  const pendientes = leads.filter(needsValor);
+  document.getElementById('kpi-hot').textContent = pendientes.length;
+  renderPendientesValor(pendientes);
+
+  // KPI 3 — Crecimiento mensual (ingresos; si no hay valores, usa nº de consultas)
+  const tasaEl  = document.getElementById('kpi-tasa');
+  const tasaSub = document.getElementById('kpi-tasa-sub');
+  let base, cur;
+  if(ingresosCur>0 || ingresosPrev>0){ base=ingresosPrev; cur=ingresosCur; if(tasaSub) tasaSub.textContent='ingresos vs mes anterior'; }
+  else { base=atendidosPrev; cur=atendidosCur; if(tasaSub) tasaSub.textContent='consultas vs mes anterior'; }
+  if(base>0){
+    const pct = Math.round(((cur-base)/base)*100);
+    tasaEl.textContent = (pct>=0?'+':'') + pct + '%';
+    tasaEl.style.color = pct>0?'#16a34a':pct<0?'#dc2626':'';
+  } else if(cur>0){
+    tasaEl.textContent = '🚀 Nuevo';
+    tasaEl.style.color = '#16a34a';
+  } else {
+    tasaEl.textContent = '—';
+    tasaEl.style.color = '';
+  }
+}
+
+function renderPendientesValor(list){
+  const el = document.getElementById('pending-valor-list');
+  if(!el) return;
+  if(!list.length){ el.innerHTML=''; return; }
+  const chips = list.slice(0,12).map(l=>{
+    const nm = (l.nombre||'Paciente').split(' ')[0];
+    return `<button class="pv-chip" onclick="irAPendientesValor()" title="${(l.nombre||'')} — definir valor y enviar pago">${nm}</button>`;
+  }).join('');
+  const extra = list.length>12 ? `<span class="pv-more">+${list.length-12} más</span>` : '';
+  el.innerHTML = `<div class="pv-wrap">
+    <span class="pv-title">⚠️ Falta definir valor de consulta (${list.length}):</span>
+    ${chips}${extra}
+  </div>`;
+}
+
+function irAPendientesValor(){
+  if(typeof showSection==='function') showSection('leads');
+  else { const t=document.querySelector('[onclick*="leads"]'); if(t) t.click(); }
+  pendienteValorFilter = true;
+  applyFilters();
+  const wrap = document.getElementById('leads-table-wrap');
+  if(wrap && wrap.scrollIntoView) wrap.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// Perfil de pacientes: características más frecuentes (género, edad, condiciones)
 function renderFunnel(leads){
-  const steps = [
-    {label:'Pendiente contactar', key:'Pendiente de contactar', color:'#64748b'},
-    {label:'En proceso',          key:'En proceso',             color:'#d97706'},
-    {label:'Cita agendada',       key:'Cita agendada',          color:'#16a34a'},
-    {label:'No contestado',       key:'No contestado',          color:'#ea580c'},
-    {label:'Sin interés',         key:'Sin interes',            color:'#dc2626'},
-    {label:'Cerrado',             key:'Cerrado',                color:'#6b4a9a'},
-  ];
-  const counts = {};
-  leads.forEach(l=>{ counts[l.estatus] = (counts[l.estatus]||0)+1; });
-  const max = Math.max(...Object.values(counts),1);
   const el = document.getElementById('funnel-chart');
   if(!leads.length){ el.innerHTML='<div class="empty"><div class="empty-ico">📭</div><p>Sin leads aún</p></div>'; return; }
-  el.innerHTML = steps.map(s=>{
-    const n = counts[s.key]||0;
-    const w = Math.round((n/max)*100);
-    return `<div class="funnel-item">
-      <div class="funnel-label">${s.label}</div>
-      <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:${w}%;background:${s.color}"></div></div>
-      <div class="funnel-count">${n}</div>
+
+  // Género
+  const gen = {};
+  leads.forEach(l=>{ const g=(l.genero||'').trim(); if(g) gen[g]=(gen[g]||0)+1; });
+  const totalGen = Object.values(gen).reduce((a,b)=>a+b,0)||1;
+
+  // Edad por rango
+  const rangos = [['18–30',n=>n>=18&&n<30],['30–45',n=>n>=30&&n<45],['45–60',n=>n>=45&&n<60],['60+',n=>n>=60]];
+  const edadCount = {}; let conEdad=0;
+  leads.forEach(l=>{ const n=Number(l.edad); if(!isNaN(n)&&n>0){ conEdad++; const r=rangos.find(([lab,fn])=>fn(n)); if(r) edadCount[r[0]]=(edadCount[r[0]]||0)+1; }});
+
+  // Condiciones / enfermedades desde la ficha en notas
+  const enf = {};
+  leads.forEach(l=>{
+    const f = parseFichaFromNotes(l.notas);
+    if(f && f.enfermedades){
+      f.enfermedades.split(/[,;/]+/).map(s=>s.trim())
+        .filter(s=>s && !/^(no|ninguna?|ninguno|n\/a|-|sin)$/i.test(s))
+        .forEach(e=>{ const k=e.charAt(0).toUpperCase()+e.slice(1).toLowerCase(); enf[k]=(enf[k]||0)+1; });
+    }
+  });
+
+  const top = (obj,n)=>Object.entries(obj).sort((a,b)=>b[1]-a[1]).slice(0,n);
+  const bar = (label,count,total,color)=>{
+    const pct = Math.round((count/total)*100);
+    return `<div class="perfil-item">
+      <div class="perfil-label">${label}</div>
+      <div class="perfil-bar-wrap"><div class="perfil-bar" style="width:${pct}%;background:${color}"></div></div>
+      <div class="perfil-count">${pct}%</div>
     </div>`;
-  }).join('');
+  };
+
+  let html = '';
+  const topGen = top(gen,2);
+  if(topGen.length){
+    html += '<div class="perfil-group"><div class="perfil-h">Género predominante</div>';
+    html += topGen.map(([g,c])=>bar(g,c,totalGen, g==='Femenino'?'#d946a4':g==='Masculino'?'#3b82f6':'#8b5cf6')).join('');
+    html += '</div>';
+  }
+  const topEdad = top(edadCount,3);
+  if(topEdad.length){
+    html += '<div class="perfil-group"><div class="perfil-h">Rangos de edad más frecuentes</div>';
+    html += topEdad.map(([r,c])=>bar(r+' años',c,conEdad||1,'#6b4a9a')).join('');
+    html += '</div>';
+  }
+  const topEnf = top(enf,3);
+  if(topEnf.length){
+    const maxEnf = topEnf[0][1];
+    html += '<div class="perfil-group"><div class="perfil-h">Condiciones más repetidas</div>';
+    html += topEnf.map(([e,c])=>`<div class="perfil-item"><div class="perfil-label">${e}</div><div class="perfil-bar-wrap"><div class="perfil-bar" style="width:${Math.round((c/maxEnf)*100)}%;background:#4a8c54"></div></div><div class="perfil-count">${c}</div></div>`).join('');
+    html += '</div>';
+  }
+  el.innerHTML = html || '<div class="empty"><div class="empty-ico">👤</div><p>Sin datos de perfil aún</p></div>';
 }
 
 function renderTempChart(leads){
@@ -1314,7 +1461,7 @@ function renderLeadsTable(leads){
     });
   });
 
-  const COLS = 9;
+  const COLS = 11;
   let counter = 0;
   const rows = [];
   monthKeys.forEach(k=>{
@@ -1359,6 +1506,7 @@ function renderLeadsTable(leads){
         <td style="font-size:.78rem">${l.email||'—'}</td>
         <td style="font-size:.78rem">${tel}</td>
         <td>${tempBadge(l.temperatura)}</td>
+        <td>${valorCellHTML(l)}</td>
         <td>${statusBadge(l.estatus)}</td>
         <td>${pagoSelect(l)}</td>
         <td style="font-size:.75rem;color:var(--g2);white-space:nowrap">${cita||'<span style="color:var(--g4)">—</span>'}</td>
@@ -1370,7 +1518,7 @@ function renderLeadsTable(leads){
 
   el.innerHTML = '<div class="tbl-wrap"><table><thead><tr>'
     + '<th>#</th><th>Nombre</th><th>Email</th><th>Teléfono</th>'
-    + '<th>Temperatura</th><th>Estatus</th><th>Pago</th><th>Cita agendada</th><th>Sala</th><th>Ficha</th>'
+    + '<th>Temperatura</th><th>Valor consulta</th><th>Estatus</th><th>Pago</th><th>Cita agendada</th><th>Sala</th><th>Ficha</th>'
     + '</tr></thead><tbody>'
     + rows.join('')
     + '</tbody></table></div>';
@@ -1378,6 +1526,7 @@ function renderLeadsTable(leads){
 
 function filterLeads(estatus, btn){
   currentFilter = estatus;
+  pendienteValorFilter = false;
   document.querySelectorAll('.filters .filter-btn').forEach(b=>b.classList.remove('on'));
   if(btn) btn.classList.add('on');
   applyFilters();
@@ -1401,6 +1550,7 @@ function clearAllFilters(){
   currentFilter   = '';
   currentAgeRange = '';
   currentGender   = '';
+  pendienteValorFilter = false;
   document.getElementById('leads-search').value = '';
   document.getElementById('status-btn-all').click();
   document.getElementById('age-btn-all').click();
@@ -1448,6 +1598,7 @@ function monthLabel(key){
 function applyFilters(){
   const q = (document.getElementById('leads-search').value||'').toLowerCase();
   let filtered = allLeads;
+  if(pendienteValorFilter) filtered = filtered.filter(needsValor);
   if(currentFilter) filtered = filtered.filter(l=>l.estatus===currentFilter);
   if(currentAgeRange) filtered = filtered.filter(l=>ageInRange(l.edad, currentAgeRange));
   if(currentGender) filtered = filtered.filter(l=>(l.genero||'')===currentGender);
@@ -2226,6 +2377,70 @@ async function changeEstadoPago(sel){
     sel.value = prev;
   }finally{
     sel.disabled = false;
+  }
+}
+
+// ── VALOR DE CONSULTA (editable inline + envío de pago) ───────────
+const VALORES_KEY = 'nutriage_valores';
+function _loadValores(){ try{ return JSON.parse(localStorage.getItem(VALORES_KEY)||'{}'); }catch(e){ return {}; } }
+function _saveValor(id, val){
+  const m=_loadValores();
+  if(val>0) m[id]=val; else delete m[id];
+  localStorage.setItem(VALORES_KEY, JSON.stringify(m));
+}
+function fmtMiles(n){ return Number(n||0).toLocaleString('es-CL'); }
+
+function valorCellHTML(l){
+  if(!l.id) return '<span style="color:var(--g4);font-size:.72rem">—</span>';
+  const v = leadValor(l);
+  const val = v>0 ? fmtMiles(v) : '';
+  const pagado = ['Pagado','Efectivo'].includes(l.estadoPago||'');
+  const title = pagado ? 'Pago ya registrado'
+              : (v>0 ? 'Enviar correo de pago al paciente' : 'Define un valor antes de enviar');
+  return `<div class="valor-cell">
+    <div class="valor-input-wrap"><span class="valor-pre">$</span>
+      <input class="valor-input" type="text" inputmode="numeric" value="${val}" placeholder="0"
+        data-id="${l.id}" onchange="changeValor(this)" onkeydown="if(event.key==='Enter')this.blur()"></div>
+    <button class="valor-send${pagado?' done':''}" onclick="enviarPago('${l.id}',this)" title="${title}">${pagado?'✓':'📧'}</button>
+  </div>`;
+}
+
+async function changeValor(input){
+  const id  = input.dataset.id;
+  const raw = (input.value||'').replace(/[^\d]/g,'');
+  const val = raw ? parseInt(raw,10) : 0;
+  const lead = allLeads.find(l=>l.id===id);
+  if(lead) lead.valor = val;
+  _saveValor(id, val);
+  input.value = val>0 ? fmtMiles(val) : '';
+  input.disabled = true;
+  try{
+    await apiPatch(`/leads/${id}/status`, { valor: val });
+    showToast('Valor guardado: $'+fmtMiles(val), 'success');
+  }catch(e){
+    showToast('Guardado local (sin conexión al servidor)', 'info');
+  }finally{
+    input.disabled = false;
+    updateKPIs(allLeads);
+  }
+}
+
+async function enviarPago(id, btn){
+  const lead = allLeads.find(l=>l.id===id);
+  const v = lead ? leadValor(lead) : 0;
+  if(v<=0){ showToast('Primero define el valor de la consulta', 'error'); return; }
+  if(['Pagado','Efectivo'].includes((lead&&lead.estadoPago)||'')){
+    if(!confirm('Este paciente ya figura como pagado. ¿Reenviar el correo de pago igual?')) return;
+  } else if(!confirm(`¿Enviar correo de pago a ${(lead&&lead.nombre)||'el paciente'} por $${fmtMiles(v)}?`)) return;
+  btn.disabled = true; const prev = btn.textContent; btn.textContent='…';
+  try{
+    await apiPost(`/pago/${id}/enviar`, { valor: v });
+    if(lead && !lead.estadoPago) lead.estadoPago = 'Pendiente';
+    showToast('Correo de pago enviado ✉️', 'success');
+  }catch(e){
+    showToast('No se pudo enviar el correo: '+e.message, 'error');
+  }finally{
+    btn.disabled = false; btn.textContent = prev;
   }
 }
 

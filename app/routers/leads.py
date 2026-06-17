@@ -54,6 +54,7 @@ def list_leads():
                 "edad":        edad_p,
                 "genero":      genero,
                 "estadoPago":  (props.get("Estado de pago", {}).get("select") or {}).get("name", ""),
+                "valor":       props.get("Valor consulta", {}).get("number"),
             })
         return jsonify({"total": len(leads), "leads": leads})
     except Exception as e:
@@ -75,6 +76,7 @@ def update_status(page_id):
             estatus=data.get("estatus"),
             resumen=data.get("resumen"),
             estado_pago=data.get("estadoPago"),
+            valor=data.get("valor"),
         )
         return jsonify({"id": result["id"]})
     except Exception as e:

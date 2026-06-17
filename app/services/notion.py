@@ -55,13 +55,15 @@ def create_lead(data: dict) -> dict:
         props["Presupuesto"] = {"select": {"name": data["presupuesto"]}}
     if data.get("estado_pago"):
         props["Estado de pago"] = {"select": {"name": data["estado_pago"]}}
+    if data.get("valor") not in (None, ""):
+        props["Valor consulta"] = {"number": int(data["valor"])}
 
     return _post("/pages", {"parent": {"database_id": settings.NOTION_DB_LEADS}, "properties": props})
 
 
 def update_lead_status(page_id: str, temperatura: str = None,
                        estatus: str = None, resumen: str = None,
-                       estado_pago: str = None) -> dict:
+                       estado_pago: str = None, valor=None) -> dict:
     props = {}
     if temperatura:
         props["Temperatura"] = {"select": {"name": temperatura}}
@@ -71,6 +73,8 @@ def update_lead_status(page_id: str, temperatura: str = None,
         props["Resumen del paciente"] = {"rich_text": [{"text": {"content": resumen}}]}
     if estado_pago:
         props["Estado de pago"] = {"select": {"name": estado_pago}}
+    if valor is not None:
+        props["Valor consulta"] = {"number": int(valor)}
     return _patch(f"/pages/{page_id}", {"properties": props})
 
 
