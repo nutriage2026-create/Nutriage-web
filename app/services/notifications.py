@@ -50,11 +50,33 @@ def send_email(to, subject: str, body_html: str, attachments=None) -> bool:
 
     msg = build_email_message(settings.GMAIL_USER, recipients, subject, body_html, attachments)
 
-    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-        server.login(settings.GMAIL_USER, settings.GMAIL_APP_PASSWORD)
-        server.sendmail(settings.GMAIL_USER, recipients, msg.as_string())
+    # Intenta varios puertos/modos. Render bloquea algunos puertos SMTP salientes;
+    # probamos 587 (STARTTLS) y 465 (SSL) con timeout corto para no colgar el worker.
+    intentos = [
+        ("587-starttls", 587),
+        ("465-ssl",      465),
+    ]
+    ultimo_error = None
+    for nombre, puerto in intentos:
+        try:
+            if puerto == 465:
+                server = smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15)
+            else:
+                server = smtplib.SMTP("smtp.gmail.com", puerto, timeout=15)
+                server.ehlo()
+                server.starttls()
+                server.ehlo()
+            with server:
+                server.login(settings.GMAIL_USER, settings.GMAIL_APP_PASSWORD)
+                server.sendmail(settings.GMAIL_USER, recipients, msg.as_string())
+            print(f"[notifications] email enviado via {nombre}")
+            return True
+        except Exception as e:
+            ultimo_error = e
+            print(f"[notifications] fallo SMTP {nombre}: {type(e).__name__}: {e}")
 
-    return True
+    print(f"[notifications] todos los modos SMTP fallaron — ultimo: {ultimo_error}")
+    return False
 
 
 def send_whatsapp_callmebot(message: str) -> bool:
