@@ -64,6 +64,15 @@ def enviar_pago(lead_id):
     paciente con ese monto + el link para pagar y subir su comprobante.
     Body JSON (opcional): { "valor": 18000 }
     """
+    try:
+        return _enviar_pago_impl(lead_id)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": "diag", "tipo": type(e).__name__, "detalle": str(e)}), 500
+
+
+def _enviar_pago_impl(lead_id):
     data = request.get_json(silent=True) or {}
     valor = data.get("valor")
 
