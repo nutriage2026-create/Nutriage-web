@@ -35,6 +35,8 @@ services:
         value: production
       - key: TZ
         value: America/Santiago
+      - key: NUTRICIONISTA_EMAILS
+        value: nutriage2026@gmail.com,nutricionistafernandaugarte@gmail.com
 
   - type: web
     name: nutriage-frontend
