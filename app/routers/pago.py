@@ -3,7 +3,7 @@ from flask import Blueprint, request, jsonify
 from app.services.notion import get_lead, upload_file_to_lead, update_lead_status
 from app.services.notifications import (
     send_email, send_whatsapp_callmebot, _fmt_fecha_hora_cl,
-    notify_pago_paciente,
+    notify_pago_paciente, notify_pago_nutricionista,
 )
 from app.config import settings
 
@@ -100,6 +100,12 @@ def enviar_pago(lead_id):
     enviado = notify_pago_paciente(nombre, email, monto, cita_iso, link)
     if not enviado:
         return jsonify({"error": "No se pudo enviar el correo (revisa Gmail)"}), 502
+
+    # Copia a la nutricionista con el mismo link, por si quiere enviarlo ella.
+    try:
+        notify_pago_nutricionista(nombre, email, monto, cita_iso, link)
+    except Exception as e:
+        print(f"[pago] copia a nutricionista falló: {e}")
 
     return jsonify({"ok": True, "email": email, "monto": monto}), 200
 

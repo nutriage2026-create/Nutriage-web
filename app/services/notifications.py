@@ -138,6 +138,49 @@ def notify_pago_paciente(nombre: str, email: str, monto: int, cita_iso: str, lin
         return False
 
 
+def notify_pago_nutricionista(nombre: str, email_paciente: str, monto: int,
+                              cita_iso: str, link: str) -> bool:
+    """
+    Envía a la nutricionista (NUTRICIONISTA_EMAILS) una copia con el link de pago
+    y los datos del paciente, para que ella misma pueda reenviárselo si hace falta.
+    """
+    emails = settings.NUTRICIONISTA_EMAILS
+    if not emails:
+        return False
+    primer_nombre = (nombre or "").split(" ")[0] or "paciente"
+    fecha = _fmt_fecha_hora_cl(cita_iso)
+    monto_fmt = f"${int(monto):,}".replace(",", ".")
+    body = f"""
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;color:#0f172a">
+      <h2 style="color:#3d2459;font-family:Georgia,serif">💳 Link de pago de {primer_nombre}</h2>
+      <p>Ya se le envió el correo de pago al paciente. Aquí tienes el mismo
+         <strong>link de pago</strong> por si quieres enviárselo tú directo
+         (WhatsApp, correo, etc.):</p>
+      <div style="background:#f0e8fa;border:1px solid #d4bbec;border-radius:12px;padding:16px 18px;margin:18px 0">
+        <p style="margin:4px 0"><strong>👤 Paciente:</strong> {nombre or '—'}</p>
+        <p style="margin:4px 0"><strong>✉️ Correo:</strong> {email_paciente or '—'}</p>
+        <p style="margin:4px 0"><strong>📅 Cita:</strong> {fecha}</p>
+        <p style="margin:4px 0;font-size:1.15rem"><strong>💳 Valor:</strong>
+           <span style="color:#2d5e34;font-weight:800">{monto_fmt}</span></p>
+      </div>
+      <p style="text-align:center;margin:26px 0">
+        <a href="{link}" style="background:#4a8c54;color:#fff;text-decoration:none;
+           padding:13px 28px;border-radius:10px;font-weight:700;display:inline-block">
+           Abrir link de pago →</a>
+      </p>
+      <p style="font-size:.85rem;color:#64748b">Link para copiar y enviar:<br>
+         <a href="{link}" style="color:#6b4a9a">{link}</a></p>
+      <hr style="border:none;border-top:1px solid #e2e8f0;margin:20px 0">
+      <small style="color:#999">Copia automática de NutriAge para la nutricionista.</small>
+    </div>
+    """
+    try:
+        return send_email(emails, f"NutriAge · Link de pago de {primer_nombre}", body)
+    except Exception as e:
+        print(f"[notifications] copia de pago a la nutricionista falló: {e}")
+        return False
+
+
 def notify_nueva_cita(payload: dict) -> None:
     """
     Envia correo (a todos los NUTRICIONISTA_EMAILS) y WhatsApp con el detalle
