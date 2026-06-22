@@ -60,9 +60,9 @@ def send_email(to, subject: str, body_html: str, attachments=None) -> bool:
     for nombre, puerto in intentos:
         try:
             if puerto == 465:
-                server = smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15)
+                server = smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=8)
             else:
-                server = smtplib.SMTP("smtp.gmail.com", puerto, timeout=15)
+                server = smtplib.SMTP("smtp.gmail.com", puerto, timeout=8)
                 server.ehlo()
                 server.starttls()
                 server.ehlo()
