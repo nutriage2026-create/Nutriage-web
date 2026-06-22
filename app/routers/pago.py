@@ -19,37 +19,6 @@ def _monto_lead(props) -> int:
     return int(v) if v else PRECIO_CONSULTA
 
 
-@bp.get("/_diag/correo")
-def diag_correo():
-    """TEMPORAL: diagnostica el envio por Brevo y manda un correo de prueba."""
-    import httpx
-    mail_from = settings.MAIL_FROM or settings.GMAIL_USER or "nutriage2026@gmail.com"
-    info = {"brevo_key_set": bool(settings.BREVO_API_KEY), "mail_from": mail_from}
-    if not settings.BREVO_API_KEY:
-        info["resultado"] = "NO hay BREVO_API_KEY en el entorno (el redeploy quizas no termino)"
-        return jsonify(info), 200
-    payload = {
-        "sender":      {"name": "NutriAge", "email": mail_from},
-        "to":          [{"email": "nutricionistafernandaugarte@gmail.com"},
-                        {"email": "nutriage2026@gmail.com"}],
-        "subject":     "NutriAge · prueba de correo (diagnostico)",
-        "htmlContent": "<p>✅ Si lees esto, el envio por Brevo funciona.</p>",
-    }
-    try:
-        with httpx.Client(timeout=20) as c:
-            r = c.post("https://api.brevo.com/v3/smtp/email",
-                       headers={"api-key": settings.BREVO_API_KEY,
-                                "accept": "application/json",
-                                "content-type": "application/json"},
-                       json=payload)
-        info["brevo_status"] = r.status_code
-        info["brevo_resp"] = r.text[:500]
-        info["ok"] = r.is_success
-    except Exception as e:
-        info["error"] = f"{type(e).__name__}: {e}"
-    return jsonify(info), 200
-
-
 def _prop(props, name, default=""):
     return props.get(name, {}) or {}
 
@@ -95,15 +64,6 @@ def enviar_pago(lead_id):
     paciente con ese monto + el link para pagar y subir su comprobante.
     Body JSON (opcional): { "valor": 18000 }
     """
-    try:
-        return _enviar_pago_impl(lead_id)
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return jsonify({"error": "diag", "tipo": type(e).__name__, "detalle": str(e)}), 500
-
-
-def _enviar_pago_impl(lead_id):
     data = request.get_json(silent=True) or {}
     valor = data.get("valor")
 
