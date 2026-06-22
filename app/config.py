@@ -38,6 +38,13 @@ class Settings:
     @property
     def GMAIL_APP_PASSWORD(self):       return _get("GMAIL_APP_PASSWORD")
 
+    # Envio de correo por HTTP (Render bloquea SMTP). BREVO_API_KEY de brevo.com.
+    # MAIL_FROM: remitente verificado en Brevo (ej. nutriage2026@gmail.com).
+    @property
+    def BREVO_API_KEY(self):            return _get("BREVO_API_KEY")
+    @property
+    def MAIL_FROM(self):                return _get("MAIL_FROM")
+
     @property
     def JWT_SECRET(self):               return _get("JWT_SECRET")
     @property

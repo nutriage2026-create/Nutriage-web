@@ -27,6 +27,10 @@ services:
         sync: false
       - key: GMAIL_APP_PASSWORD
         sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: MAIL_FROM
+        value: nutriage2026@gmail.com
       - key: JWT_SECRET
         sync: false
       - key: FERNANDA_PASSWORD

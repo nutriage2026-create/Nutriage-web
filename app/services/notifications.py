@@ -34,49 +34,80 @@ def build_email_message(sender, recipients, subject, body_html, attachments=None
     return msg
 
 
-def send_email(to, subject: str, body_html: str, attachments=None) -> bool:
+def _send_email_brevo(recipients, subject, body_html, attachments=None) -> bool:
     """
-    Envia email via Gmail SMTP. Acepta string o lista de destinatarios.
-    attachments: lista de (filename, content_bytes, content_type) opcional.
-    Requiere GMAIL_USER y GMAIL_APP_PASSWORD.
+    Envia email por HTTP via Brevo (api.brevo.com). Render bloquea SMTP saliente,
+    pero HTTPS (puerto 443) si pasa. Remitente = MAIL_FROM o el Gmail configurado.
     """
-    if not settings.GMAIL_USER or not settings.GMAIL_APP_PASSWORD:
-        print("[notifications] Gmail no configurado — email no enviado.")
+    key = settings.BREVO_API_KEY
+    if not key:
+        return False
+    import base64
+    sender_email = settings.MAIL_FROM or settings.GMAIL_USER or "nutriage2026@gmail.com"
+    payload = {
+        "sender":      {"name": "NutriAge", "email": sender_email},
+        "to":          [{"email": r} for r in recipients],
+        "subject":     subject,
+        "htmlContent": body_html,
+    }
+    if attachments:
+        payload["attachment"] = [
+            {"name": fn, "content": base64.b64encode(content).decode()}
+            for (fn, content, _ctype) in attachments
+        ]
+    try:
+        with httpx.Client(timeout=20) as c:
+            r = c.post(
+                "https://api.brevo.com/v3/smtp/email",
+                headers={"api-key": key, "accept": "application/json",
+                         "content-type": "application/json"},
+                json=payload,
+            )
+        if r.is_success:
+            print("[notifications] email enviado via Brevo")
+            return True
+        print(f"[notifications] Brevo fallo {r.status_code}: {r.text[:300]}")
+        return False
+    except Exception as e:
+        print(f"[notifications] Brevo error: {type(e).__name__}: {e}")
         return False
 
+
+def send_email(to, subject: str, body_html: str, attachments=None) -> bool:
+    """
+    Envia email. Acepta string o lista de destinatarios.
+    attachments: lista de (filename, content_bytes, content_type) opcional.
+    Prioriza Brevo por HTTP (Render bloquea SMTP); si no hay BREVO_API_KEY,
+    cae a Gmail SMTP (que solo funciona fuera de Render).
+    """
     recipients = [to] if isinstance(to, str) else list(to)
     if not recipients:
         return False
 
-    msg = build_email_message(settings.GMAIL_USER, recipients, subject, body_html, attachments)
-
-    # Intenta varios puertos/modos. Render bloquea algunos puertos SMTP salientes;
-    # probamos 587 (STARTTLS) y 465 (SSL) con timeout corto para no colgar el worker.
-    intentos = [
-        ("587-starttls", 587),
-        ("465-ssl",      465),
-    ]
-    ultimo_error = None
-    for nombre, puerto in intentos:
-        try:
-            if puerto == 465:
-                server = smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=8)
-            else:
-                server = smtplib.SMTP("smtp.gmail.com", puerto, timeout=8)
-                server.ehlo()
-                server.starttls()
-                server.ehlo()
-            with server:
-                server.login(settings.GMAIL_USER, settings.GMAIL_APP_PASSWORD)
-                server.sendmail(settings.GMAIL_USER, recipients, msg.as_string())
-            print(f"[notifications] email enviado via {nombre}")
+    # 1. Brevo por HTTP (recomendado en Render)
+    if settings.BREVO_API_KEY:
+        if _send_email_brevo(recipients, subject, body_html, attachments):
             return True
-        except Exception as e:
-            ultimo_error = e
-            print(f"[notifications] fallo SMTP {nombre}: {type(e).__name__}: {e}")
+        # Si Brevo esta configurado pero fallo, no intentamos SMTP (esta bloqueado).
+        return False
 
-    print(f"[notifications] todos los modos SMTP fallaron — ultimo: {ultimo_error}")
-    return False
+    # 2. Fallback: Gmail SMTP (sirve en local; en Render esta bloqueado)
+    if not settings.GMAIL_USER or not settings.GMAIL_APP_PASSWORD:
+        print("[notifications] Sin BREVO_API_KEY ni Gmail — email no enviado.")
+        return False
+
+    msg = build_email_message(settings.GMAIL_USER, recipients, subject, body_html, attachments)
+    try:
+        with smtplib.SMTP("smtp.gmail.com", 587, timeout=10) as server:
+            server.ehlo()
+            server.starttls()
+            server.login(settings.GMAIL_USER, settings.GMAIL_APP_PASSWORD)
+            server.sendmail(settings.GMAIL_USER, recipients, msg.as_string())
+        print("[notifications] email enviado via SMTP 587")
+        return True
+    except Exception as e:
+        print(f"[notifications] fallo SMTP: {type(e).__name__}: {e}")
+        return False
 
 
 def send_whatsapp_callmebot(message: str) -> bool:

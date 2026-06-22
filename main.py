@@ -37,7 +37,7 @@ def root():
     return jsonify({
         "app": "NutriAge API",
         "env": settings.APP_ENV,
-        "version": "diag-pago-2",
+        "version": "brevo-1",
         "status": "ok",
         "endpoints": {
             "GET  /availability/event-types":     "Tipos de consulta en Cal.com",
