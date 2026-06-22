@@ -41,6 +41,10 @@ services:
         value: America/Santiago
       - key: NUTRICIONISTA_EMAILS
         value: nutriage2026@gmail.com,nutricionistafernandaugarte@gmail.com
+      - key: NUTRICIONISTA_WHATSAPP
+        value: "56951974428"
+      - key: CALLMEBOT_API_KEY
+        sync: false
 
   - type: web
     name: nutriage-frontend
