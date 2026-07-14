@@ -2510,6 +2510,9 @@ function openFicha(key){
   }
   if(!b && !lead) return;
 
+  // Nueva ficha 360° (reemplaza el modal simple). Si por algo no cargó, cae al modal viejo.
+  if(typeof window.openFicha2 === 'function'){ return window.openFicha2(b, lead, key); }
+
   const nombre = (b && b.nombre) || (lead && lead.nombre) || 'paciente';
   const startIso = b && b.start ? b.start : parseCitaISO(lead && lead.notas);
   let cab = `Ficha de ${nombre}`;
@@ -3187,6 +3190,121 @@ async function submitCerrarConsulta(ev){
   </div>
 </div>
 
+<!-- ══ FICHA 360° (overlay full-screen) ══ -->
+<style>
+#ficha2{position:fixed;inset:0;background:var(--g5);z-index:210;display:none;flex-direction:column}
+#ficha2.on{display:flex}
+#ficha2 .f2-topbar{background:var(--wh);border-bottom:1px solid var(--g4);padding:.7rem 1rem;display:flex;align-items:center;gap:.7rem;flex-shrink:0}
+#ficha2 .f2-back{min-width:42px;min-height:42px;border:1.5px solid var(--g4);background:var(--wh);border-radius:var(--r);font-size:1.1rem;color:var(--g2);cursor:pointer}
+#ficha2 .f2-back:hover{background:var(--g5)}
+#ficha2 .f2-tt{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:600;color:var(--p1);line-height:1.1}
+#ficha2 .f2-ts{font-size:.7rem;color:var(--g3)}
+#ficha2 .f2-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+#ficha2 .wrap{max-width:960px;margin:0 auto;padding:1rem 1rem 3rem}
+#ficha2 .chip{display:inline-flex;align-items:center;gap:.3rem;padding:.28rem .7rem;border-radius:20px;font-size:.72rem;font-weight:700;background:var(--g5);border:1px solid var(--g4);color:var(--g2)}
+#ficha2 .chip.purple{background:var(--p5);border-color:var(--p4);color:var(--p1)}
+#ficha2 .chip.green{background:var(--s5);border-color:var(--s4);color:var(--s1)}
+#ficha2 .chip.alergia{background:#fef2f2;border-color:#fecaca;color:#b91c1c}
+#ficha2 .pheader{background:var(--wh);border:1px solid var(--g4);border-radius:var(--rl);padding:1rem}
+#ficha2 .ph-flex{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+#ficha2 .ph-top{display:flex;gap:.8rem;align-items:flex-start}
+#ficha2 .ph-avatar{width:52px;height:52px;border-radius:50%;background:var(--p5);color:var(--p1);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.05rem;flex-shrink:0;border:2px solid var(--p4)}
+#ficha2 .ph-name{font-family:'Cormorant Garamond',serif;font-size:1.45rem;font-weight:600;color:var(--p1);line-height:1.15}
+#ficha2 .ph-meta{font-size:.78rem;color:var(--g3);margin-top:.15rem}
+#ficha2 .ph-motivo{margin-top:.55rem;font-size:.85rem;color:var(--g2)}
+#ficha2 .ph-motivo strong{color:var(--g1)}
+#ficha2 .ph-cita{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.65rem}
+#ficha2 .ph-actions{display:flex;gap:.55rem;margin-left:auto}
+#ficha2 .btn-pri{min-height:48px;padding:0 1.3rem;background:var(--p2);color:var(--wh);border:none;border-radius:var(--r);font-size:.9rem;font-weight:700;cursor:pointer}
+#ficha2 .btn-pri:hover{background:var(--p1)}
+#ficha2 .btn-wsp{min-height:48px;background:var(--s5);color:var(--s1);border:1.5px solid var(--s3);border-radius:var(--r);font-size:.82rem;font-weight:700;cursor:pointer;padding:0 .9rem}
+#ficha2 .btn-wsp:hover{background:var(--s4)}
+#ficha2 .alertas{border:1.5px solid var(--hot);background:#fef2f2;border-radius:var(--rl);padding:.75rem .9rem;margin-top:.8rem}
+#ficha2 .alertas h2{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--hot);margin-bottom:.45rem}
+#ficha2 .alertas ul{list-style:none}
+#ficha2 .alertas li{font-size:.8rem;color:var(--g1);padding:.22rem 0;display:flex;gap:.5rem;align-items:baseline}
+#ficha2 .alertas li::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--hot);flex-shrink:0}
+#ficha2 .sec{background:var(--wh);border:1px solid var(--g4);border-radius:var(--rl);margin-top:.8rem;overflow:hidden}
+#ficha2 .sec-h{padding:.75rem 1rem;border-bottom:1px solid var(--g4);display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+#ficha2 .sec-h h2{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;color:var(--p1)}
+#ficha2 .sec-h .src{font-size:.66rem;font-weight:700;color:var(--g3)}
+#ficha2 .sec-b{padding:.9rem 1rem}
+#ficha2 .metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+#ficha2 .mcard{border:1px solid var(--g4);border-radius:var(--r);padding:.7rem .8rem;background:var(--g5)}
+#ficha2 .mcard .ml{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--g3)}
+#ficha2 .mcard .mv{font-size:1.35rem;font-weight:800;color:var(--g1);margin-top:.15rem}
+#ficha2 .mcard .mv small{font-size:.7rem;font-weight:700;color:var(--g3)}
+#ficha2 .mdelta{display:inline-flex;align-items:center;gap:.25rem;font-size:.78rem;font-weight:800;margin-top:.25rem}
+#ficha2 .mdelta.mejora{color:var(--s2)}#ficha2 .mdelta.empeora{color:var(--hot)}#ficha2 .mdelta.igual{color:var(--g3)}
+#ficha2 .chart-controls{display:flex;flex-wrap:wrap;gap:.5rem;margin:.9rem 0 .6rem;align-items:center}
+#ficha2 .chart-controls label{font-size:.7rem;font-weight:800;color:var(--g3)}
+#ficha2 .chart-controls select{min-height:44px;padding:.4rem .7rem;border:1.5px solid var(--g4);border-radius:var(--r);font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:700;color:var(--g2);background:var(--wh)}
+#ficha2 .chart-box{position:relative;height:210px}
+#ficha2 .chart-n{font-size:.68rem;color:var(--g3);margin-top:.4rem}
+#ficha2 .an-group{margin-bottom:.75rem}#ficha2 .an-group:last-child{margin-bottom:0}
+#ficha2 .an-h{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--p2);margin-bottom:.4rem}
+#ficha2 .an-chips{display:flex;flex-wrap:wrap;gap:.4rem}
+#ficha2 .lab-cards{display:flex;flex-direction:column;gap:.5rem}
+#ficha2 .lab-card{border:1px solid var(--g4);border-radius:var(--r);padding:.6rem .75rem;display:flex;align-items:center;gap:.6rem;justify-content:space-between}
+#ficha2 .lab-name{font-size:.8rem;font-weight:700;color:var(--g1)}
+#ficha2 .lab-ref{font-size:.68rem;color:var(--g3)}
+#ficha2 .lab-val{font-size:.9rem;font-weight:800;text-align:right}
+#ficha2 .sem{display:inline-block;padding:.15rem .55rem;border-radius:20px;font-size:.64rem;font-weight:800;margin-top:.15rem}
+#ficha2 .sem.ok{background:var(--s5);color:var(--s1)}#ficha2 .sem.fuera{background:#fef2f2;color:var(--hot)}
+#ficha2 .plan-row{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap}
+#ficha2 .plan-name{font-size:.9rem;font-weight:800;color:var(--g1)}
+#ficha2 .plan-meta{font-size:.74rem;color:var(--g3);margin-top:.15rem}
+#ficha2 .adh-wrap{margin-top:.7rem}
+#ficha2 .adh-lbl{font-size:.74rem;font-weight:700;color:var(--g2);display:flex;justify-content:space-between;margin-bottom:.3rem}
+#ficha2 .adh-bar{height:10px;background:var(--g4);border-radius:5px;overflow:hidden}
+#ficha2 .adh-fill{height:100%;background:var(--s2);border-radius:5px}
+#ficha2 .btn-sec{min-height:44px;padding:.5rem 1rem;border:1.5px solid var(--p3);background:var(--wh);color:var(--p2);border-radius:var(--r);font-size:.8rem;font-weight:700;cursor:pointer}
+#ficha2 .btn-sec:hover{background:var(--p5)}
+#ficha2 .nota-txt{font-size:.83rem;color:var(--g2);line-height:1.55;background:var(--g5);border:1px solid var(--g4);border-radius:var(--r);padding:.7rem .85rem;white-space:pre-wrap}
+#ficha2 .acuerdos{margin-top:.75rem}
+#ficha2 .acuerdo{display:flex;align-items:flex-start;gap:.6rem;padding:.5rem 0;border-bottom:1px solid var(--g4);min-height:44px}
+#ficha2 .acuerdo:last-child{border-bottom:none}
+#ficha2 .acuerdo input{width:20px;height:20px;margin-top:.1rem;accent-color:var(--s2);flex-shrink:0}
+#ficha2 .acuerdo label{font-size:.82rem;color:var(--g2);cursor:pointer}
+#ficha2 .acuerdo.done label{text-decoration:line-through;color:var(--g3)}
+#ficha2 .empty-box{text-align:center;padding:1.4rem 1rem}
+#ficha2 .empty-box .eb-ico{width:44px;height:44px;border-radius:50%;background:var(--s5);color:var(--s1);display:inline-flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:800;margin-bottom:.6rem}
+#ficha2 .empty-box h3{font-size:.92rem;font-weight:800;color:var(--g1)}
+#ficha2 .empty-box p{font-size:.78rem;color:var(--g3);margin:.3rem auto .8rem;max-width:38ch;line-height:1.45}
+#ficha2 .btn-cta{min-height:48px;padding:.7rem 1.4rem;background:var(--s2);color:var(--wh);border:none;border-radius:var(--r);font-size:.85rem;font-weight:700;cursor:pointer}
+#ficha2 .btn-cta:hover{background:var(--s1)}
+#ficha2 .partial-note{border:1px dashed var(--g4);background:var(--g5);border-radius:var(--r);padding:.55rem .75rem;font-size:.74rem;color:var(--g2);margin-top:.6rem;line-height:1.4}
+#ficha2 .f2-editor{background:var(--g5);border:1px dashed var(--p4);border-radius:var(--r);padding:.8rem}
+#ficha2 .f2-editor h4{font-size:.8rem;font-weight:800;color:var(--p1);margin-bottom:.6rem}
+#ficha2 .f2-frow{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem}
+#ficha2 .f2-field{flex:1;min-width:130px}
+#ficha2 .f2-field label{display:block;font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--g3);margin-bottom:.2rem}
+#ficha2 .f2-field input,#ficha2 .f2-field select,#ficha2 .f2-field textarea{width:100%;min-height:42px;padding:.5rem .6rem;border:1.5px solid var(--g4);border-radius:var(--r);font-family:'Nunito',sans-serif;font-size:.85rem;color:var(--g1);background:var(--wh)}
+#ficha2 .f2-field textarea{min-height:80px;resize:vertical}
+#ficha2 .f2-editor input[type=file]{width:100%;font-family:'Nunito',sans-serif;font-size:.8rem;padding:.4rem 0}
+#ficha2 .f2-eactions{display:flex;gap:.5rem;margin-top:.3rem}
+#ficha2 .f2-btn-save{min-height:44px;padding:.5rem 1.1rem;background:var(--s2);color:#fff;border:none;border-radius:var(--r);font-size:.82rem;font-weight:700;cursor:pointer}
+#ficha2 .f2-btn-save:hover{background:var(--s1)}
+#ficha2 .f2-btn-cancel{min-height:44px;padding:.5rem 1rem;background:var(--wh);color:var(--g2);border:1.5px solid var(--g4);border-radius:var(--r);font-size:.82rem;font-weight:700;cursor:pointer}
+#ficha2 .f2-file-card{display:flex;align-items:center;gap:.6rem;border:1px solid var(--g4);border-radius:var(--r);padding:.5rem .7rem;margin-top:.5rem;background:var(--wh)}
+#ficha2 .f2-file-card .fi{font-size:1.3rem}
+#ficha2 .f2-file-card .fn{flex:1;font-size:.8rem;font-weight:700;color:var(--g1);word-break:break-word}
+#ficha2 .f2-file-card a,#ficha2 .f2-file-open{font-size:.75rem;font-weight:800;color:var(--p2);text-decoration:none;border:1.5px solid var(--p3);border-radius:6px;padding:.3rem .7rem;background:var(--wh);cursor:pointer}
+#ficha2 .f2-file-open:hover{background:var(--p5)}
+#ficha2 .f2-file-del{background:none;border:none;color:var(--hot);font-size:.9rem;cursor:pointer;font-weight:800}
+#ficha2 .f2-addbtn{margin-top:.7rem;min-height:42px;padding:.5rem .9rem;background:var(--p5);color:var(--p2);border:1.5px solid var(--p4);border-radius:var(--r);font-size:.8rem;font-weight:700;cursor:pointer}
+#ficha2 .f2-addbtn:hover{background:var(--p4)}
+@media(min-width:768px){#ficha2 .metric-grid{grid-template-columns:repeat(4,1fr)}#ficha2 .chart-box{height:180px}}
+</style>
+
+<div id="ficha2">
+  <div class="f2-topbar">
+    <button class="f2-back" onclick="closeFicha2()" title="Volver a la agenda">←</button>
+    <div><div class="f2-tt" id="f2-tt">Paciente</div><div class="f2-ts" id="f2-ts">Pre-consulta</div></div>
+  </div>
+  <div class="f2-scroll" id="f2-scroll"></div>
+</div>
+
 <!-- ── REAGENDAR CITA MODAL ── -->
 <div class="ficha-modal" id="reagendar-modal">
   <div class="ficha-mbox" style="max-width:560px">
@@ -3293,5 +3411,328 @@ async function submitCerrarConsulta(ev){
     </div>
   </div>
 </div>
+<!-- Chart.js — solo para el gráfico de evolución de la ficha 360° -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+/* ══════════ FICHA 360° — datos reales + secciones que la nutricionista rellena ══════════
+   Todo lo editable (composición, laboratorio, plan, notas) se guarda en localStorage
+   por paciente. Los archivos se guardan como data URL. Es la copia LOCAL de prueba. */
+(function(){
+'use strict';
+const F2_LS='nutriage_ficha2';
+const F2_MAXFILE=20*1048576; // 20 MB por archivo (se guardan en IndexedDB, no en localStorage)
+/* ── IndexedDB: bodega para los archivos (PDF/fotos). Aguanta cientos de MB. ── */
+function idbOpen(){ return new Promise((res,rej)=>{ const r=indexedDB.open('nutriage_files',1); r.onupgradeneeded=()=>r.result.createObjectStore('files',{keyPath:'id'}); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+async function idbPut(id,name,tipo,blob){ const db=await idbOpen(); return new Promise((res,rej)=>{ const tx=db.transaction('files','readwrite'); tx.objectStore('files').put({id,name,tipo,blob}); tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error); }); }
+async function idbGet(id){ const db=await idbOpen(); return new Promise((res,rej)=>{ const tx=db.transaction('files','readonly'); const rq=tx.objectStore('files').get(id); rq.onsuccess=()=>res(rq.result); rq.onerror=()=>rej(rq.error); }); }
+async function idbDel(id){ const db=await idbOpen(); return new Promise(res=>{ const tx=db.transaction('files','readwrite'); tx.objectStore('files').delete(id); tx.oncomplete=()=>res(); tx.onerror=()=>res(); }); }
+let ctx=null, edit={}, compMetric='peso';
+const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(m,t){ if(typeof showToast==='function') showToast(m,t||'info'); else alert(m); }
+function all(){ try{return JSON.parse(localStorage.getItem(F2_LS)||'{}');}catch(e){return{};} }
+function getData(){ return all()[ctx.pkey]||{}; }
+function saveData(d){ const a=all(); a[ctx.pkey]=d; try{localStorage.setItem(F2_LS,JSON.stringify(a));return true;}catch(e){ toast('No se pudo guardar: almacenamiento lleno. Usa archivos más livianos.','err'); return false; } }
+function patch(p){ const d=getData(); Object.assign(d,p); return saveData(d); }
+function pkeyOf(b,lead,key){
+  const email=(b&&b.email)||(lead&&lead.email)||'';
+  if(email) return 'em:'+email.toLowerCase().trim();
+  const nom=(b&&b.nombre)||(lead&&lead.nombre)||'';
+  if(nom) return 'nm:'+nom.toLowerCase().replace(/\s+/g,' ').trim();
+  return 'k:'+String(key);
+}
+function inic(n){ const p=String(n||'').trim().split(/\s+/); return (((p[0]||'')[0]||'')+((p[1]||'')[0]||'')).toUpperCase(); }
+const vacio=v=>!v||/^(no|ninguna?|ningun[oa]?|sin|-|—|n\/a)/i.test(String(v).trim());
+
+window.openFicha2=function(b,lead,key){
+  const nombre=(b&&b.nombre)||(lead&&lead.nombre)||'Paciente';
+  const startIso=(b&&b.start)?b.start:(typeof parseCitaISO==='function'?parseCitaISO(lead&&lead.notas):null);
+  let notes=(b&&(b.notes||b.description||b.additionalNotes))||'';
+  if((!notes||!/FICHA CLÍNICA/i.test(notes))&&lead&&lead.notas) notes=lead.notas;
+  let ficha=(b&&(b.ficha||(b.metadata&&b.metadata.ficha)))||null;
+  if(!ficha&&typeof parseFichaFromNotes==='function') ficha=parseFichaFromNotes(notes);
+  ctx={b,lead,key,pkey:pkeyOf(b,lead,key),nombre,startIso,ficha:ficha||{}};
+  edit={}; compMetric='peso'; render();
+  document.getElementById('ficha2').classList.add('on');
+  document.body.style.overflow='hidden';
+};
+window.closeFicha2=function(){
+  const el=document.getElementById('ficha2'); if(el) el.classList.remove('on');
+  document.body.style.overflow='';
+  if(window.__f2chart){ try{window.__f2chart.destroy();}catch(e){} window.__f2chart=null; }
+};
+function citaTxt(){
+  if(!ctx.startIso) return null;
+  const d=new Date(ctx.startIso);
+  const f=d.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long',timeZone:'America/Santiago'});
+  const h=d.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',timeZone:'America/Santiago'});
+  return f.charAt(0).toUpperCase()+f.slice(1)+' · '+h;
+}
+
+/* ── secciones con datos REALES ── */
+function hCab(f,cita){
+  const tipo=(ctx.b&&ctx.b.videoUrl)?'Videollamada':'Consulta';
+  const motivo=(ctx.b&&ctx.b.objetivo)||f.objetivo||'Consulta nutricional';
+  const sala=(ctx.b&&ctx.b.videoUrl)?`<a href="${esc(ctx.b.videoUrl)}" target="_blank" rel="noopener" class="btn-pri" style="text-decoration:none;display:flex;align-items:center;justify-content:center">Abrir sala</a>`:'';
+  const tel=((ctx.b&&ctx.b.telefono)||(ctx.lead&&ctx.lead.telefono)||'');
+  const wsp=tel?`<button type="button" class="btn-wsp" onclick="f2Wsp()">WhatsApp</button>`:'';
+  return `<section class="pheader"><div class="ph-flex">
+    <div class="ph-top" style="flex:1">
+      <div class="ph-avatar">${esc(inic(ctx.nombre))}</div>
+      <div>
+        <h1 class="ph-name">${esc(ctx.nombre)}</h1>
+        <div class="ph-meta">${f.edad?esc(f.edad)+' años':'Edad no registrada'}${f.genero?' · '+esc(f.genero):''}</div>
+        <p class="ph-motivo"><strong>Motivo:</strong> ${esc(motivo)}</p>
+        <div class="ph-cita">${cita?`<span class="chip purple">${esc(cita)}</span>`:''}<span class="chip green">${tipo}</span></div>
+      </div>
+    </div>
+    <div class="ph-actions">${sala}${wsp}</div>
+  </div></section>`;
+}
+window.f2Wsp=function(){ const t=((ctx.b&&ctx.b.telefono)||(ctx.lead&&ctx.lead.telefono)||'').replace(/\D/g,''); if(!t){toast('Sin teléfono registrado','err');return;} window.open('https://wa.me/'+t,'_blank'); };
+
+function hAlertas(f){
+  const it=[];
+  if(!vacio(f.enfermedades)) it.push(f.enfermedades.trim());
+  if(!vacio(f.intolerancias)) it.push('Intolerancia / alergia: '+f.intolerancias.trim());
+  if(!vacio(f.operaciones)) it.push('Operación previa: '+f.operaciones.trim());
+  if(!it.length) return '';
+  return `<section class="alertas"><h2>Alertas clínicas</h2><ul>${it.map(a=>`<li>${esc(a)}</li>`).join('')}</ul></section>`;
+}
+function hAntro(f){
+  const tM=parseFloat(f.tallaM)||0, tC=parseFloat(f.tallaCm)||0, talla=tM+tC/100, peso=parseFloat(f.peso)||0;
+  if(!peso&&!tM&&!tC) return '';
+  let imc=null,lbl='',col='';
+  if(peso>0&&talla>0){ imc=peso/(talla*talla);
+    if(imc<18.5){lbl='Bajo peso';col='#f59e0b';}
+    else if(imc<25){lbl='Normal';col='#22c55e';}
+    else if(imc<30){lbl='Sobrepeso';col='#f59e0b';}
+    else if(imc<35){lbl='Obesidad I';col='#dc2626';}
+    else if(imc<40){lbl='Obesidad II';col='#dc2626';}
+    else{lbl='Obesidad III';col='#991b1b';} }
+  const tDisp=tM&&tC?`${tM} m ${tC} cm`:(tM?`${tM} m`:(tC?`${tC} cm`:'—'));
+  return `<section class="sec"><div class="sec-h"><h2>Antropometría</h2><span class="src">Ficha de reserva</span></div>
+    <div class="sec-b"><div class="metric-grid">
+      <div class="mcard"><div class="ml">Peso</div><div class="mv">${peso||'—'} <small>kg</small></div></div>
+      <div class="mcard"><div class="ml">Talla</div><div class="mv" style="font-size:1.1rem">${esc(tDisp)}</div></div>
+      ${imc!=null?`<div class="mcard"><div class="ml">IMC</div><div class="mv">${imc.toFixed(1)}</div><div class="mdelta" style="color:${col}">${lbl}</div></div>`:''}
+    </div></div></section>`;
+}
+function hAnamnesis(f){
+  const clean=v=>String(v||'').split(/[,;/]/).map(s=>s.trim()).filter(s=>s&&!vacio(s));
+  const cond=clean(f.enfermedades), into=clean(f.intolerancias), ops=clean(f.operaciones);
+  if(!cond.length&&!into.length&&!ops.length) return '';
+  const g=(t,items,cls='')=>items.length?`<div class="an-group"><div class="an-h">${t}</div><div class="an-chips">${items.map(i=>`<span class="chip ${cls}">${esc(i)}</span>`).join('')}</div></div>`:'';
+  return `<section class="sec"><div class="sec-h"><h2>Anamnesis</h2></div><div class="sec-b">
+    ${g('Condiciones',cond)}${g('Intolerancias / alergias',into,'alergia')}${g('Operaciones previas',ops)}</div></section>`;
+}
+function hReg24(f){
+  if(vacio(f.reg24h)) return '';
+  return `<section class="sec"><div class="sec-h"><h2>Recordatorio 24 horas</h2><span class="src">Ficha de reserva</span></div>
+    <div class="sec-b"><p class="nota-txt">${esc(f.reg24h.trim())}</p></div></section>`;
+}
+
+/* ── COMPOSICIÓN CORPORAL (editable) ── */
+function hComp(d){
+  const arr=(d.composicion||[]).slice().sort((a,b)=>String(a.fecha).localeCompare(String(b.fecha)));
+  const head=`<div class="sec-h"><h2>Composición corporal</h2><span class="src">Mediciones</span></div>`;
+  if(!arr.length) return `<section class="sec">${head}<div class="empty-box"><span class="eb-ico">+</span><h3>Aún no hay mediciones</h3><p>Registra peso y composición para ver la evolución del paciente en el tiempo.</p><button type="button" class="btn-cta" onclick="f2Edit('comp')">Registrar medición</button></div></section>`;
+  const last=arr[arr.length-1], prev=arr.length>1?arr[arr.length-2]:null;
+  const card=(label,k,unit,downGood)=>{
+    const v=last[k]; if(v==null||v==='') return '';
+    let dh='';
+    if(prev&&prev[k]!=null&&prev[k]!==''){
+      const diff=parseFloat(v)-parseFloat(prev[k]);
+      const dir=diff===0?'igual':((diff<0)===downGood?'mejora':'empeora');
+      const fl=diff<0?'↓':(diff>0?'↑':'→');
+      dh=`<div class="mdelta ${dir}"><span>${fl}</span>${Math.abs(diff).toFixed(1)}${unit?' '+unit:''}</div>`;
+    }
+    return `<div class="mcard"><div class="ml">${label}</div><div class="mv">${esc(v)} <small>${unit}</small></div>${dh}</div>`;
+  };
+  const cards=[card('Peso','peso','kg',true),card('Masa grasa','grasa','%',true),card('Masa muscular','musculo','kg',false),card('Grasa visceral','visceral','',true)].filter(Boolean).join('');
+  let g='';
+  if(arr.length>=2){
+    g=`<div class="chart-controls"><label for="f2-metrica">Métrica</label>
+      <select id="f2-metrica" onchange="f2SetMetric(this.value)">
+        <option value="peso">Peso (kg)</option><option value="grasa">Masa grasa (%)</option>
+        <option value="musculo">Masa muscular (kg)</option><option value="visceral">Grasa visceral</option>
+      </select></div>
+      <div class="chart-box"><canvas id="f2-canvas"></canvas></div>
+      <div class="chart-n">n=${arr.length} mediciones · última: ${esc(last.fecha)}</div>`;
+  } else g=`<div class="partial-note">Con una segunda medición aparecerá el gráfico de evolución y las variaciones.</div>`;
+  return `<section class="sec">${head}<div class="sec-b"><div class="metric-grid">${cards}</div>${g}<button type="button" class="f2-addbtn" onclick="f2Edit('comp')">+ Agregar medición</button></div></section>`;
+}
+function hCompEd(){
+  const today=new Date().toISOString().slice(0,10);
+  return `<section class="sec"><div class="sec-h"><h2>Nueva medición</h2></div><div class="sec-b"><div class="f2-editor"><h4>Registrar composición corporal</h4>
+    <div class="f2-frow"><div class="f2-field"><label>Fecha</label><input type="date" id="f2c-fecha" value="${today}"></div><div class="f2-field"><label>Peso (kg)</label><input type="number" step="0.1" id="f2c-peso" placeholder="74.2"></div></div>
+    <div class="f2-frow"><div class="f2-field"><label>Masa grasa (%)</label><input type="number" step="0.1" id="f2c-grasa" placeholder="36.8"></div><div class="f2-field"><label>Masa muscular (kg)</label><input type="number" step="0.1" id="f2c-musculo" placeholder="22.1"></div><div class="f2-field"><label>Grasa visceral</label><input type="number" step="1" id="f2c-visceral" placeholder="11"></div></div>
+    <div class="f2-eactions"><button type="button" class="f2-btn-save" onclick="f2SaveMeas()">Guardar medición</button><button type="button" class="f2-btn-cancel" onclick="f2Edit(null)">Cancelar</button></div>
+  </div></div></section>`;
+}
+window.f2SetMetric=function(m){ compMetric=m; buildChart(getData()); };
+window.f2SaveMeas=function(){
+  const g=id=>{const el=document.getElementById(id);return el?el.value.trim():'';};
+  const fecha=g('f2c-fecha')||new Date().toISOString().slice(0,10);
+  const m={fecha,peso:g('f2c-peso'),grasa:g('f2c-grasa'),musculo:g('f2c-musculo'),visceral:g('f2c-visceral')};
+  if(!m.peso&&!m.grasa&&!m.musculo&&!m.visceral){ toast('Ingresa al menos un valor','err'); return; }
+  const arr=(getData().composicion||[]).filter(x=>x.fecha!==fecha); arr.push(m);
+  if(patch({composicion:arr})){ toast('Medición guardada','ok'); edit={}; render(); }
+};
+function buildChart(d){
+  if(window.__f2chart){ try{window.__f2chart.destroy();}catch(e){} window.__f2chart=null; }
+  const el=document.getElementById('f2-canvas'); if(!el) return;
+  if(typeof Chart==='undefined'){ el.parentElement.innerHTML='<div class="partial-note">Gráfico no disponible sin conexión.</div>'; return; }
+  const arr=(d.composicion||[]).slice().sort((a,b)=>String(a.fecha).localeCompare(String(b.fecha)));
+  const labels=arr.map(x=>x.fecha), vals=arr.map(x=>{const v=parseFloat(x[compMetric]);return isNaN(v)?null:v;});
+  const sel=document.getElementById('f2-metrica'); if(sel) sel.value=compMetric;
+  window.__f2chart=new Chart(el,{type:'line',data:{labels,datasets:[{data:vals,borderColor:'#6b4a9a',backgroundColor:'rgba(107,74,154,.08)',pointBackgroundColor:'#3d2459',fill:true,tension:.3,pointRadius:4,spanGaps:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'#0f172a'}},scales:{y:{grid:{color:'#e2e8f0'},ticks:{color:'#64748b'}},x:{grid:{display:false},ticks:{color:'#64748b'}}}}});
+}
+
+/* ── LABORATORIO (subir archivo + valores) ── */
+function hLab(d){
+  const lab=d.laboratorio||{}, files=lab.archivos||[], ex=lab.examenes||[];
+  const head=`<div class="sec-h"><h2>Laboratorio</h2></div>`;
+  if(!files.length&&!ex.length) return `<section class="sec">${head}<div class="empty-box"><h3>Sin exámenes</h3><p>Sube el PDF o la foto de los exámenes, o registra los valores clave.</p><button type="button" class="btn-cta" onclick="f2Edit('lab')">Subir / registrar exámenes</button></div></section>`;
+  const fc=files.map((fl,i)=>fileCard(fl,'lab',i)).join('');
+  const cards=ex.map((e,i)=>`<div class="lab-card"><div><div class="lab-name">${esc(e.nombre)}</div><div class="lab-ref">Ref: ${esc(e.ref||'—')}</div></div><div style="display:flex;align-items:center;gap:.5rem"><div class="lab-val" style="color:${e.fuera?'var(--hot)':'var(--g1)'}">${esc(e.valor)}<br><span class="sem ${e.fuera?'fuera':'ok'}">${e.fuera?'Fuera de rango':'Dentro de rango'}</span></div><button type="button" class="f2-file-del" onclick="f2DelLabVal(${i})" title="Eliminar">✕</button></div></div>`).join('');
+  return `<section class="sec">${head}<div class="sec-b">${fc}${ex.length?`<div class="lab-cards" style="margin-top:.6rem">${cards}</div>`:''}<button type="button" class="f2-addbtn" onclick="f2Edit('lab')">+ Agregar / subir más</button></div></section>`;
+}
+function hLabEd(d){
+  const lab=d.laboratorio||{}, files=lab.archivos||[];
+  return `<section class="sec"><div class="sec-h"><h2>Exámenes de laboratorio</h2></div><div class="sec-b">
+    <div class="f2-editor"><h4>Subir archivo (PDF o foto)</h4><input type="file" accept=".pdf,image/*" onchange="f2Upload('lab',this)">${files.map((fl,i)=>fileCard(fl,'lab',i)).join('')}<div class="chart-n">Máx 20 MB por archivo.</div></div>
+    <div class="f2-editor" style="margin-top:.7rem"><h4>Agregar valor manual</h4>
+      <div class="f2-frow"><div class="f2-field"><label>Examen</label><input id="f2l-nom" placeholder="HbA1c"></div><div class="f2-field"><label>Valor</label><input id="f2l-val" placeholder="7,9 %"></div></div>
+      <div class="f2-frow"><div class="f2-field"><label>Rango referencia</label><input id="f2l-ref" placeholder="4,0 – 7,0 %"></div><div class="f2-field"><label>Estado</label><select id="f2l-fuera"><option value="">Dentro de rango</option><option value="1">Fuera de rango</option></select></div></div>
+      <div class="f2-eactions"><button type="button" class="f2-btn-save" onclick="f2SaveLabVal()">Agregar valor</button><button type="button" class="f2-btn-cancel" onclick="f2Edit(null)">Listo</button></div>
+    </div></div></section>`;
+}
+window.f2SaveLabVal=function(){
+  const g=id=>{const el=document.getElementById(id);return el?el.value.trim():'';};
+  const nom=g('f2l-nom'); if(!nom){toast('Escribe el nombre del examen','err');return;}
+  const lab=getData().laboratorio||{}; lab.examenes=lab.examenes||[];
+  lab.examenes.push({nombre:nom,valor:g('f2l-val'),ref:g('f2l-ref'),fuera:!!g('f2l-fuera')});
+  if(patch({laboratorio:lab})){ toast('Valor agregado','ok'); render(); }
+};
+window.f2DelLabVal=function(i){ const lab=getData().laboratorio||{}; (lab.examenes||[]).splice(i,1); patch({laboratorio:lab}); render(); };
+
+/* ── PLAN ALIMENTARIO (subir PDF + adherencia) ── */
+function hPlan(d){
+  const plan=d.plan||{};
+  const head=`<div class="sec-h"><h2>Plan alimentario</h2></div>`;
+  if(!plan.archivo&&!plan.nombre) return `<section class="sec">${head}<div class="empty-box"><h3>Sin plan cargado</h3><p>Sube el plan de alimentación (PDF) para tenerlo a mano en la consulta.</p><button type="button" class="btn-cta" onclick="f2Edit('plan')">Subir plan</button></div></section>`;
+  let adh='';
+  if(plan.adherencia&&plan.adherencia.total){ const pct=Math.round(plan.adherencia.cumplidos/plan.adherencia.total*100);
+    adh=`<div class="adh-wrap"><div class="adh-lbl"><span>Adherencia</span><span>${plan.adherencia.cumplidos} de ${plan.adherencia.total} días</span></div><div class="adh-bar"><div class="adh-fill" style="width:${pct}%"></div></div></div>`; }
+  const ver=plan.archivo?`<button type="button" class="btn-sec" onclick="f2OpenFile('plan',0)">Ver plan</button>`:'';
+  return `<section class="sec">${head}<div class="sec-b"><div class="plan-row"><div><div class="plan-name">${esc(plan.nombre||'Plan alimentario')}</div><div class="plan-meta">${plan.entrega?esc(plan.entrega):(plan.archivo?esc(plan.archivo.name):'')}</div></div>${ver}</div>${adh}<button type="button" class="f2-addbtn" onclick="f2Edit('plan')">Editar plan / adherencia</button></div></section>`;
+}
+function hPlanEd(d){
+  const plan=d.plan||{};
+  return `<section class="sec"><div class="sec-h"><h2>Plan alimentario</h2></div><div class="sec-b">
+    <div class="f2-editor"><h4>Subir plan (PDF o foto)</h4><input type="file" accept=".pdf,image/*" onchange="f2Upload('plan',this)">${plan.archivo?fileCard(plan.archivo,'plan',0):''}<div class="chart-n">Máx 20 MB.</div></div>
+    <div class="f2-editor" style="margin-top:.7rem"><h4>Detalles</h4>
+      <div class="f2-frow"><div class="f2-field"><label>Nombre del plan</label><input id="f2p-nom" value="${esc(plan.nombre||'')}" placeholder="Plan hipocalórico 1.500 kcal"></div></div>
+      <div class="f2-frow"><div class="f2-field"><label>Días cumplidos</label><input type="number" id="f2p-cum" value="${plan.adherencia?plan.adherencia.cumplidos:''}" placeholder="5"></div><div class="f2-field"><label>Días totales</label><input type="number" id="f2p-tot" value="${plan.adherencia?plan.adherencia.total:''}" placeholder="7"></div></div>
+      <div class="f2-eactions"><button type="button" class="f2-btn-save" onclick="f2SavePlan()">Guardar</button><button type="button" class="f2-btn-cancel" onclick="f2Edit(null)">Listo</button></div>
+    </div></div></section>`;
+}
+window.f2SavePlan=function(){
+  const g=id=>{const el=document.getElementById(id);return el?el.value.trim():'';};
+  const plan=getData().plan||{}; plan.nombre=g('f2p-nom');
+  const cum=g('f2p-cum'), tot=g('f2p-tot');
+  if(tot) plan.adherencia={cumplidos:parseInt(cum||'0',10),total:parseInt(tot,10)}; else delete plan.adherencia;
+  if(patch({plan})){ toast('Plan actualizado','ok'); edit={}; render(); }
+};
+
+/* ── NOTAS DE SESIÓN ── */
+function hNotas(d){
+  const n=d.notas||{};
+  const head=`<div class="sec-h"><h2>Notas de sesión</h2></div>`;
+  if(!n.texto&&!(n.acuerdos&&n.acuerdos.length)) return `<section class="sec">${head}<div class="empty-box"><h3>Sin notas</h3><p>Anota lo hablado y los acuerdos para llegar con contexto a la próxima consulta.</p><button type="button" class="btn-cta" onclick="f2Edit('notas')">Escribir notas</button></div></section>`;
+  const ac=(n.acuerdos||[]).map((a,i)=>`<div class="acuerdo ${a.done?'done':''}"><input type="checkbox" id="f2ac-${i}" ${a.done?'checked':''} onchange="f2ToggleAc(${i})"><label for="f2ac-${i}">${esc(a.texto)}</label></div>`).join('');
+  return `<section class="sec">${head}<div class="sec-b">${n.texto?`<p class="nota-txt">${esc(n.texto)}</p>`:''}${ac?`<div class="acuerdos"><div class="an-h" style="margin-bottom:.3rem">Acuerdos</div>${ac}</div>`:''}<button type="button" class="f2-addbtn" onclick="f2Edit('notas')">Editar notas</button></div></section>`;
+}
+function hNotasEd(d){
+  const n=d.notas||{}, ac=(n.acuerdos||[]).map(a=>a.texto).join('\n');
+  return `<section class="sec"><div class="sec-h"><h2>Notas de sesión</h2></div><div class="sec-b"><div class="f2-editor"><h4>Notas</h4>
+    <div class="f2-field"><label>¿Qué se habló / observaciones?</label><textarea id="f2n-texto" placeholder="Refiere menos ansiedad...">${esc(n.texto||'')}</textarea></div>
+    <div class="f2-field" style="margin-top:.5rem"><label>Acuerdos (uno por línea)</label><textarea id="f2n-ac" placeholder="Aumentar agua a 1,5 L&#10;Registrar comidas del finde">${esc(ac)}</textarea></div>
+    <div class="f2-eactions"><button type="button" class="f2-btn-save" onclick="f2SaveNotas()">Guardar</button><button type="button" class="f2-btn-cancel" onclick="f2Edit(null)">Cancelar</button></div>
+  </div></div></section>`;
+}
+window.f2SaveNotas=function(){
+  const texto=((document.getElementById('f2n-texto')||{}).value||'').trim();
+  const acRaw=(document.getElementById('f2n-ac')||{}).value||'';
+  const prevMap={}; ((getData().notas||{}).acuerdos||[]).forEach(a=>prevMap[a.texto]=a.done);
+  const acuerdos=acRaw.split('\n').map(s=>s.trim()).filter(Boolean).map(t=>({texto:t,done:!!prevMap[t]}));
+  if(patch({notas:{texto,acuerdos,fecha:new Date().toISOString()}})){ toast('Notas guardadas','ok'); edit={}; render(); }
+};
+window.f2ToggleAc=function(i){ const n=getData().notas||{}; if(n.acuerdos&&n.acuerdos[i]){ n.acuerdos[i].done=!n.acuerdos[i].done; patch({notas:n}); } };
+
+/* ── ARCHIVOS ── */
+function fileCard(fl,section,idx){
+  const isImg=/^image\//.test(fl.tipo||'');
+  return `<div class="f2-file-card"><span class="fi">${isImg?'🖼️':'📄'}</span><span class="fn">${esc(fl.name)}</span><button type="button" class="f2-file-open" onclick="f2OpenFile('${section}',${idx})">Ver</button><button type="button" class="f2-file-del" title="Eliminar" onclick="f2DelFile('${section}',${idx})">✕</button></div>`;
+}
+function fileOf(section,idx){
+  const d=getData();
+  if(section==='lab') return (d.laboratorio&&d.laboratorio.archivos||[])[idx]||null;
+  if(section==='plan') return (d.plan&&d.plan.archivo)||null;
+  return null;
+}
+window.f2OpenFile=async function(section,idx){
+  const fl=fileOf(section,idx); if(!fl) return;
+  if(fl.dataUrl){ window.open(fl.dataUrl,'_blank'); return; } // compat archivos viejos
+  try{
+    const rec=await idbGet(fl.fileId);
+    if(!rec||!rec.blob){ toast('No se encontró el archivo','err'); return; }
+    const url=URL.createObjectURL(rec.blob);
+    window.open(url,'_blank');
+    setTimeout(()=>URL.revokeObjectURL(url),60000);
+  }catch(e){ toast('No se pudo abrir el archivo','err'); }
+};
+window.f2Upload=async function(section,input){
+  const file=input.files&&input.files[0]; if(!file) return;
+  const maxMB=Math.round(F2_MAXFILE/1048576);
+  if(file.size>F2_MAXFILE){ toast('Archivo muy pesado (máx '+maxMB+' MB). Comprime el PDF o baja la resolución de la foto.','err'); input.value=''; return; }
+  const id='f'+Date.now()+Math.random().toString(36).slice(2,7);
+  try{ await idbPut(id,file.name,file.type,file); }
+  catch(e){ toast('No se pudo guardar el archivo','err'); return; }
+  const item={name:file.name,tipo:file.type,fileId:id};
+  const d=getData();
+  if(section==='lab'){ const lab=d.laboratorio||{}; lab.archivos=lab.archivos||[]; lab.archivos.push(item); if(patch({laboratorio:lab})) toast('Archivo subido','ok'); }
+  else if(section==='plan'){ const plan=d.plan||{}; plan.archivo=item; if(patch({plan})) toast('Plan subido','ok'); }
+  render();
+};
+window.f2DelFile=async function(section,idx){
+  const fl=fileOf(section,idx);
+  if(fl&&fl.fileId){ try{ await idbDel(fl.fileId); }catch(e){} }
+  const d=getData();
+  if(section==='lab'){ const lab=d.laboratorio||{}; (lab.archivos||[]).splice(idx,1); patch({laboratorio:lab}); }
+  else if(section==='plan'){ const plan=d.plan||{}; delete plan.archivo; patch({plan}); }
+  render();
+};
+
+/* ── control de edición y render maestro ── */
+window.f2Edit=function(sec){ edit={}; if(sec) edit[sec]=true; render(); if(sec){ const e=document.querySelector('#ficha2 .f2-editor'); if(e) e.scrollIntoView({behavior:'smooth',block:'center'}); } };
+function render(){
+  const d=getData(), f=ctx.ficha||{}, cita=citaTxt();
+  document.getElementById('f2-tt').textContent=ctx.nombre;
+  document.getElementById('f2-ts').textContent=cita?('Pre-consulta · '+cita):'Pre-consulta';
+  document.getElementById('f2-scroll').innerHTML=`<div class="wrap">
+    ${hCab(f,cita)}${hAlertas(f)}${hAntro(f)}
+    ${edit.comp?hCompEd():hComp(d)}
+    ${hAnamnesis(f)}
+    ${edit.lab?hLabEd(d):hLab(d)}
+    ${edit.plan?hPlanEd(d):hPlan(d)}
+    ${edit.notas?hNotasEd(d):hNotas(d)}
+    ${hReg24(f)}
+  </div>`;
+  buildChart(d);
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&document.getElementById('ficha2').classList.contains('on')) closeFicha2(); });
+})();
+</script>
 </body>
 </html>
