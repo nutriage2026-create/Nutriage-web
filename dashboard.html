@@ -3294,6 +3294,11 @@ async function submitCerrarConsulta(ev){
 #ficha2 .f2-file-del{background:none;border:none;color:var(--hot);font-size:.9rem;cursor:pointer;font-weight:800}
 #ficha2 .f2-addbtn{margin-top:.7rem;min-height:42px;padding:.5rem .9rem;background:var(--p5);color:var(--p2);border:1.5px solid var(--p4);border-radius:var(--r);font-size:.8rem;font-weight:700;cursor:pointer}
 #ficha2 .f2-addbtn:hover{background:var(--p4)}
+#ficha2 .sec.s-purple{border-left:4px solid var(--p3)}#ficha2 .sec.s-purple>.sec-h{background:var(--p5)}
+#ficha2 .sec.s-red{border-left:4px solid #dc2626}#ficha2 .sec.s-red>.sec-h{background:#fef2f2}
+#ficha2 .sec.s-blue{border-left:4px solid #0ea5e9}#ficha2 .sec.s-blue>.sec-h{background:#f0f9ff}
+#ficha2 .sec.s-green{border-left:4px solid var(--s2)}#ficha2 .sec.s-green>.sec-h{background:#f0fdf4}
+#ficha2 .sec.s-amber{border-left:4px solid #c47c2a}#ficha2 .sec.s-amber>.sec-h{background:#fdf5e0}
 @media(min-width:768px){#ficha2 .metric-grid{grid-template-columns:repeat(4,1fr)}#ficha2 .chart-box{height:180px}}
 </style>
 
@@ -3469,6 +3474,25 @@ function citaTxt(){
 }
 
 /* ── secciones con datos REALES ── */
+function imcInfo(f){
+  const tM=parseFloat(f.tallaM)||0,tC=parseFloat(f.tallaCm)||0,talla=tM+tC/100,peso=parseFloat(f.peso)||0;
+  if(!(peso>0&&talla>0)) return null;
+  const imc=peso/(talla*talla); let lbl,cls;
+  if(imc<18.5){lbl='Bajo peso';cls='imc-bajo';}
+  else if(imc<25){lbl='Normal';cls='imc-normal';}
+  else if(imc<30){lbl='Sobrepeso';cls='imc-sobre';}
+  else if(imc<35){lbl='Obesidad I';cls='imc-ob1';}
+  else if(imc<40){lbl='Obesidad II';cls='imc-ob2';}
+  else {lbl='Obesidad III';cls='imc-ob3';}
+  return {imc,lbl,cls};
+}
+function f2Hero(f){
+  const chips=[]; const gico=f.genero==='Femenino'?'♀️':(f.genero==='Masculino'?'♂️':'');
+  if(f.edad||f.genero){ const p=[]; if(gico)p.push(gico); if(f.edad)p.push(esc(f.edad)+' años'); if(f.genero)p.push(esc(f.genero)); chips.push('<span class="fc-hero-chip demo">'+p.join(' · ')+'</span>'); }
+  const im=imcInfo(f); if(im) chips.push('<span class="fc-hero-chip '+im.cls+'">⚖️ IMC '+im.imc.toFixed(1)+' · '+im.lbl+'</span>');
+  if(!vacio(f.actividad)) chips.push('<span class="fc-hero-chip act">🏃 '+esc(f.actividad.trim())+'</span>');
+  return chips.length?'<div class="fc-hero">'+chips.join('')+'</div>':'';
+}
 function hCab(f,cita){
   const tipo=(ctx.b&&ctx.b.videoUrl)?'Videollamada':'Consulta';
   const motivo=(ctx.b&&ctx.b.objetivo)||f.objetivo||'Consulta nutricional';
@@ -3481,7 +3505,7 @@ function hCab(f,cita){
       <div>
         <h1 class="ph-name">${esc(ctx.nombre)}</h1>
         <div class="ph-meta">${f.edad?esc(f.edad)+' años':'Edad no registrada'}${f.genero?' · '+esc(f.genero):''}</div>
-        <p class="ph-motivo"><strong>Motivo:</strong> ${esc(motivo)}</p>
+        <p class="ph-motivo"><strong>Motivo:</strong> ${esc(motivo)}</p>${f2Hero(f)}
         <div class="ph-cita">${cita?`<span class="chip purple">${esc(cita)}</span>`:''}<span class="chip green">${tipo}</span></div>
       </div>
     </div>
@@ -3496,7 +3520,7 @@ function hAlertas(f){
   if(!vacio(f.intolerancias)) it.push('Intolerancia / alergia: '+f.intolerancias.trim());
   if(!vacio(f.operaciones)) it.push('Operación previa: '+f.operaciones.trim());
   if(!it.length) return '';
-  return `<section class="alertas"><h2>Alertas clínicas</h2><ul>${it.map(a=>`<li>${esc(a)}</li>`).join('')}</ul></section>`;
+  return `<section class="alertas"><h2>🚨 Alertas clínicas</h2><ul>${it.map(a=>`<li>${esc(a)}</li>`).join('')}</ul></section>`;
 }
 function hAntro(f){
   const tM=parseFloat(f.tallaM)||0, tC=parseFloat(f.tallaCm)||0, talla=tM+tC/100, peso=parseFloat(f.peso)||0;
@@ -3510,7 +3534,7 @@ function hAntro(f){
     else if(imc<40){lbl='Obesidad II';col='#dc2626';}
     else{lbl='Obesidad III';col='#991b1b';} }
   const tDisp=tM&&tC?`${tM} m ${tC} cm`:(tM?`${tM} m`:(tC?`${tC} cm`:'—'));
-  return `<section class="sec"><div class="sec-h"><h2>Antropometría</h2><span class="src">Ficha de reserva</span></div>
+  return `<section class="sec s-purple"><div class="sec-h"><h2>📏 Antropometría</h2><span class="src">Ficha de reserva</span></div>
     <div class="sec-b"><div class="metric-grid">
       <div class="mcard"><div class="ml">Peso</div><div class="mv">${peso||'—'} <small>kg</small></div></div>
       <div class="mcard"><div class="ml">Talla</div><div class="mv" style="font-size:1.1rem">${esc(tDisp)}</div></div>
@@ -3522,20 +3546,20 @@ function hAnamnesis(f){
   const cond=clean(f.enfermedades), into=clean(f.intolerancias), ops=clean(f.operaciones);
   if(!cond.length&&!into.length&&!ops.length) return '';
   const g=(t,items,cls='')=>items.length?`<div class="an-group"><div class="an-h">${t}</div><div class="an-chips">${items.map(i=>`<span class="chip ${cls}">${esc(i)}</span>`).join('')}</div></div>`:'';
-  return `<section class="sec"><div class="sec-h"><h2>Anamnesis</h2></div><div class="sec-b">
+  return `<section class="sec s-red"><div class="sec-h"><h2>🩺 Anamnesis</h2></div><div class="sec-b">
     ${g('Condiciones',cond)}${g('Intolerancias / alergias',into,'alergia')}${g('Operaciones previas',ops)}</div></section>`;
 }
 function hReg24(f){
   if(vacio(f.reg24h)) return '';
-  return `<section class="sec"><div class="sec-h"><h2>Recordatorio 24 horas</h2><span class="src">Ficha de reserva</span></div>
+  return `<section class="sec s-green"><div class="sec-h"><h2>🍽️ Recordatorio 24 horas</h2><span class="src">Ficha de reserva</span></div>
     <div class="sec-b"><p class="nota-txt">${esc(f.reg24h.trim())}</p></div></section>`;
 }
 
 /* ── COMPOSICIÓN CORPORAL (editable) ── */
 function hComp(d){
   const arr=(d.composicion||[]).slice().sort((a,b)=>String(a.fecha).localeCompare(String(b.fecha)));
-  const head=`<div class="sec-h"><h2>Composición corporal</h2><span class="src">Mediciones</span></div>`;
-  if(!arr.length) return `<section class="sec">${head}<div class="empty-box"><span class="eb-ico">+</span><h3>Aún no hay mediciones</h3><p>Registra peso y composición para ver la evolución del paciente en el tiempo.</p><button type="button" class="btn-cta" onclick="f2Edit('comp')">Registrar medición</button></div></section>`;
+  const head=`<div class="sec-h"><h2>📊 Composición corporal</h2><span class="src">Mediciones</span></div>`;
+  if(!arr.length) return `<section class="sec s-green">${head}<div class="empty-box"><span class="eb-ico">+</span><h3>Aún no hay mediciones</h3><p>Registra peso y composición para ver la evolución del paciente en el tiempo.</p><button type="button" class="btn-cta" onclick="f2Edit('comp')">Registrar medición</button></div></section>`;
   const last=arr[arr.length-1], prev=arr.length>1?arr[arr.length-2]:null;
   const card=(label,k,unit,downGood)=>{
     const v=last[k]; if(v==null||v==='') return '';
@@ -3559,11 +3583,11 @@ function hComp(d){
       <div class="chart-box"><canvas id="f2-canvas"></canvas></div>
       <div class="chart-n">n=${arr.length} mediciones · última: ${esc(last.fecha)}</div>`;
   } else g=`<div class="partial-note">Con una segunda medición aparecerá el gráfico de evolución y las variaciones.</div>`;
-  return `<section class="sec">${head}<div class="sec-b"><div class="metric-grid">${cards}</div>${g}<button type="button" class="f2-addbtn" onclick="f2Edit('comp')">+ Agregar medición</button></div></section>`;
+  return `<section class="sec s-green">${head}<div class="sec-b"><div class="metric-grid">${cards}</div>${g}<button type="button" class="f2-addbtn" onclick="f2Edit('comp')">+ Agregar medición</button></div></section>`;
 }
 function hCompEd(){
   const today=new Date().toISOString().slice(0,10);
-  return `<section class="sec"><div class="sec-h"><h2>Nueva medición</h2></div><div class="sec-b"><div class="f2-editor"><h4>Registrar composición corporal</h4>
+  return `<section class="sec s-green"><div class="sec-h"><h2>📊 Nueva medición</h2></div><div class="sec-b"><div class="f2-editor"><h4>Registrar composición corporal</h4>
     <div class="f2-frow"><div class="f2-field"><label>Fecha</label><input type="date" id="f2c-fecha" value="${today}"></div><div class="f2-field"><label>Peso (kg)</label><input type="number" step="0.1" id="f2c-peso" placeholder="74.2"></div></div>
     <div class="f2-frow"><div class="f2-field"><label>Masa grasa (%)</label><input type="number" step="0.1" id="f2c-grasa" placeholder="36.8"></div><div class="f2-field"><label>Masa muscular (kg)</label><input type="number" step="0.1" id="f2c-musculo" placeholder="22.1"></div><div class="f2-field"><label>Grasa visceral</label><input type="number" step="1" id="f2c-visceral" placeholder="11"></div></div>
     <div class="f2-eactions"><button type="button" class="f2-btn-save" onclick="f2SaveMeas()">Guardar medición</button><button type="button" class="f2-btn-cancel" onclick="f2Edit(null)">Cancelar</button></div>
@@ -3591,15 +3615,15 @@ function buildChart(d){
 /* ── LABORATORIO (subir archivo + valores) ── */
 function hLab(d){
   const lab=d.laboratorio||{}, files=lab.archivos||[], ex=lab.examenes||[];
-  const head=`<div class="sec-h"><h2>Laboratorio</h2></div>`;
-  if(!files.length&&!ex.length) return `<section class="sec">${head}<div class="empty-box"><h3>Sin exámenes</h3><p>Sube el PDF o la foto de los exámenes, o registra los valores clave.</p><button type="button" class="btn-cta" onclick="f2Edit('lab')">Subir / registrar exámenes</button></div></section>`;
+  const head=`<div class="sec-h"><h2>🧪 Laboratorio</h2></div>`;
+  if(!files.length&&!ex.length) return `<section class="sec s-amber">${head}<div class="empty-box"><h3>Sin exámenes</h3><p>Sube el PDF o la foto de los exámenes, o registra los valores clave.</p><button type="button" class="btn-cta" onclick="f2Edit('lab')">Subir / registrar exámenes</button></div></section>`;
   const fc=files.map((fl,i)=>fileCard(fl,'lab',i)).join('');
   const cards=ex.map((e,i)=>`<div class="lab-card"><div><div class="lab-name">${esc(e.nombre)}</div><div class="lab-ref">Ref: ${esc(e.ref||'—')}</div></div><div style="display:flex;align-items:center;gap:.5rem"><div class="lab-val" style="color:${e.fuera?'var(--hot)':'var(--g1)'}">${esc(e.valor)}<br><span class="sem ${e.fuera?'fuera':'ok'}">${e.fuera?'Fuera de rango':'Dentro de rango'}</span></div><button type="button" class="f2-file-del" onclick="f2DelLabVal(${i})" title="Eliminar">✕</button></div></div>`).join('');
-  return `<section class="sec">${head}<div class="sec-b">${fc}${ex.length?`<div class="lab-cards" style="margin-top:.6rem">${cards}</div>`:''}<button type="button" class="f2-addbtn" onclick="f2Edit('lab')">+ Agregar / subir más</button></div></section>`;
+  return `<section class="sec s-amber">${head}<div class="sec-b">${fc}${ex.length?`<div class="lab-cards" style="margin-top:.6rem">${cards}</div>`:''}<button type="button" class="f2-addbtn" onclick="f2Edit('lab')">+ Agregar / subir más</button></div></section>`;
 }
 function hLabEd(d){
   const lab=d.laboratorio||{}, files=lab.archivos||[];
-  return `<section class="sec"><div class="sec-h"><h2>Exámenes de laboratorio</h2></div><div class="sec-b">
+  return `<section class="sec s-amber"><div class="sec-h"><h2>🧪 Exámenes de laboratorio</h2></div><div class="sec-b">
     <div class="f2-editor"><h4>Subir archivo (PDF o foto)</h4><input type="file" accept=".pdf,image/*" onchange="f2Upload('lab',this)">${files.map((fl,i)=>fileCard(fl,'lab',i)).join('')}<div class="chart-n">Máx 20 MB por archivo.</div></div>
     <div class="f2-editor" style="margin-top:.7rem"><h4>Agregar valor manual</h4>
       <div class="f2-frow"><div class="f2-field"><label>Examen</label><input id="f2l-nom" placeholder="HbA1c"></div><div class="f2-field"><label>Valor</label><input id="f2l-val" placeholder="7,9 %"></div></div>
@@ -3619,17 +3643,17 @@ window.f2DelLabVal=function(i){ const lab=getData().laboratorio||{}; (lab.examen
 /* ── PLAN ALIMENTARIO (subir PDF + adherencia) ── */
 function hPlan(d){
   const plan=d.plan||{};
-  const head=`<div class="sec-h"><h2>Plan alimentario</h2></div>`;
-  if(!plan.archivo&&!plan.nombre) return `<section class="sec">${head}<div class="empty-box"><h3>Sin plan cargado</h3><p>Sube el plan de alimentación (PDF) para tenerlo a mano en la consulta.</p><button type="button" class="btn-cta" onclick="f2Edit('plan')">Subir plan</button></div></section>`;
+  const head=`<div class="sec-h"><h2>📋 Plan alimentario</h2></div>`;
+  if(!plan.archivo&&!plan.nombre) return `<section class="sec s-blue">${head}<div class="empty-box"><h3>Sin plan cargado</h3><p>Sube el plan de alimentación (PDF) para tenerlo a mano en la consulta.</p><button type="button" class="btn-cta" onclick="f2Edit('plan')">Subir plan</button></div></section>`;
   let adh='';
   if(plan.adherencia&&plan.adherencia.total){ const pct=Math.round(plan.adherencia.cumplidos/plan.adherencia.total*100);
     adh=`<div class="adh-wrap"><div class="adh-lbl"><span>Adherencia</span><span>${plan.adherencia.cumplidos} de ${plan.adherencia.total} días</span></div><div class="adh-bar"><div class="adh-fill" style="width:${pct}%"></div></div></div>`; }
   const ver=plan.archivo?`<button type="button" class="btn-sec" onclick="f2OpenFile('plan',0)">Ver plan</button>`:'';
-  return `<section class="sec">${head}<div class="sec-b"><div class="plan-row"><div><div class="plan-name">${esc(plan.nombre||'Plan alimentario')}</div><div class="plan-meta">${plan.entrega?esc(plan.entrega):(plan.archivo?esc(plan.archivo.name):'')}</div></div>${ver}</div>${adh}<button type="button" class="f2-addbtn" onclick="f2Edit('plan')">Editar plan / adherencia</button></div></section>`;
+  return `<section class="sec s-blue">${head}<div class="sec-b"><div class="plan-row"><div><div class="plan-name">${esc(plan.nombre||'Plan alimentario')}</div><div class="plan-meta">${plan.entrega?esc(plan.entrega):(plan.archivo?esc(plan.archivo.name):'')}</div></div>${ver}</div>${adh}<button type="button" class="f2-addbtn" onclick="f2Edit('plan')">Editar plan / adherencia</button></div></section>`;
 }
 function hPlanEd(d){
   const plan=d.plan||{};
-  return `<section class="sec"><div class="sec-h"><h2>Plan alimentario</h2></div><div class="sec-b">
+  return `<section class="sec s-blue"><div class="sec-h"><h2>📋 Plan alimentario</h2></div><div class="sec-b">
     <div class="f2-editor"><h4>Subir plan (PDF o foto)</h4><input type="file" accept=".pdf,image/*" onchange="f2Upload('plan',this)">${plan.archivo?fileCard(plan.archivo,'plan',0):''}<div class="chart-n">Máx 20 MB.</div></div>
     <div class="f2-editor" style="margin-top:.7rem"><h4>Detalles</h4>
       <div class="f2-frow"><div class="f2-field"><label>Nombre del plan</label><input id="f2p-nom" value="${esc(plan.nombre||'')}" placeholder="Plan hipocalórico 1.500 kcal"></div></div>
@@ -3648,14 +3672,14 @@ window.f2SavePlan=function(){
 /* ── NOTAS DE SESIÓN ── */
 function hNotas(d){
   const n=d.notas||{};
-  const head=`<div class="sec-h"><h2>Notas de sesión</h2></div>`;
-  if(!n.texto&&!(n.acuerdos&&n.acuerdos.length)) return `<section class="sec">${head}<div class="empty-box"><h3>Sin notas</h3><p>Anota lo hablado y los acuerdos para llegar con contexto a la próxima consulta.</p><button type="button" class="btn-cta" onclick="f2Edit('notas')">Escribir notas</button></div></section>`;
+  const head=`<div class="sec-h"><h2>📝 Notas de sesión</h2></div>`;
+  if(!n.texto&&!(n.acuerdos&&n.acuerdos.length)) return `<section class="sec s-purple">${head}<div class="empty-box"><h3>Sin notas</h3><p>Anota lo hablado y los acuerdos para llegar con contexto a la próxima consulta.</p><button type="button" class="btn-cta" onclick="f2Edit('notas')">Escribir notas</button></div></section>`;
   const ac=(n.acuerdos||[]).map((a,i)=>`<div class="acuerdo ${a.done?'done':''}"><input type="checkbox" id="f2ac-${i}" ${a.done?'checked':''} onchange="f2ToggleAc(${i})"><label for="f2ac-${i}">${esc(a.texto)}</label></div>`).join('');
-  return `<section class="sec">${head}<div class="sec-b">${n.texto?`<p class="nota-txt">${esc(n.texto)}</p>`:''}${ac?`<div class="acuerdos"><div class="an-h" style="margin-bottom:.3rem">Acuerdos</div>${ac}</div>`:''}<button type="button" class="f2-addbtn" onclick="f2Edit('notas')">Editar notas</button></div></section>`;
+  return `<section class="sec s-purple">${head}<div class="sec-b">${n.texto?`<p class="nota-txt">${esc(n.texto)}</p>`:''}${ac?`<div class="acuerdos"><div class="an-h" style="margin-bottom:.3rem">Acuerdos</div>${ac}</div>`:''}<button type="button" class="f2-addbtn" onclick="f2Edit('notas')">Editar notas</button></div></section>`;
 }
 function hNotasEd(d){
   const n=d.notas||{}, ac=(n.acuerdos||[]).map(a=>a.texto).join('\n');
-  return `<section class="sec"><div class="sec-h"><h2>Notas de sesión</h2></div><div class="sec-b"><div class="f2-editor"><h4>Notas</h4>
+  return `<section class="sec s-purple"><div class="sec-h"><h2>📝 Notas de sesión</h2></div><div class="sec-b"><div class="f2-editor"><h4>Notas</h4>
     <div class="f2-field"><label>¿Qué se habló / observaciones?</label><textarea id="f2n-texto" placeholder="Refiere menos ansiedad...">${esc(n.texto||'')}</textarea></div>
     <div class="f2-field" style="margin-top:.5rem"><label>Acuerdos (uno por línea)</label><textarea id="f2n-ac" placeholder="Aumentar agua a 1,5 L&#10;Registrar comidas del finde">${esc(ac)}</textarea></div>
     <div class="f2-eactions"><button type="button" class="f2-btn-save" onclick="f2SaveNotas()">Guardar</button><button type="button" class="f2-btn-cancel" onclick="f2Edit(null)">Cancelar</button></div>
