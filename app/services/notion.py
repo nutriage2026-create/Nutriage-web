@@ -1,5 +1,6 @@
 import httpx
 import re
+import json
 from datetime import date
 from app.config import settings
 
@@ -215,6 +216,114 @@ def upload_file_to_lead(page_id: str, filename: str, content: bytes,
             "file_upload": {"id": upload_id},
         }]}
     }})
+
+
+# ── FICHA 360° (datos como bloque JSON + archivos como bloques de archivo) ────
+
+FICHA_MARKER = "##FICHA360##"
+
+
+def _list_children(page_id: str) -> list:
+    """Lista todos los bloques hijos de una página (con paginación)."""
+    out, cursor = [], None
+    with httpx.Client(timeout=20) as c:
+        while True:
+            url = f"{BASE}/blocks/{page_id}/children?page_size=100"
+            if cursor:
+                url += f"&start_cursor={cursor}"
+            r = c.get(url, headers=_h())
+            if not r.is_success:
+                raise Exception(f"Notion {r.status_code}: {r.text[:400]}")
+            j = r.json()
+            out += j.get("results", [])
+            if not j.get("has_more"):
+                break
+            cursor = j.get("next_cursor")
+    return out
+
+
+def _block_code_text(b: dict) -> str:
+    rt = b.get("code", {}).get("rich_text", [])
+    return "".join(x.get("plain_text", "") for x in rt)
+
+
+def get_ficha360(page_id: str) -> dict:
+    """
+    Devuelve {data:{...}, archivos:[{section,name,tipo,url,blockId}]}.
+    data = JSON guardado en un bloque de código marcado; archivos = bloques file.
+    """
+    children = _list_children(page_id)
+    data, archivos = {}, []
+    for b in children:
+        t = b.get("type")
+        if t == "code":
+            txt = _block_code_text(b)
+            if txt.startswith(FICHA_MARKER):
+                try:
+                    data = json.loads(txt[len(FICHA_MARKER):]) or {}
+                except Exception:
+                    data = {}
+        elif t == "file":
+            fb = b.get("file", {})
+            url = (fb.get("file") or {}).get("url") or (fb.get("external") or {}).get("url")
+            cap = "".join(x.get("plain_text", "") for x in fb.get("caption", []))
+            parts = cap.split("|", 2)
+            section = parts[0] if parts and parts[0] else "lab"
+            tipo = parts[1] if len(parts) > 1 else ""
+            name = parts[2] if len(parts) > 2 else "archivo"
+            archivos.append({"section": section, "name": name, "tipo": tipo,
+                             "url": url, "blockId": b.get("id")})
+    return {"data": data, "archivos": archivos}
+
+
+def save_ficha360(page_id: str, data: dict) -> dict:
+    """Guarda el JSON de la ficha en un bloque de código marcado (crea o actualiza)."""
+    payload = FICHA_MARKER + json.dumps(data, ensure_ascii=False)
+    chunks = [payload[i:i + 1900] for i in range(0, len(payload), 1900)] or [FICHA_MARKER]
+    rich = [{"type": "text", "text": {"content": ch}} for ch in chunks]
+    block_id = None
+    for b in _list_children(page_id):
+        if b.get("type") == "code" and _block_code_text(b).startswith(FICHA_MARKER):
+            block_id = b.get("id")
+            break
+    if block_id:
+        return _patch(f"/blocks/{block_id}", {"code": {"rich_text": rich, "language": "json"}})
+    return _patch(f"/blocks/{page_id}/children", {"children": [
+        {"object": "block", "type": "code",
+         "code": {"rich_text": rich, "language": "json"}}
+    ]})
+
+
+def append_ficha_file(page_id: str, filename: str, content: bytes,
+                      content_type: str, section: str) -> dict:
+    """Sube un archivo a Notion y lo agrega como bloque file en la página del paciente."""
+    create = _post("/file_uploads", {"filename": filename, "content_type": content_type})
+    upload_id, upload_url = create["id"], create["upload_url"]
+    headers = {"Authorization": f"Bearer {settings.NOTION_TOKEN}",
+               "Notion-Version": "2022-06-28"}
+    with httpx.Client(timeout=60) as c:
+        r = c.post(upload_url, headers=headers,
+                   files={"file": (filename, content, content_type)})
+        if not r.is_success:
+            raise Exception(f"Notion upload {r.status_code}: {r.text[:400]}")
+    cap = f"{section}|{content_type}|{filename}"
+    res = _patch(f"/blocks/{page_id}/children", {"children": [
+        {"object": "block", "type": "file",
+         "file": {"type": "file_upload", "file_upload": {"id": upload_id},
+                  "caption": [{"type": "text", "text": {"content": cap}}]}}
+    ]})
+    nb = (res.get("results") or [{}])[0]
+    url = ((nb.get("file") or {}).get("file") or {}).get("url")
+    return {"blockId": nb.get("id"), "name": filename, "tipo": content_type,
+            "url": url, "section": section}
+
+
+def delete_block(block_id: str) -> dict:
+    with httpx.Client(timeout=20) as c:
+        r = c.delete(f"{BASE}/blocks/{block_id}", headers=_h())
+        if not r.is_success:
+            raise Exception(f"Notion {r.status_code}: {r.text[:400]}")
+        return r.json()
 
 
 def save_agent_history(titulo: str, tipo: str, paciente: str, contenido: str) -> dict:

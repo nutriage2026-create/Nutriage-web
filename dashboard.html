@@ -3434,10 +3434,33 @@ async function idbDel(id){ const db=await idbOpen(); return new Promise(res=>{ c
 let ctx=null, edit={}, compMetric='peso';
 const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function toast(m,t){ if(typeof showToast==='function') showToast(m,t||'info'); else alert(m); }
+let state={};
 function all(){ try{return JSON.parse(localStorage.getItem(F2_LS)||'{}');}catch(e){return{};} }
-function getData(){ return all()[ctx.pkey]||{}; }
-function saveData(d){ const a=all(); a[ctx.pkey]=d; try{localStorage.setItem(F2_LS,JSON.stringify(a));return true;}catch(e){ toast('No se pudo guardar: almacenamiento lleno. Usa archivos más livianos.','err'); return false; } }
-function patch(p){ const d=getData(); Object.assign(d,p); return saveData(d); }
+function getData(){ return state; }
+function persist(){
+  if(ctx.leadId){
+    const clean=JSON.parse(JSON.stringify(state));
+    if(clean.laboratorio) delete clean.laboratorio.archivos;
+    if(clean.plan) delete clean.plan.archivo;
+    fetch(API+'/ficha360/'+ctx.leadId,{method:'PUT',headers:authHeaders({'Content-Type':'application/json'}),body:JSON.stringify(clean)})
+      .then(r=>{ if(!r.ok) toast('No se pudo guardar en el servidor','err'); }).catch(()=>toast('Sin conexión: no se guardó','err'));
+    return true;
+  }
+  const a=all(); a[ctx.pkey]=state; try{localStorage.setItem(F2_LS,JSON.stringify(a));return true;}catch(e){ toast('No se pudo guardar: almacenamiento lleno.','err'); return false; }
+}
+function patch(p){ Object.assign(state,p); return persist(); }
+async function loadState(){
+  if(ctx.leadId){
+    try{
+      const r=await fetch(API+'/ficha360/'+ctx.leadId,{headers:authHeaders()});
+      if(r.ok){ const j=await r.json(); state=j.data||{};
+        const arch=j.archivos||[];
+        state.laboratorio=state.laboratorio||{}; state.laboratorio.archivos=arch.filter(a=>a.section==='lab');
+        const pf=arch.find(a=>a.section==='plan'); state.plan=state.plan||{}; if(pf) state.plan.archivo=pf; else if(state.plan) delete state.plan.archivo;
+      } else { state=all()[ctx.pkey]||{}; }
+    }catch(e){ state=all()[ctx.pkey]||{}; toast('Sin conexión: mostrando datos locales','err'); }
+  } else { state=all()[ctx.pkey]||{}; }
+}
 function pkeyOf(b,lead,key){
   const email=(b&&b.email)||(lead&&lead.email)||'';
   if(email) return 'em:'+email.toLowerCase().trim();
@@ -3448,17 +3471,22 @@ function pkeyOf(b,lead,key){
 function inic(n){ const p=String(n||'').trim().split(/\s+/); return (((p[0]||'')[0]||'')+((p[1]||'')[0]||'')).toUpperCase(); }
 const vacio=v=>!v||/^(no|ninguna?|ningun[oa]?|sin|-|—|n\/a)/i.test(String(v).trim());
 
-window.openFicha2=function(b,lead,key){
+window.openFicha2=async function(b,lead,key){
   const nombre=(b&&b.nombre)||(lead&&lead.nombre)||'Paciente';
   const startIso=(b&&b.start)?b.start:(typeof parseCitaISO==='function'?parseCitaISO(lead&&lead.notas):null);
   let notes=(b&&(b.notes||b.description||b.additionalNotes))||'';
   if((!notes||!/FICHA CLÍNICA/i.test(notes))&&lead&&lead.notas) notes=lead.notas;
   let ficha=(b&&(b.ficha||(b.metadata&&b.metadata.ficha)))||null;
   if(!ficha&&typeof parseFichaFromNotes==='function') ficha=parseFichaFromNotes(notes);
-  ctx={b,lead,key,pkey:pkeyOf(b,lead,key),nombre,startIso,ficha:ficha||{}};
-  edit={}; compMetric='peso'; render();
+  ctx={b,lead,key,pkey:pkeyOf(b,lead,key),leadId:(lead&&lead.id)||null,nombre,startIso,ficha:ficha||{}};
+  edit={}; compMetric='peso'; state={};
   document.getElementById('ficha2').classList.add('on');
   document.body.style.overflow='hidden';
+  document.getElementById('f2-tt').textContent=nombre;
+  document.getElementById('f2-ts').textContent='Cargando…';
+  document.getElementById('f2-scroll').innerHTML='<div class="wrap"><div class="partial-note" style="margin-top:1rem">Cargando ficha…</div></div>';
+  await loadState();
+  render();
 };
 window.closeFicha2=function(){
   const el=document.getElementById('ficha2'); if(el) el.classList.remove('on');
@@ -3707,7 +3735,8 @@ function fileOf(section,idx){
 }
 window.f2OpenFile=async function(section,idx){
   const fl=fileOf(section,idx); if(!fl) return;
-  if(fl.dataUrl){ window.open(fl.dataUrl,'_blank'); return; } // compat archivos viejos
+  if(fl.url){ window.open(fl.url,'_blank'); return; }
+  if(fl.dataUrl){ window.open(fl.dataUrl,'_blank'); return; }
   try{
     const rec=await idbGet(fl.fileId);
     if(!rec||!rec.blob){ toast('No se encontró el archivo','err'); return; }
@@ -3720,21 +3749,32 @@ window.f2Upload=async function(section,input){
   const file=input.files&&input.files[0]; if(!file) return;
   const maxMB=Math.round(F2_MAXFILE/1048576);
   if(file.size>F2_MAXFILE){ toast('Archivo muy pesado (máx '+maxMB+' MB). Comprime el PDF o baja la resolución de la foto.','err'); input.value=''; return; }
+  if(ctx.leadId){
+    const fd=new FormData(); fd.append('file',file); fd.append('section',section);
+    try{
+      const r=await fetch(API+'/ficha360/'+ctx.leadId+'/archivo',{method:'POST',headers:authHeaders(),body:fd});
+      const j=await r.json().catch(()=>({}));
+      if(!r.ok){ toast(j.error||'No se pudo subir el archivo','err'); return; }
+      if(section==='lab'){ state.laboratorio=state.laboratorio||{}; state.laboratorio.archivos=state.laboratorio.archivos||[]; state.laboratorio.archivos.push(j); }
+      else if(section==='plan'){ state.plan=state.plan||{}; state.plan.archivo=j; }
+      toast('Archivo subido','ok'); render();
+    }catch(e){ toast('Sin conexión: no se subió el archivo','err'); }
+    return;
+  }
   const id='f'+Date.now()+Math.random().toString(36).slice(2,7);
   try{ await idbPut(id,file.name,file.type,file); }
   catch(e){ toast('No se pudo guardar el archivo','err'); return; }
   const item={name:file.name,tipo:file.type,fileId:id};
-  const d=getData();
-  if(section==='lab'){ const lab=d.laboratorio||{}; lab.archivos=lab.archivos||[]; lab.archivos.push(item); if(patch({laboratorio:lab})) toast('Archivo subido','ok'); }
-  else if(section==='plan'){ const plan=d.plan||{}; plan.archivo=item; if(patch({plan})) toast('Plan subido','ok'); }
-  render();
+  if(section==='lab'){ state.laboratorio=state.laboratorio||{}; state.laboratorio.archivos=state.laboratorio.archivos||[]; state.laboratorio.archivos.push(item); persist(); }
+  else if(section==='plan'){ state.plan=state.plan||{}; state.plan.archivo=item; persist(); }
+  toast('Archivo subido','ok'); render();
 };
 window.f2DelFile=async function(section,idx){
   const fl=fileOf(section,idx);
-  if(fl&&fl.fileId){ try{ await idbDel(fl.fileId); }catch(e){} }
-  const d=getData();
-  if(section==='lab'){ const lab=d.laboratorio||{}; (lab.archivos||[]).splice(idx,1); patch({laboratorio:lab}); }
-  else if(section==='plan'){ const plan=d.plan||{}; delete plan.archivo; patch({plan}); }
+  if(fl&&fl.blockId&&ctx.leadId){ try{ await fetch(API+'/ficha360/archivo/'+fl.blockId,{method:'DELETE',headers:authHeaders()}); }catch(e){} }
+  else if(fl&&fl.fileId){ try{ await idbDel(fl.fileId); }catch(e){} }
+  if(section==='lab'){ state.laboratorio=state.laboratorio||{}; (state.laboratorio.archivos||[]).splice(idx,1); persist(); }
+  else if(section==='plan'){ delete (state.plan||{}).archivo; persist(); }
   render();
 };
 

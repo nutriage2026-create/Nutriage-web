@@ -11,6 +11,7 @@ from app.routers.bookings      import bp as bookings_bp
 from app.routers.auth          import bp as auth_bp
 from app.routers.consultas     import bp as consultas_bp
 from app.routers.pago          import bp as pago_bp
+from app.routers.ficha360      import bp as ficha360_bp
 
 app = Flask(__name__)
 CORS(app)
@@ -24,6 +25,7 @@ app.register_blueprint(bookings_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(consultas_bp)
 app.register_blueprint(pago_bp)
+app.register_blueprint(ficha360_bp)
 
 
 @app.get("/pago-pagina")
