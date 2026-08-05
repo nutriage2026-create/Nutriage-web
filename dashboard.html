@@ -1877,15 +1877,19 @@ async function applyScheduleAutoCorrections(){
   let availability = JSON.parse(JSON.stringify(scheduleData.availability||[]));
   let changed = false;
 
-  // Migración única: extender endTime < 21:00 a 21:00
-  if(!localStorage.getItem('na-hours-21-migrated')){
+  // Migración única: jornada 08:30–22:00
+  if(!localStorage.getItem('na-hours-2200-migrated')){
     for(const a of availability){
-      if(a.endTime && a.endTime !== '00:00' && a.endTime < '21:00'){
-        a.endTime = '21:00';
+      if(a.startTime && a.startTime !== '00:00' && a.startTime > '08:30'){
+        a.startTime = '08:30';
+        changed = true;
+      }
+      if(a.endTime && a.endTime !== '00:00' && a.endTime < '22:00'){
+        a.endTime = '22:00';
         changed = true;
       }
     }
-    localStorage.setItem('na-hours-21-migrated','1');
+    localStorage.setItem('na-hours-2200-migrated','1');
   }
 
   // Auto-bloquear el día actual (una sola vez por día; respeta desbloqueo manual posterior)
@@ -1923,7 +1927,7 @@ function renderWeeklyEditor(){
   for(const a of avail){
     for(const d of a.days){
       enabledDays.add(d);
-      dayTimes[d] = {start: a.startTime||'09:00', end: a.endTime||'21:00'};
+      dayTimes[d] = {start: a.startTime||'08:30', end: a.endTime||'22:00'};
     }
   }
 
@@ -1933,8 +1937,8 @@ function renderWeeklyEditor(){
   let html = '';
   for(const d of days){
     const on  = enabledDays.has(d);
-    const st  = dayTimes[d]?.start || '09:00';
-    const en  = dayTimes[d]?.end   || '21:00';
+    const st  = dayTimes[d]?.start || '08:30';
+    const en  = dayTimes[d]?.end   || '22:00';
     html += `<div class="day-row ${on?'active':'blocked'}" id="dr-${d}">
       <div class="day-toggle">
         <input type="checkbox" id="chk-${d}" ${on?'checked':''} onchange="toggleDay('${d}')">
@@ -1946,7 +1950,7 @@ function renderWeeklyEditor(){
         <input type="time" id="en-${d}" value="${en}" oninput="updateDayPreview('${d}')">
       </div>
       <div class="sc-preview-wrap">
-        <div class="sc-preview-label">Bloques de 45 min · 9:00 → 21:00</div>
+        <div class="sc-preview-label">Bloques de 45 min · 8:30 → 22:00</div>
         <div class="sc-preview-grid" id="prev-${d}"></div>
       </div>
     </div>`;
@@ -1961,8 +1965,8 @@ function updateDayPreview(d){
   const grid = document.getElementById('prev-'+d);
   if(!grid) return;
   const on  = document.getElementById('chk-'+d)?.checked;
-  const st  = document.getElementById('st-'+d)?.value || '09:00';
-  const en  = document.getElementById('en-'+d)?.value || '21:00';
+  const st  = document.getElementById('st-'+d)?.value || '08:30';
+  const en  = document.getElementById('en-'+d)?.value || '22:00';
   const slots = (on && st && en && en > st) ? _slotsFromRanges([{startTime:st, endTime:en}]) : new Array(SLOT_COUNT).fill(false);
   let html = '';
   for(let i=0;i<SLOT_COUNT;i++){
@@ -1991,8 +1995,8 @@ async function saveSchedule(){
   const avail = [];
   for(const d of days){
     if(document.getElementById('chk-'+d)?.checked){
-      const st = document.getElementById('st-'+d)?.value || '09:00';
-      const en = document.getElementById('en-'+d)?.value || '21:00';
+      const st = document.getElementById('st-'+d)?.value || '08:30';
+      const en = document.getElementById('en-'+d)?.value || '22:00';
       avail.push({days:[d], startTime:st, endTime:en});
     }
   }
@@ -2085,9 +2089,9 @@ function renderScCalendar(){
   _scDs = null; _scWdEN = null; _scSlots = new Array(SLOT_COUNT).fill(false);
 }
 
-// ── Helpers de slots: 9:00–21:00 en bloques de 45 min (16 slots) ──
-const SLOT_COUNT = 16;
-const SLOT_START_MIN = 9*60;
+// ── Helpers de slots: 8:30–22:00 en bloques de 45 min (18 slots) ──
+const SLOT_COUNT = 18;
+const SLOT_START_MIN = 8*60 + 30;
 const SLOT_LEN = 45;
 const _slotMinStart = i => SLOT_START_MIN + i*SLOT_LEN;
 const _slotMinEnd   = i => SLOT_START_MIN + (i+1)*SLOT_LEN;
