@@ -486,14 +486,14 @@ function checkStep2(){
 // ── CALENDARIO ───────────────────────────────────────────────────
 async function initCal(){
   renderCal(true);
-  await ensureHours19();
+  await ensureHours21();
   await fetchSlots();
 }
 
-// Migra el horario en Cal.com a 09:00–19:00 (intervalos de 45 min = 14 slots)
-// una sola vez por navegador. Idempotente: solo extiende endTimes < 19:00.
-async function ensureHours19(){
-  if(localStorage.getItem('na-hours-19-migrated')) return;
+// Migra el horario en Cal.com a 09:00–21:00 (intervalos de 45 min = 16 slots)
+// una sola vez por navegador. Idempotente: solo extiende endTimes < 21:00.
+async function ensureHours21(){
+  if(localStorage.getItem('na-hours-21-migrated')) return;
   try{
     const r1 = await fetch(`${API}/availability/schedule`);
     if(!r1.ok) return;
@@ -503,14 +503,14 @@ async function ensureHours19(){
     let changed = false;
     const availability = sched.availability.map(a=>{
       const copy = {...a, days:[...(a.days||[])]};
-      if(copy.endTime && copy.endTime !== '00:00' && copy.endTime < '19:00'){
-        copy.endTime = '19:00';
+      if(copy.endTime && copy.endTime !== '00:00' && copy.endTime < '21:00'){
+        copy.endTime = '21:00';
         changed = true;
       }
       return copy;
     });
     if(!changed){
-      localStorage.setItem('na-hours-19-migrated','1');
+      localStorage.setItem('na-hours-21-migrated','1');
       return;
     }
     const r2 = await fetch(`${API}/availability/schedule`,{
@@ -518,8 +518,8 @@ async function ensureHours19(){
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({id: sched.id, availability, overrides: sched.overrides||[]})
     });
-    if(r2.ok) localStorage.setItem('na-hours-19-migrated','1');
-  } catch(e){ console.error('ensureHours19:', e); }
+    if(r2.ok) localStorage.setItem('na-hours-21-migrated','1');
+  } catch(e){ console.error('ensureHours21:', e); }
 }
 
 async function fetchSlots(){
