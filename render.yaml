@@ -13,6 +13,8 @@ services:
         sync: false
       - key: NOTION_DB_HISTORIAL_AGENTE
         sync: false
+      - key: NOTION_DB_CONFIG
+        value: 3c1748deef338159833ff32528a6a50c
       - key: CALCOM_API_KEY
         sync: false
       - key: CALCOM_USERNAME

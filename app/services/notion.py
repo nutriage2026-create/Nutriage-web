@@ -339,3 +339,53 @@ def save_agent_history(titulo: str, tipo: str, paciente: str, contenido: str) ->
         "parent": {"database_id": settings.NOTION_DB_HISTORIAL_AGENTE},
         "properties": props,
     })
+
+
+# ── CONFIGURACION (DB "Configuracion NutriAge") ───────────────────────────────
+
+VALOR_CONSULTA_DEFAULT = 15000
+
+
+def _find_config_row(clave: str) -> dict | None:
+    body = {
+        "filter": {"property": "Clave", "title": {"equals": clave}},
+        "page_size": 1,
+    }
+    with httpx.Client(timeout=20) as c:
+        r = c.post(f"{BASE}/databases/{settings.NOTION_DB_CONFIG}/query",
+                   headers=_h(), json=body)
+        if not r.is_success:
+            raise Exception(f"Notion {r.status_code}: {r.text[:400]}")
+        results = r.json().get("results", [])
+        return results[0] if results else None
+
+
+def get_valor_consulta() -> int:
+    """Valor vigente de la consulta. Si algo falla, cae al valor por defecto."""
+    if not settings.NOTION_DB_CONFIG:
+        return VALOR_CONSULTA_DEFAULT
+    try:
+        row = _find_config_row("Valor consulta")
+        if not row:
+            return VALOR_CONSULTA_DEFAULT
+        n = row.get("properties", {}).get("Numero", {}).get("number")
+        return int(n) if n else VALOR_CONSULTA_DEFAULT
+    except Exception as e:
+        print(f"[notion] get_valor_consulta fallo: {e}")
+        return VALOR_CONSULTA_DEFAULT
+
+
+def set_valor_consulta(valor: int) -> int:
+    """Guarda el nuevo valor de la consulta. Crea la fila si no existe."""
+    valor = int(valor)
+    props = {"Numero": {"number": valor}}
+    row = _find_config_row("Valor consulta")
+    if row:
+        _patch(f"/pages/{row['id']}", {"properties": props})
+    else:
+        props["Clave"] = {"title": [{"text": {"content": "Valor consulta"}}]}
+        _post("/pages", {
+            "parent": {"database_id": settings.NOTION_DB_CONFIG},
+            "properties": props,
+        })
+    return valor

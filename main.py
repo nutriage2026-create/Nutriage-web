@@ -12,6 +12,7 @@ from app.routers.auth          import bp as auth_bp
 from app.routers.consultas     import bp as consultas_bp
 from app.routers.pago          import bp as pago_bp
 from app.routers.ficha360      import bp as ficha360_bp
+from app.routers.config        import bp as config_bp
 
 app = Flask(__name__)
 CORS(app)
@@ -26,6 +27,7 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(consultas_bp)
 app.register_blueprint(pago_bp)
 app.register_blueprint(ficha360_bp)
+app.register_blueprint(config_bp)
 
 
 @app.get("/pago-pagina")
@@ -50,6 +52,8 @@ def root():
             "POST /analysis/leads/<id>":           "Análisis IA + email + historial Notion",
             "POST /webhooks/make":                 "Recibir eventos de Make.com",
             "POST /consultas/cerrar":              "Cerrar consulta + appendear bloques en lead",
+            "GET  /config/valor-consulta":         "Valor vigente de la consulta",
+            "PATCH /config/valor-consulta":        "Cambiar el valor de la consulta",
         },
     })
 

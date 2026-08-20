@@ -20,6 +20,10 @@ class Settings:
     def NOTION_DB_LEADS(self):          return _get("NOTION_DB_LEADS")
     @property
     def NOTION_DB_HISTORIAL_AGENTE(self):return _get("NOTION_DB_HISTORIAL_AGENTE")
+    # DB "Configuracion NutriAge": ajustes editables por la nutricionista
+    # (valor de la consulta, datos de transferencia).
+    @property
+    def NOTION_DB_CONFIG(self):         return _get("NOTION_DB_CONFIG")
 
     @property
     def CALCOM_API_KEY(self):           return _get("CALCOM_API_KEY")

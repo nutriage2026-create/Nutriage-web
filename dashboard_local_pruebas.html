@@ -491,6 +491,29 @@ tr:hover td{background:var(--g5)}
 .kpi-card-tall.green::before{background:linear-gradient(90deg,var(--s1),var(--s3))}
 .kpi-grid-3{grid-template-columns:repeat(3,1fr)}
 
+/* ── VALOR DE LA CONSULTA ── */
+.valor-band{display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;background:linear-gradient(135deg,var(--p1),var(--p2));border-radius:var(--rl);padding:1.15rem 1.5rem;margin-bottom:1.75rem;box-shadow:0 4px 18px rgba(61,36,89,.18)}
+.valor-band-ico{font-size:2rem;line-height:1}
+.valor-band-main{flex:1;min-width:190px}
+.valor-band-label{font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--p4)}
+.valor-band-num{font-family:'Cormorant Garamond',serif;font-size:2.6rem;font-weight:700;color:#fff;line-height:1.05}
+.valor-band-sub{font-size:.72rem;color:var(--p4);margin-top:.15rem}
+.valor-band-btn{background:rgba(255,255,255,.16);border:1.5px solid rgba(255,255,255,.4);color:#fff;font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:800;padding:.55rem 1.1rem;border-radius:var(--r);cursor:pointer;transition:background .15s}
+.valor-band-btn:hover{background:rgba(255,255,255,.28)}
+.valor-band-edit{display:none;align-items:center;gap:.5rem;flex-wrap:wrap}
+.valor-band.editing .valor-band-edit{display:flex}
+.valor-band.editing .valor-band-view{display:none}
+.valor-band-inp{font-family:'Cormorant Garamond',serif;font-size:1.9rem;font-weight:700;width:150px;padding:.15rem .5rem;border:none;border-radius:var(--r);background:#fff;color:var(--p1)}
+.valor-band-inp:focus{outline:2px solid var(--s3)}
+.valor-band-save{background:var(--s2);border:none;color:#fff;font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:800;padding:.55rem 1.1rem;border-radius:var(--r);cursor:pointer}
+.valor-band-save:hover{background:var(--s1)}
+.valor-band-cancel{background:transparent;border:1.5px solid rgba(255,255,255,.4);color:#fff;font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:700;padding:.55rem .9rem;border-radius:var(--r);cursor:pointer}
+@media(max-width:640px){
+  .valor-band{padding:1rem 1.1rem;gap:.8rem}
+  .valor-band-num{font-size:2.1rem}
+  .valor-band-inp{width:120px;font-size:1.5rem}
+}
+
 /* ── REFRESH SPIN ── */
 @keyframes refreshSpin{to{transform:rotate(360deg)}}
 .refresh-btn.loading .refresh-ico{display:inline-block;animation:refreshSpin .6s linear infinite}
@@ -666,6 +689,26 @@ tr:hover td{background:var(--g5)}
 
       <!-- ══ OVERVIEW ══════════════════════════════════════════════ -->
       <div class="section on" id="section-overview">
+
+        <!-- ── VALOR DE LA CONSULTA ───────────────────────────── -->
+        <div class="valor-band" id="valor-band">
+          <div class="valor-band-ico">💰</div>
+          <div class="valor-band-main">
+            <div class="valor-band-label">Valor de tu consulta</div>
+            <div class="valor-band-view">
+              <div class="valor-band-num" id="valor-band-num">—</div>
+              <div class="valor-band-sub">Es el precio que ven tus pacientes al reservar</div>
+            </div>
+            <div class="valor-band-edit">
+              <span class="valor-band-num">$</span>
+              <input class="valor-band-inp" type="number" id="valor-band-inp" min="1000" max="500000" step="500"
+                     onkeydown="if(event.key==='Enter')saveValorConsulta();if(event.key==='Escape')cancelValorConsulta()">
+              <button class="valor-band-save" id="valor-band-save" onclick="saveValorConsulta()">Guardar</button>
+              <button class="valor-band-cancel" onclick="cancelValorConsulta()">Cancelar</button>
+            </div>
+          </div>
+          <button class="valor-band-btn valor-band-view" onclick="editValorConsulta()">✏️ Cambiar valor</button>
+        </div>
 
         <!-- ── ZONA A: Panel de Hoy ───────────────────────────── -->
         <div class="overview-zone zone-a">
@@ -1067,6 +1110,60 @@ async function apiPatch(path, body){
   return data;
 }
 
+// ── VALOR DE LA CONSULTA ────────────────────────────────────────
+let valorConsulta = null;
+
+function pintarValorConsulta(v){
+  valorConsulta = v;
+  const el = document.getElementById('valor-band-num');
+  if(el) el.textContent = '$' + Number(v||0).toLocaleString('es-CL');
+}
+
+async function loadValorConsulta(){
+  const d = await apiFetch('/config/valor-consulta');
+  if(d && typeof d.valor === 'number') pintarValorConsulta(d.valor);
+}
+
+function editValorConsulta(){
+  const band = document.getElementById('valor-band');
+  const inp  = document.getElementById('valor-band-inp');
+  if(!band || !inp) return;
+  inp.value = valorConsulta != null ? valorConsulta : '';
+  band.classList.add('editing');
+  inp.focus();
+  inp.select();
+}
+
+function cancelValorConsulta(){
+  const band = document.getElementById('valor-band');
+  if(band) band.classList.remove('editing');
+}
+
+async function saveValorConsulta(){
+  const band = document.getElementById('valor-band');
+  const inp  = document.getElementById('valor-band-inp');
+  const btn  = document.getElementById('valor-band-save');
+  if(!band || !inp) return;
+  const v = parseInt(inp.value, 10);
+  if(!v || v < 1000 || v > 500000){
+    showToast('El valor debe estar entre $1.000 y $500.000', 'err');
+    inp.focus();
+    return;
+  }
+  if(v === valorConsulta){ band.classList.remove('editing'); return; }
+  if(btn){ btn.disabled = true; btn.textContent = 'Guardando...'; }
+  try{
+    const d = await apiPatch('/config/valor-consulta', { valor: v });
+    pintarValorConsulta(d.valor);
+    band.classList.remove('editing');
+    showToast('Valor actualizado a $' + Number(d.valor).toLocaleString('es-CL'), 'ok');
+  } catch(e){
+    showToast('No se pudo guardar: ' + e.message, 'err');
+  } finally {
+    if(btn){ btn.disabled = false; btn.textContent = 'Guardar'; }
+  }
+}
+
 // ── API STATUS ────────────────────────────────────────────────────
 function setApiStatus(ok){
   const dot = document.getElementById('api-dot');
@@ -1092,6 +1189,8 @@ function startLastUpdatedTick(){
 async function loadAll(){
   const btn = document.getElementById('refresh-btn');
   if(btn){ btn.classList.add('loading'); btn.disabled = true; }
+
+  loadValorConsulta();
 
   const bkData = await apiFetch('/bookings/?status=upcoming&limit=50');
   const apiOk  = bkData !== null;
