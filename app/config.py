@@ -21,9 +21,12 @@ class Settings:
     @property
     def NOTION_DB_HISTORIAL_AGENTE(self):return _get("NOTION_DB_HISTORIAL_AGENTE")
     # DB "Configuracion NutriAge": ajustes editables por la nutricionista
-    # (valor de la consulta, datos de transferencia).
+    # (valor de la consulta, datos de transferencia). Trae default para no
+    # depender de que Render aplique el render.yaml; el ID solo sirve con
+    # NOTION_TOKEN, asi que no es un secreto.
     @property
-    def NOTION_DB_CONFIG(self):         return _get("NOTION_DB_CONFIG")
+    def NOTION_DB_CONFIG(self):
+        return _get("NOTION_DB_CONFIG", "3c1748deef338159833ff32528a6a50c")
 
     @property
     def CALCOM_API_KEY(self):           return _get("CALCOM_API_KEY")
