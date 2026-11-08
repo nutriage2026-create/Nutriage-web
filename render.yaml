@@ -37,6 +37,8 @@ services:
         sync: false
       - key: FERNANDA_PASSWORD
         sync: false
+      - key: CRON_SECRET
+        sync: false
       - key: APP_ENV
         value: production
       - key: TZ

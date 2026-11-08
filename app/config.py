@@ -56,6 +56,9 @@ class Settings:
     def JWT_SECRET(self):               return _get("JWT_SECRET")
     @property
     def FERNANDA_PASSWORD(self):        return _get("FERNANDA_PASSWORD")
+    # Clave que debe enviar cron-job.org en el header X-Cron-Secret.
+    @property
+    def CRON_SECRET(self):              return _get("CRON_SECRET")
 
     @property
     def APP_ENV(self):                  return _get("APP_ENV", "development")

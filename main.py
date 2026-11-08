@@ -13,6 +13,7 @@ from app.routers.consultas     import bp as consultas_bp
 from app.routers.pago          import bp as pago_bp
 from app.routers.ficha360      import bp as ficha360_bp
 from app.routers.config        import bp as config_bp
+from app.routers.cron          import bp as cron_bp
 
 app = Flask(__name__)
 CORS(app)
@@ -28,6 +29,7 @@ app.register_blueprint(consultas_bp)
 app.register_blueprint(pago_bp)
 app.register_blueprint(ficha360_bp)
 app.register_blueprint(config_bp)
+app.register_blueprint(cron_bp)
 
 
 @app.get("/pago-pagina")
