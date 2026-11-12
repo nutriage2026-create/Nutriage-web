@@ -64,14 +64,18 @@ def get_bookings(status: str = "upcoming", limit: int = 20) -> dict:
         return r.json()
 
 
-def create_booking(event_type_id: str, start: str, name: str, email: str, notes: str = "") -> dict:
+def create_booking(event_type_id: str, start: str, name: str, email: str, notes: str = "",
+                   modalidad: str = "virtual") -> dict:
+    metadata = {"modalidad": modalidad}
+    if notes:
+        metadata["notes"] = notes
     payload = {
         "eventTypeId": int(event_type_id),
         "start": start,
         "responses": {"name": name, "email": email},
         "timeZone": "America/Mexico_City",
         "language": "es",
-        "metadata": {"notes": notes} if notes else {},
+        "metadata": metadata,
     }
     with httpx.Client(timeout=15) as c:
         r = c.post(f"{BASE}/bookings", headers=_headers(), json=payload)

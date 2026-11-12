@@ -6,17 +6,33 @@ from app.services.notifications import (
     notify_pago_paciente, notify_pago_nutricionista,
 )
 from app.config import settings
+from app.routers.config import monto_a_pagar
 
 bp = Blueprint("pago", __name__, url_prefix="/pago")
 
 PRECIO_CONSULTA = 15000          # valor por defecto si la nutricionista no definió uno
 MAX_BYTES = 8 * 1024 * 1024  # 8 MB
+TIPOS_PERMITIDOS = ("image/jpeg", "image/png", "image/webp", "image/heic", "application/pdf")
+
+
+def _clp(n) -> str:
+    """15000 -> '15.000' (formato chileno)."""
+    return f"{int(n or 0):,}".replace(",", ".")
+
+
+def _modalidad_lead(props) -> str:
+    rt = props.get("Notas", {}).get("rich_text") or []
+    notas = rt[0].get("plain_text", "") if rt else ""
+    return "presencial" if "Modalidad: Presencial" in notas else "virtual"
 
 
 def _monto_lead(props) -> int:
-    """Valor de la consulta definido por la nutricionista; cae al precio base."""
+    """
+    Lo que el paciente debe transferir: 50% del valor si es presencial (abono)
+    o 100% si es online. El valor es el que quedo guardado al agendar.
+    """
     v = props.get("Valor consulta", {}).get("number")
-    return int(v) if v else PRECIO_CONSULTA
+    return monto_a_pagar(int(v) if v else PRECIO_CONSULTA, _modalidad_lead(props))
 
 
 def _prop(props, name, default=""):
@@ -53,6 +69,7 @@ def info_pago(lead_id):
         "nombre":     nombre,
         "cita":       _cita_desde_notas(notas),
         "monto":      _monto_lead(props),
+        "modalidad":  _modalidad_lead(props),
         "estadoPago": estado,
     })
 
@@ -128,11 +145,18 @@ def subir_comprobante(lead_id):
 
     filename = f.filename or "comprobante"
     ctype = f.mimetype or "application/octet-stream"
+    if ctype not in TIPOS_PERMITIDOS:
+        return jsonify({"error": "Sube una foto (JPG o PNG) o un PDF"}), 400
+
+    # Quien hizo la transferencia: muchas veces paga la pareja, la mamá o el
+    # papá y el nombre no calza con el del paciente.
+    titular = (request.form.get("titular") or "").strip()[:120]
 
     # 1. Subir el comprobante a Notion + marcar "Por verificar"
     try:
         upload_file_to_lead(lead_id, filename, content, ctype)
-        update_lead_status(lead_id, estado_pago="Por verificar")
+        update_lead_status(lead_id, estado_pago="Por verificar",
+                           pagado_por=titular or None)
     except Exception as e:
         return jsonify({"error": f"No se pudo guardar el comprobante: {e}"}), 502
 
@@ -145,16 +169,35 @@ def subir_comprobante(lead_id):
         notas_rt = _prop(props, "Notas").get("rich_text") or []
         notas = notas_rt[0].get("plain_text", "") if notas_rt else ""
         fecha = _fmt_fecha_hora_cl(_cita_desde_notas(notas))
+        monto = _monto_lead(props)
+        email_paciente = _prop(props, "Email").get("email") or "—"
+
+        fila_titular = ""
+        if titular and titular.strip().lower() != nombre.strip().lower():
+            fila_titular = (f'<p><strong>Transfirió:</strong> {titular} '
+                            f'<span style="color:#c47c2a">(distinto al paciente)</span></p>')
+        elif titular:
+            fila_titular = f"<p><strong>Transfirió:</strong> {titular}</p>"
 
         body = f"""
         <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
           <h2 style="color:#3d2459">🧾 Comprobante de pago recibido</h2>
           <hr>
           <p><strong>Paciente:</strong> {nombre}</p>
+          <p><strong>Correo:</strong> {email_paciente}</p>
           <p><strong>Consulta:</strong> {fecha}</p>
+          <p><strong>Monto:</strong> ${_clp(monto)}</p>
+          {fila_titular}
           <p>El paciente subió su comprobante de transferencia (adjunto en este
-             correo). Revísalo en tu dashboard y, si está todo bien, marca el
-             pago como <strong>Pagado</strong> para enviarle el link de la sala.</p>
+             correo). Revisa tu banco y, si está todo bien, marca el pago como
+             <strong>Pagado</strong> en tu dashboard para enviarle el link de la sala.</p>
+          <p style="margin:18px 0">
+            <a href="{settings.PUBLIC_BASE_URL}/dashboard"
+               style="background:#3d2459;color:#fff;padding:11px 22px;border-radius:8px;
+                      text-decoration:none;font-weight:bold;display:inline-block">
+              Abrir mi dashboard
+            </a>
+          </p>
           <hr>
           <small style="color:#999">Aviso automático desde NutriAge · el comprobante va adjunto</small>
         </div>
@@ -164,7 +207,7 @@ def subir_comprobante(lead_id):
                        f"NutriAge · Comprobante de {nombre}", body,
                        attachments=[(filename, content, ctype)])
         send_whatsapp_callmebot(
-            f"🧾 *Comprobante recibido*\n👤 {nombre}\n📅 {fecha}\n"
+            f"🧾 *Comprobante recibido*\n👤 {nombre}\n📅 {fecha}\n💰 ${_clp(monto)}\n"
             f"Revísalo en tu dashboard y marca 'Pagado' para enviar el link."
         )
     except Exception as e:

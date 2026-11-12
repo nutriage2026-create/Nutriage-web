@@ -1,7 +1,8 @@
 import httpx
 import re
 import json
-from datetime import date
+from datetime import date, datetime
+from zoneinfo import ZoneInfo
 from app.config import settings
 
 BASE = "https://api.notion.com/v1"
@@ -64,8 +65,11 @@ def create_lead(data: dict) -> dict:
 
 def update_lead_status(page_id: str, temperatura: str = None,
                        estatus: str = None, resumen: str = None,
-                       estado_pago: str = None, valor=None) -> dict:
+                       estado_pago: str = None, valor=None,
+                       pagado_por: str = None) -> dict:
     props = {}
+    if pagado_por:
+        props["Pagado por"] = {"rich_text": [{"text": {"content": pagado_por[:120]}}]}
     if temperatura:
         props["Temperatura"] = {"select": {"name": temperatura}}
     if estatus:
@@ -375,17 +379,139 @@ def get_valor_consulta() -> int:
         return VALOR_CONSULTA_DEFAULT
 
 
-def set_valor_consulta(valor: int) -> int:
-    """Guarda el nuevo valor de la consulta. Crea la fila si no existe."""
-    valor = int(valor)
-    props = {"Numero": {"number": valor}}
-    row = _find_config_row("Valor consulta")
+DATOS_BANCO_DEFAULT = {
+    "banco":            "Mercado Pago",
+    "tipoCuenta":       "Cuenta Vista",
+    "numeroCuenta":     "1085089504",
+    "rut":              "20.726.694-9",
+    "titular":          "Fernanda Javiera Ugarte Opazo",
+    "correo":           "ferjaviugarte2024@gmail.com",
+}
+
+# Clave en la DB de Notion -> clave que consume el frontend
+_BANCO_KEYS = {
+    "Banco":                "banco",
+    "Tipo de cuenta":       "tipoCuenta",
+    "Numero de cuenta":     "numeroCuenta",
+    "RUT":                  "rut",
+    "Titular":              "titular",
+    "Correo transferencia": "correo",
+}
+
+
+def get_datos_banco() -> dict:
+    """Datos de transferencia que ve el paciente. Cae a los valores por defecto."""
+    datos = dict(DATOS_BANCO_DEFAULT)
+    if not settings.NOTION_DB_CONFIG:
+        return datos
+    try:
+        with httpx.Client(timeout=20) as c:
+            r = c.post(f"{BASE}/databases/{settings.NOTION_DB_CONFIG}/query",
+                       headers=_h(), json={"page_size": 100})
+            if not r.is_success:
+                raise Exception(f"Notion {r.status_code}: {r.text[:200]}")
+            for row in r.json().get("results", []):
+                props = row.get("properties", {})
+                titulo = props.get("Clave", {}).get("title") or []
+                clave = titulo[0].get("plain_text", "") if titulo else ""
+                destino = _BANCO_KEYS.get(clave)
+                if not destino:
+                    continue
+                texto_rt = props.get("Texto", {}).get("rich_text") or []
+                texto = texto_rt[0].get("plain_text", "").strip() if texto_rt else ""
+                if texto:
+                    datos[destino] = texto
+    except Exception as e:
+        print(f"[notion] get_datos_banco fallo: {e}")
+    return datos
+
+
+def _set_config(clave: str, props: dict) -> None:
+    row = _find_config_row(clave)
     if row:
         _patch(f"/pages/{row['id']}", {"properties": props})
     else:
-        props["Clave"] = {"title": [{"text": {"content": "Valor consulta"}}]}
+        props = dict(props)
+        props["Clave"] = {"title": [{"text": {"content": clave}}]}
         _post("/pages", {
             "parent": {"database_id": settings.NOTION_DB_CONFIG},
             "properties": props,
         })
+
+
+def set_valor_consulta(valor: int) -> int:
+    """Guarda el nuevo valor de la consulta. Crea la fila si no existe."""
+    valor = int(valor)
+    _set_config("Valor consulta", {"Numero": {"number": valor}})
     return valor
+
+
+# Modalidad -> fila en la DB de configuracion
+_CLAVE_VALOR = {"presencial": "Valor presencial", "virtual": "Valor online"}
+
+
+def _get_config_number(clave: str):
+    row = _find_config_row(clave)
+    if not row:
+        return None
+    n = row.get("properties", {}).get("Numero", {}).get("number")
+    return int(n) if n else None
+
+
+def get_valores_consulta() -> dict:
+    """Precio vigente por modalidad. Si falta alguno, usa el valor unico antiguo."""
+    base = get_valor_consulta()
+    valores = {"presencial": base, "virtual": base}
+    if not settings.NOTION_DB_CONFIG:
+        return valores
+    for modalidad, clave in _CLAVE_VALOR.items():
+        try:
+            n = _get_config_number(clave)
+            if n:
+                valores[modalidad] = n
+        except Exception as e:
+            print(f"[notion] get_valores_consulta {clave} fallo: {e}")
+    return valores
+
+
+def set_valor_modalidad(modalidad: str, valor: int) -> int:
+    """Cambia el precio de una modalidad y deja registro en el historial."""
+    valor = int(valor)
+    anterior = get_valores_consulta()[modalidad]
+    _set_config(_CLAVE_VALOR[modalidad], {"Numero": {"number": valor}})
+    if anterior != valor:
+        etiqueta = "Presencial" if modalidad == "presencial" else "Online"
+        ahora = datetime.now(ZoneInfo("America/Santiago")).strftime("%Y-%m-%d %H:%M")
+        _post("/pages", {
+            "parent": {"database_id": settings.NOTION_DB_CONFIG},
+            "properties": {
+                "Clave":  {"title": [{"text": {"content": "Historial precio"}}]},
+                "Numero": {"number": valor},
+                "Texto":  {"rich_text": [{"text": {"content": f"{ahora}|{etiqueta}|{anterior}|{valor}"}}]},
+            },
+        })
+    return valor
+
+
+def get_historial_precios(limite: int = 50) -> list:
+    """Cambios de precio, del mas reciente al mas antiguo."""
+    body = {
+        "filter": {"property": "Clave", "title": {"equals": "Historial precio"}},
+        "sorts": [{"timestamp": "created_time", "direction": "descending"}],
+        "page_size": limite,
+    }
+    with httpx.Client(timeout=20) as c:
+        r = c.post(f"{BASE}/databases/{settings.NOTION_DB_CONFIG}/query",
+                   headers=_h(), json=body)
+        if not r.is_success:
+            raise Exception(f"Notion {r.status_code}: {r.text[:400]}")
+    historial = []
+    for row in r.json().get("results", []):
+        rt = row.get("properties", {}).get("Texto", {}).get("rich_text") or []
+        partes = (rt[0].get("plain_text", "") if rt else "").split("|")
+        if len(partes) != 4:
+            continue
+        fecha, modalidad, anterior, nuevo = partes
+        historial.append({"fecha": fecha, "modalidad": modalidad,
+                          "anterior": int(anterior), "nuevo": int(nuevo)})
+    return historial

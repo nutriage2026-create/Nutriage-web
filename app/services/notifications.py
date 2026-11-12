@@ -253,6 +253,8 @@ def notify_nueva_cita(payload: dict) -> None:
     objetivo = payload.get("objetivo") or "—"
     video    = payload.get("video_url") or ""
     ficha    = payload.get("ficha") or {}
+    modalidad = payload.get("modalidad") or "Online"
+    modalidad_ico = "🏥" if modalidad == "Presencial" else "📹"
 
     # ── Correo HTML ───────────────────────────────────────────────
     ficha_rows = ""
@@ -293,6 +295,7 @@ def notify_nueva_cita(payload: dict) -> None:
       <p><strong>Paciente:</strong> {nombre}</p>
       <p><strong>Correo:</strong> {email_p}</p>
       <p><strong>Telefono:</strong> {tel}</p>
+      <p style="background:#f0e8fa;border-radius:8px;padding:10px 14px;font-size:1.05em"><strong>{modalidad_ico} Modalidad: {modalidad}</strong></p>
       <p><strong>Cuando:</strong> {fecha}</p>
       <p><strong>Tipo de consulta:</strong> {tipo}</p>
       <p><strong>Objetivo:</strong> {objetivo}</p>
@@ -303,7 +306,7 @@ def notify_nueva_cita(payload: dict) -> None:
     </div>
     """
     try:
-        send_email(emails, f"NutriAge · Nueva reserva: {nombre}", body_html)
+        send_email(emails, f"NutriAge · Nueva reserva ({modalidad}): {nombre}", body_html)
     except Exception as e:
         print(f"[notifications] correo nueva_cita fallo: {e}")
 
@@ -318,6 +321,7 @@ def notify_nueva_cita(payload: dict) -> None:
         f"👤 {nombre}",
         f"📅 {fecha}",
         f"🩺 {tipo}",
+        f"{modalidad_ico} {modalidad}",
     ]
     if video:
         wa_lines.append(f"🎥 {video}")

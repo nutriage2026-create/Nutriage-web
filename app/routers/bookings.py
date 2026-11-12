@@ -25,6 +25,9 @@ def list_bookings():
             resp  = b.get("responses") or {}
             nombre = resp.get("name") or (b.get("attendees") or [{}])[0].get("name", "—")
             email  = resp.get("email") or (b.get("attendees") or [{}])[0].get("email", "")
+            meta   = b.get("metadata") or {}
+            # Las citas anteriores a esta opción eran todas por videollamada.
+            modalidad = "presencial" if meta.get("modalidad") == "presencial" else "virtual"
             bookings.append({
                 "id":          b.get("id"),
                 "uid":         b.get("uid", ""),
@@ -35,7 +38,8 @@ def list_bookings():
                 "status":      b.get("status", ""),
                 "nombre":      nombre,
                 "email":       email,
-                "videoUrl":    (b.get("metadata") or {}).get("videoCallUrl", ""),
+                "modalidad":   modalidad,
+                "videoUrl":    "" if modalidad == "presencial" else meta.get("videoCallUrl", ""),
             })
         return jsonify({"total": len(bookings), "bookings": bookings})
     except Exception as e:

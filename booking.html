@@ -137,6 +137,9 @@ textarea.inp{resize:vertical;min-height:60px;line-height:1.5;font-family:'Nunito
 .alert-info{background:var(--p5);color:var(--p1);border:1px solid var(--p4)}
 
 /* ── SPINNER ── */
+.tc-precio{margin-top:.6rem;font-size:.92rem;font-weight:800;color:var(--s1)}
+.tc-precio small{display:block;font-size:.72rem;font-weight:700;color:var(--g3)}
+.pol-pago{background:var(--s5);border:1px solid var(--s4);border-radius:var(--r);padding:.8rem 1rem;font-size:.8rem;color:var(--g2);line-height:1.5;margin-top:.9rem;display:none}
 .spin{width:16px;height:16px;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:rot .65s linear infinite;display:inline-block}
 .spin.dark{border-color:rgba(100,116,139,.2);border-top-color:var(--p2)}
 @keyframes rot{to{transform:rotate(360deg)}}
@@ -159,7 +162,7 @@ textarea.inp{resize:vertical;min-height:60px;line-height:1.5;font-family:'Nunito
   <div class="hdr-circle">N</div>
   <div class="hdr-info">
     <div class="hdr-title">NutriAge</div>
-    <div class="hdr-sub">Nutricionista Fernanda Ugarte · Consulta Online</div>
+    <div class="hdr-sub">Nutricionista Fernanda Ugarte · Consulta online o presencial</div>
   </div>
 </div>
 
@@ -194,6 +197,24 @@ textarea.inp{resize:vertical;min-height:60px;line-height:1.5;font-family:'Nunito
         </div>
       </div>
     </div>
+    <div class="card">
+      <div class="card-ttl">¿Cómo quieres tu consulta?</div>
+      <div class="card-sub">Elige si nos vemos por videollamada o en persona. Este paso es obligatorio.</div>
+      <div class="type-grid">
+        <div class="type-card" id="tc-virtual" onclick="selectModalidad('virtual')">
+          <span class="tc-ico">💻</span>
+          <div class="tc-ttl">Online</div>
+          <div class="tc-desc">Por videollamada, desde donde estés. El enlace te llega por correo una vez realizado el pago.</div>
+          <div class="tc-precio" id="tc-precio-virtual"></div>
+        </div>
+        <div class="type-card" id="tc-presencial" onclick="selectModalidad('presencial')">
+          <span class="tc-ico">🏥</span>
+          <div class="tc-ttl">Presencial</div>
+          <div class="tc-desc">En persona con Fernanda. Te enviaremos los detalles por correo.</div>
+          <div class="tc-precio" id="tc-precio-presencial"></div>
+        </div>
+      </div>
+    </div>
     <div class="btn-row">
       <button class="btn btn-primary" id="btn1" onclick="goStep(2)" disabled>Continuar &rarr;</button>
     </div>
@@ -203,7 +224,7 @@ textarea.inp{resize:vertical;min-height:60px;line-height:1.5;font-family:'Nunito
   <div id="step2" style="display:none">
     <div class="card">
       <div class="card-ttl">Tus datos personales</div>
-      <div class="card-sub">Necesitamos esta información para confirmar tu reserva y enviarte el enlace de la videollamada.</div>
+      <div class="card-sub">Necesitamos esta información para confirmar tu reserva y enviarte los detalles de tu consulta.</div>
       <div class="field">
         <label>Nombre completo *</label>
         <input class="inp" type="text" id="f-nombre" placeholder="Ej: María González" oninput="checkStep2()">
@@ -214,8 +235,8 @@ textarea.inp{resize:vertical;min-height:60px;line-height:1.5;font-family:'Nunito
           <input class="inp" type="email" id="f-email" placeholder="tucorreo@email.com" oninput="checkStep2()">
         </div>
         <div class="field">
-          <label>Teléfono (opcional)</label>
-          <input class="inp" type="tel" id="f-tel" placeholder="+56 9 0000 0000">
+          <label>Teléfono WhatsApp *</label>
+          <input class="inp" type="tel" id="f-tel" placeholder="+56 9 0000 0000" oninput="checkStep2()">
         </div>
       </div>
       <div class="field">
@@ -330,7 +351,7 @@ Ejemplo:
   <div id="step3" style="display:none">
     <div class="card">
       <div class="card-ttl">Elige fecha y hora</div>
-      <div class="card-sub">Selecciona un día disponible y luego el horario que mejor te acomode. Las consultas duran 45 minutos y son online por videollamada.</div>
+      <div class="card-sub">Selecciona un día disponible y luego el horario que mejor te acomode. Las consultas duran 45 minutos.</div>
 
       <div class="cal-nav-row">
         <button class="cal-arrow" id="cal-prev" onclick="prevMonth()">&#8592;</button>
@@ -366,8 +387,8 @@ Ejemplo:
       <div class="card-ttl">Confirmar reserva</div>
       <div class="card-sub">Revisa los detalles y confirma tu cita. Recibirás un correo de confirmación.</div>
       <div id="summary-body"></div>
-      <div class="price-badge">Consulta Nutricional Virtual &middot; 45 min &middot; online</div>
-      <div class="price-note">El valor de tu consulta te llegará por correo una vez confirmada tu reserva.</div>
+      <div class="price-badge" id="price-badge">Consulta Nutricional &middot; 45 min</div>
+      <div class="pol-pago" id="price-note"></div>
     </div>
     <div class="alert alert-err" id="err4">Hubo un problema al agendar. Por favor intenta de nuevo.</div>
     <div class="btn-row">
@@ -381,10 +402,10 @@ Ejemplo:
     <div class="card">
       <div class="success-body">
         <div class="success-check">&#10003;</div>
-        <div class="success-title">&#161;Cita confirmada!</div>
-        <div class="success-sub">Tu consulta fue agendada exitosamente con Fernanda. Revisa tu correo para el enlace de la videollamada.</div>
+        <div class="success-title">&#161;Hora agendada!</div>
+        <div class="success-sub" id="success-msg"></div>
         <div class="success-box" id="success-box"></div>
-        <div style="font-size:.78rem;color:var(--g3);margin-bottom:1rem">Si tienes dudas, escribe a <strong>nutriage2026@gmail.com</strong></div>
+        <div style="font-size:.78rem;color:var(--g3);margin-bottom:1rem">Si tienes dudas, escribe a <strong>nutricionistafernandaugarte@gmail.com</strong></div>
         <button class="btn btn-new" onclick="resetFlow()">+ Agendar otra consulta</button>
       </div>
     </div>
@@ -393,13 +414,13 @@ Ejemplo:
 </div><!-- /wrap -->
 
 <script>
-const API = 'https://nutriage-api.onrender.com';
+const API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://localhost:8000' : 'https://nutriage-api.onrender.com';
 const EID = '5378644';
 const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const DOWS   = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
 
 let S = {
-  tipo: null,
+  tipo: null, modalidad: null,
   nombre:'', email:'', telefono:'', objetivo:'',
   edad:'', genero:'',
   peso:'', tallaM:'', tallaCm:'',
@@ -407,7 +428,8 @@ let S = {
   actividad:'', reg24h:'',
   selDate: null, selTime: null, selTimeLabel: null,
   slots: {},
-  month: new Date()
+  month: new Date(),
+  valores: null
 };
 
 // ── NAVEGACIÓN ───────────────────────────────────────────────────
@@ -473,14 +495,26 @@ function selectTipo(t){
   S.tipo = t;
   document.getElementById('tc-primera').classList.toggle('on', t==='primera');
   document.getElementById('tc-seguimiento').classList.toggle('on', t==='seguimiento');
-  document.getElementById('btn1').disabled = false;
+  checkStep1();
+}
+
+function selectModalidad(m){
+  S.modalidad = m;
+  document.getElementById('tc-virtual').classList.toggle('on', m==='virtual');
+  document.getElementById('tc-presencial').classList.toggle('on', m==='presencial');
+  checkStep1();
+}
+
+function checkStep1(){
+  document.getElementById('btn1').disabled = !(S.tipo && S.modalidad);
 }
 
 // ── PASO 2 ───────────────────────────────────────────────────────
 function checkStep2(){
   const n = document.getElementById('f-nombre').value.trim();
   const e = document.getElementById('f-email').value.trim();
-  document.getElementById('btn2').disabled = !(n && e && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+  const t = document.getElementById('f-tel').value.replace(/\D/g,'');
+  document.getElementById('btn2').disabled = !(n && e && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) && t.length >= 8);
 }
 
 // ── CALENDARIO ───────────────────────────────────────────────────
@@ -644,6 +678,8 @@ function nextMonth(){
 
 // ── PASO 4: RESUMEN ──────────────────────────────────────────────
 function buildSummary(){
+  const etiquetaModalidad = S.modalidad==='presencial' ? 'presencial' : 'online';
+  document.getElementById('price-badge').textContent = `Consulta Nutricional ${etiquetaModalidad} · 45 min`;
   S.nombre   = document.getElementById('f-nombre').value.trim();
   S.email    = document.getElementById('f-email').value.trim();
   S.telefono = document.getElementById('f-tel').value.trim();
@@ -695,9 +731,15 @@ function buildSummary(){
       <div><div class="sum-lbl">Ficha clínica</div><div class="sum-val">Completada · Fernanda la revisará antes de la consulta</div></div>
     </div>` : ''}
     <div class="sum-item">
-      <div class="sum-ico">💻</div>
-      <div><div class="sum-lbl">Modalidad</div><div class="sum-val">Videollamada online · 45 minutos</div></div>
-    </div>`;
+      <div class="sum-ico">${S.modalidad==='presencial'?'🏥':'💻'}</div>
+      <div><div class="sum-lbl">Modalidad</div><div class="sum-val">${S.modalidad==='presencial'?'Presencial · 45 minutos':'Online (videollamada) · 45 minutos'}</div></div>
+    </div>
+    ${precioDe(S.modalidad) ? `<div class="sum-item">
+      <div class="sum-ico">💰</div>
+      <div><div class="sum-lbl">Valor de la consulta</div><div class="sum-val">$${fmtCLP(precioDe(S.modalidad).valor)}</div></div>
+    </div>` : ''}`;
+
+  pintarPrecios();
 }
 
 function tallaLabel(){
@@ -744,6 +786,7 @@ async function confirmBooking(){
     email: S.email,
     telefono: S.telefono,
     objetivo: S.objetivo,
+    modalidad: S.modalidad,
     canal: 'Web',
     notes: baseNote + buildFichaNotes(),
     ficha: S.tipo === 'primera' ? {
@@ -787,10 +830,18 @@ function showSuccess(data){
     <div class="sb-row"><span>Fecha</span><span>${dlbl.charAt(0).toUpperCase()+dlbl.slice(1)}</span></div>
     <div class="sb-row"><span>Hora</span><span>${S.selTimeLabel} (Chile)</span></div>
     <div class="sb-row"><span>Tipo</span><span>${S.tipo==='primera'?'Primera consulta':'Seguimiento'}</span></div>
-    <div class="sb-row"><span>Booking #</span><span>${data.booking?.id || '—'}</span></div>`;
+    <div class="sb-row"><span>Modalidad</span><span>${S.modalidad==='presencial'?'Presencial':'Online'}</span></div>
+    ${data && data.pago ? `<div class="sb-row"><span>Valor</span><span>$${fmtCLP(data.pago.valor)}</span></div>
+    <div class="sb-row"><span>A pagar al confirmar</span><span>$${fmtCLP(data.pago.monto)}</span></div>` : ''}
+    <div class="sb-row"><span>Booking #</span><span>${(data && data.booking && data.booking.id) || '—'}</span></div>`;
 
-  [1,2,3,4].forEach(i=>{
-    const el = document.getElementById('step'+i);
+  document.getElementById('success-msg').textContent =
+    'Unos días antes de tu cita te llegará un correo para que confirmes tu asistencia. ' +
+    'Cuando confirmes, te enviaremos los datos para transferir' +
+    (S.modalidad==='presencial' ? ' el abono.' : ' y, una vez pagado, el enlace de la videollamada.');
+
+  ['step1','step2','stepFicha','step3','step4'].forEach(id=>{
+    const el = document.getElementById(id);
     if(el) el.style.display='none';
   });
   document.getElementById('prog-bar').style.display = 'none';
@@ -798,14 +849,57 @@ function showSuccess(data){
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
+// ── PRECIOS ──────────────────────────────────────────────────────
+function fmtCLP(n){ return Number(n||0).toLocaleString('es-CL'); }
+
+function precioDe(m){ return S.valores && m ? S.valores[m] : null; }
+
+// Precio vigente de cada modalidad, para que la paciente lo vea antes de elegir.
+async function loadValores(){
+  try{
+    const r = await fetch(`${API}/config/valores`);
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    S.valores = await r.json();
+    pintarPrecios();
+  } catch(e){
+    console.error('No se pudo cargar el valor de la consulta:', e);
+  }
+}
+
+function textoPolitica(m){
+  const p = precioDe(m);
+  if(!p) return '';
+  return m === 'presencial'
+    ? `Abono del ${p.porcentaje}%: <strong>$${fmtCLP(p.monto)}</strong>. El resto se paga el día de la consulta.`
+    : `Pago del ${p.porcentaje}%: <strong>$${fmtCLP(p.monto)}</strong> antes de la consulta.`;
+}
+
+function pintarPrecios(){
+  ['virtual','presencial'].forEach(m=>{
+    const el = document.getElementById('tc-precio-'+m);
+    const p = precioDe(m);
+    if(el && p) el.innerHTML = `$${fmtCLP(p.valor)}<small>${m==='presencial'?'Abono del 50% al confirmar':'Pago del 100% al confirmar'}</small>`;
+  });
+  const note = document.getElementById('price-note');
+  if(note){
+    const pol = textoPolitica(S.modalidad);
+    note.innerHTML = pol
+      ? `💳 ${pol}<br>Ahora no pagas nada. Unos días antes te pediremos confirmar tu asistencia por correo y ahí te enviaremos los datos para transferir. El plazo para pagar es hasta 48 horas antes de la cita.`
+      : '';
+    note.style.display = pol ? 'block' : 'none';
+  }
+}
+
 // ── RESET ────────────────────────────────────────────────────────
 function resetFlow(){
-  S = {tipo:null, nombre:'', email:'', telefono:'', objetivo:'',
+  const prevValores = S.valores;
+  S = {tipo:null, modalidad:null, nombre:'', email:'', telefono:'', objetivo:'',
        edad:'', genero:'',
        peso:'', tallaM:'', tallaCm:'',
        enfermedades:'', operaciones:'', intolerancias:'',
        actividad:'', reg24h:'',
-       selDate:null, selTime:null, selTimeLabel:null, slots:{}, month:new Date()};
+       selDate:null, selTime:null, selTimeLabel:null, slots:{}, month:new Date(),
+       valores:prevValores};
   document.getElementById('prog-bar').style.display = 'flex';
   ['f-nombre','f-email','f-tel','f-edad','f-peso','f-talla-m','f-talla-cm','f-enf','f-ope','f-int','f-24h']
     .forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
@@ -816,13 +910,15 @@ function resetFlow(){
   document.getElementById('btn2').disabled = true;
   document.getElementById('btn3').disabled = true;
   document.getElementById('btnFicha').disabled = true;
+  document.getElementById('tc-virtual').classList.remove('on');
+  document.getElementById('tc-presencial').classList.remove('on');
   document.getElementById('tc-primera').classList.remove('on');
   document.getElementById('tc-seguimiento').classList.remove('on');
   document.getElementById('slots-section').style.display = 'none';
   goStep(1);
 }
 
-document.addEventListener('DOMContentLoaded', ()=> goStep(1));
+document.addEventListener('DOMContentLoaded', ()=>{ goStep(1); loadValores(); });
 
 // Refresca la disponibilidad cuando la pestaña vuelve a estar visible
 function _isOnCalendarStep(){ return document.getElementById('step3')?.style.display === 'block'; }

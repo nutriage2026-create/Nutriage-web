@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify
 from app.services.calcom import create_booking
-from app.services.notion import create_lead, save_agent_history
+from app.services.notion import create_lead, save_agent_history, get_valores_consulta
 from app.services.notifications import notify_nueva_cita
+from app.routers.config import monto_a_pagar
 
 bp = Blueprint("appointments", __name__, url_prefix="/appointments")
 
@@ -19,12 +20,19 @@ def book_appointment():
       - objetivo    (str, opcional)
       - canal       (str, opcional)  ej: "Instagram"
       - notes       (str, opcional)
+      - telefono    (str)  WhatsApp del paciente
+      - modalidad   (str)  "virtual" (online) | "presencial"
     """
     data = request.get_json(silent=True) or {}
-    required = ["eventTypeId", "start", "name", "email"]
+    required = ["eventTypeId", "start", "name", "email", "telefono", "modalidad"]
     missing = [f for f in required if not data.get(f)]
     if missing:
         return jsonify({"error": f"Faltan campos: {', '.join(missing)}"}), 400
+
+    if data["modalidad"] not in ("presencial", "virtual"):
+        return jsonify({"error": "Elige la modalidad: presencial u online"}), 400
+    modalidad = data["modalidad"]
+    modalidad_txt = "Presencial" if modalidad == "presencial" else "Online"
 
     # 1. Agendar en Cal.com
     try:
@@ -34,12 +42,18 @@ def book_appointment():
             name=data["name"],
             email=data["email"],
             notes=data.get("notes", ""),
+            modalidad=modalidad,
         )
     except Exception as e:
         return jsonify({"error": f"Cal.com error: {str(e)}"}), 502
 
     booking_id = booking.get("data", {}).get("id", "")
-    booking_url = booking.get("data", {}).get("meetingUrl", "")
+    booking_url = booking.get("data", {}).get("meetingUrl", "") if modalidad == "virtual" else ""
+
+    # Precio vigente al momento de reservar. Queda congelado en la cita: si la
+    # nutricionista sube la tarifa despues, esta cita mantiene lo que el
+    # paciente vio al agendar.
+    valor = get_valores_consulta()[modalidad]
 
     # 2. Crear lead en Notion con estatus "Cita agendada"
     try:
@@ -51,8 +65,9 @@ def book_appointment():
             "canal":       data.get("canal", "Web"),
             "estatus":     "Cita agendada",
             "estado_pago": "Pendiente",
+            "valor":       valor,
             "temperatura": "Warm",
-            "notas":       f"Cita: {data['start']} | Booking ID: {booking_id} | {data.get('notes','')}",
+            "notas":       f"Cita: {data['start']} | Booking ID: {booking_id} | Modalidad: {modalidad_txt} | {data.get('notes','')}",
         })
     except Exception as e:
         return jsonify({"error": f"Notion error: {str(e)}", "booking": booking}), 502
@@ -84,6 +99,7 @@ def book_appointment():
             "tipo":      "Primera consulta" if data.get("ficha") else "Seguimiento",
             "objetivo":  data.get("objetivo", ""),
             "video_url": booking_url,
+            "modalidad": modalidad_txt,
             "ficha":     data.get("ficha") or {},
         })
     except Exception as e:
@@ -98,5 +114,10 @@ def book_appointment():
         "lead": {
             "id": lead.get("id"),
             "url": lead.get("url"),
+        },
+        "pago": {
+            "valor": valor,
+            "monto": monto_a_pagar(valor, modalidad),
+            "estado": "Pendiente",
         },
     }), 201

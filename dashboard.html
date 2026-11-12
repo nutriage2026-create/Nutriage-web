@@ -294,6 +294,9 @@ tr:hover td{background:var(--g5)}
 .ficha-row-btn{border:1px solid var(--p4);background:var(--p5);color:var(--p2);font-family:'Nunito',sans-serif;font-size:.7rem;font-weight:700;padding:.28rem .7rem;border-radius:6px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .ficha-row-btn:hover{background:var(--p2);color:#fff;border-color:var(--p2)}
 .row-actions{display:inline-flex;gap:.35rem;flex-wrap:wrap;justify-content:center}
+.mod-chip{display:inline-block;font-size:.7rem;font-weight:700;padding:.2rem .55rem;border-radius:999px;white-space:nowrap}
+.mod-presencial{background:#fdebd3;color:#a4570f}
+.mod-virtual{background:var(--p5);color:var(--p2)}
 .cerrar-btn{background:var(--s5);border-color:var(--s3);color:var(--s1)}
 .cerrar-btn:hover{background:var(--s2);color:#fff;border-color:var(--s2)}
 
@@ -507,6 +510,19 @@ tr:hover td{background:var(--g5)}
 .valor-band-inp:focus{outline:2px solid var(--s3)}
 .valor-band-save{background:var(--s2);border:none;color:#fff;font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:800;padding:.55rem 1.1rem;border-radius:var(--r);cursor:pointer}
 .valor-band-save:hover{background:var(--s1)}
+.vb-grid{display:flex;gap:1rem;flex-wrap:wrap;margin-top:.4rem}
+.vb-item{flex:1;min-width:200px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:var(--r);padding:.7rem .9rem}
+.vb-tag{font-size:.78rem;font-weight:800;color:#fff}
+.vb-edit{display:none;align-items:center;gap:.4rem;flex-wrap:wrap;margin-top:.3rem}
+.vb-item.editing .vb-edit{display:flex}
+.vb-item.editing .vb-view{display:none}
+.vb-item .valor-band-btn{margin-top:.45rem;padding:.35rem .8rem;font-size:.74rem}
+.vb-item .valor-band-inp{width:130px;font-size:1.5rem}
+.vb-foot{display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap;margin-top:.6rem}
+.vb-hist{width:100%;background:#fff;border-radius:var(--r);padding:.6rem .9rem;margin-top:.4rem;max-height:240px;overflow:auto}
+.vb-hist table{width:100%;font-size:.78rem;border-collapse:collapse}
+.vb-hist th,.vb-hist td{text-align:left;padding:.35rem .4rem;border-bottom:1px solid var(--g4);color:var(--g1)}
+.vb-hist th{font-size:.68rem;text-transform:uppercase;color:var(--g3)}
 .valor-band-cancel{background:transparent;border:1.5px solid rgba(255,255,255,.4);color:#fff;font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:700;padding:.55rem .9rem;border-radius:var(--r);cursor:pointer}
 @media(max-width:640px){
   .valor-band{padding:1rem 1.1rem;gap:.8rem}
@@ -694,20 +710,45 @@ tr:hover td{background:var(--g5)}
         <div class="valor-band" id="valor-band">
           <div class="valor-band-ico">💰</div>
           <div class="valor-band-main">
-            <div class="valor-band-label">Valor de tu consulta</div>
-            <div class="valor-band-view">
-              <div class="valor-band-num" id="valor-band-num">—</div>
-              <div class="valor-band-sub">Es el precio que ven tus pacientes al reservar</div>
+            <div class="valor-band-label">Valores de consulta</div>
+            <div class="vb-grid">
+              <div class="vb-item" id="vb-presencial">
+                <div class="vb-tag">🏥 Presencial</div>
+                <div class="vb-view">
+                  <div class="valor-band-num" id="vb-num-presencial">—</div>
+                  <div class="valor-band-sub" id="vb-sub-presencial">Se cobra abono del 50%</div>
+                  <button class="valor-band-btn" onclick="editValor('presencial')">✏️ Cambiar</button>
+                </div>
+                <div class="vb-edit">
+                  <span class="valor-band-num">$</span>
+                  <input class="valor-band-inp" type="number" id="vb-inp-presencial" min="1000" max="500000" step="500"
+                         onkeydown="if(event.key==='Enter')saveValor('presencial');if(event.key==='Escape')cancelValor('presencial')">
+                  <button class="valor-band-save" id="vb-save-presencial" onclick="saveValor('presencial')">Guardar</button>
+                  <button class="valor-band-cancel" onclick="cancelValor('presencial')">Cancelar</button>
+                </div>
+              </div>
+              <div class="vb-item" id="vb-virtual">
+                <div class="vb-tag">💻 Online</div>
+                <div class="vb-view">
+                  <div class="valor-band-num" id="vb-num-virtual">—</div>
+                  <div class="valor-band-sub" id="vb-sub-virtual">Se cobra el 100%</div>
+                  <button class="valor-band-btn" onclick="editValor('virtual')">✏️ Cambiar</button>
+                </div>
+                <div class="vb-edit">
+                  <span class="valor-band-num">$</span>
+                  <input class="valor-band-inp" type="number" id="vb-inp-virtual" min="1000" max="500000" step="500"
+                         onkeydown="if(event.key==='Enter')saveValor('virtual');if(event.key==='Escape')cancelValor('virtual')">
+                  <button class="valor-band-save" id="vb-save-virtual" onclick="saveValor('virtual')">Guardar</button>
+                  <button class="valor-band-cancel" onclick="cancelValor('virtual')">Cancelar</button>
+                </div>
+              </div>
             </div>
-            <div class="valor-band-edit">
-              <span class="valor-band-num">$</span>
-              <input class="valor-band-inp" type="number" id="valor-band-inp" min="1000" max="500000" step="500"
-                     onkeydown="if(event.key==='Enter')saveValorConsulta();if(event.key==='Escape')cancelValorConsulta()">
-              <button class="valor-band-save" id="valor-band-save" onclick="saveValorConsulta()">Guardar</button>
-              <button class="valor-band-cancel" onclick="cancelValorConsulta()">Cancelar</button>
+            <div class="vb-foot">
+              <div class="valor-band-sub">Las citas ya agendadas mantienen el valor con que se reservaron.</div>
+              <button class="valor-band-btn" onclick="toggleHistorialPrecios()">📜 Historial de cambios</button>
             </div>
+            <div class="vb-hist" id="vb-hist" style="display:none"></div>
           </div>
-          <button class="valor-band-btn valor-band-view" onclick="editValorConsulta()">✏️ Cambiar valor</button>
         </div>
 
         <!-- ── ZONA A: Panel de Hoy ───────────────────────────── -->
@@ -1110,57 +1151,92 @@ async function apiPatch(path, body){
   return data;
 }
 
-// ── VALOR DE LA CONSULTA ────────────────────────────────────────
-let valorConsulta = null;
+// ── VALORES DE CONSULTA ─────────────────────────────────────────
+let valoresConsulta = {presencial:null, virtual:null};
+const fmtPeso = v => '$' + Number(v||0).toLocaleString('es-CL');
 
-function pintarValorConsulta(v){
-  valorConsulta = v;
-  const el = document.getElementById('valor-band-num');
-  if(el) el.textContent = '$' + Number(v||0).toLocaleString('es-CL');
+function pintarValores(d){
+  ['presencial','virtual'].forEach(m=>{
+    if(!d || !d[m]) return;
+    valoresConsulta[m] = d[m].valor;
+    const num = document.getElementById('vb-num-'+m);
+    const sub = document.getElementById('vb-sub-'+m);
+    if(num) num.textContent = fmtPeso(d[m].valor);
+    if(sub) sub.textContent = m==='presencial'
+      ? `Abono 50%: se cobran ${fmtPeso(d[m].monto)}`
+      : `Pago 100%: se cobran ${fmtPeso(d[m].monto)}`;
+  });
 }
 
 async function loadValorConsulta(){
-  const d = await apiFetch('/config/valor-consulta');
-  if(d && typeof d.valor === 'number') pintarValorConsulta(d.valor);
+  const d = await apiFetch('/config/valores');
+  if(d) pintarValores(d);
 }
 
-function editValorConsulta(){
-  const band = document.getElementById('valor-band');
-  const inp  = document.getElementById('valor-band-inp');
-  if(!band || !inp) return;
-  inp.value = valorConsulta != null ? valorConsulta : '';
-  band.classList.add('editing');
+function editValor(m){
+  const item = document.getElementById('vb-'+m);
+  const inp  = document.getElementById('vb-inp-'+m);
+  if(!item || !inp) return;
+  inp.value = valoresConsulta[m] != null ? valoresConsulta[m] : '';
+  item.classList.add('editing');
   inp.focus();
   inp.select();
 }
 
-function cancelValorConsulta(){
-  const band = document.getElementById('valor-band');
-  if(band) band.classList.remove('editing');
+function cancelValor(m){
+  const item = document.getElementById('vb-'+m);
+  if(item) item.classList.remove('editing');
 }
 
-async function saveValorConsulta(){
-  const band = document.getElementById('valor-band');
-  const inp  = document.getElementById('valor-band-inp');
-  const btn  = document.getElementById('valor-band-save');
-  if(!band || !inp) return;
-  const v = parseInt(inp.value, 10);
-  if(!v || v < 1000 || v > 500000){
-    showToast('El valor debe estar entre $1.000 y $500.000', 'err');
+async function saveValor(m){
+  const item = document.getElementById('vb-'+m);
+  const inp  = document.getElementById('vb-inp-'+m);
+  const btn  = document.getElementById('vb-save-'+m);
+  if(!item || !inp) return;
+  const v = Number(inp.value);
+  if(!Number.isInteger(v) || v < 1000 || v > 500000){
+    showToast('El valor debe ser un número entero entre $1.000 y $500.000', 'err');
     inp.focus();
     return;
   }
-  if(v === valorConsulta){ band.classList.remove('editing'); return; }
+  if(v === valoresConsulta[m]){ item.classList.remove('editing'); return; }
   if(btn){ btn.disabled = true; btn.textContent = 'Guardando...'; }
   try{
-    const d = await apiPatch('/config/valor-consulta', { valor: v });
-    pintarValorConsulta(d.valor);
-    band.classList.remove('editing');
-    showToast('Valor actualizado a $' + Number(d.valor).toLocaleString('es-CL'), 'ok');
+    await apiPatch('/config/valores', { modalidad: m, valor: v });
+    await loadValorConsulta();
+    item.classList.remove('editing');
+    showToast(`Valor ${m==='presencial'?'presencial':'online'} actualizado a ${fmtPeso(v)}`, 'ok');
+    const hist = document.getElementById('vb-hist');
+    if(hist && hist.style.display !== 'none') loadHistorialPrecios();
   } catch(e){
     showToast('No se pudo guardar: ' + e.message, 'err');
   } finally {
     if(btn){ btn.disabled = false; btn.textContent = 'Guardar'; }
+  }
+}
+
+function toggleHistorialPrecios(){
+  const hist = document.getElementById('vb-hist');
+  if(!hist) return;
+  const abrir = hist.style.display === 'none';
+  hist.style.display = abrir ? 'block' : 'none';
+  if(abrir) loadHistorialPrecios();
+}
+
+async function loadHistorialPrecios(){
+  const hist = document.getElementById('vb-hist');
+  if(!hist) return;
+  hist.innerHTML = '<div style="font-size:.8rem;color:var(--g3)">Cargando...</div>';
+  try{
+    const d = await apiFetch('/config/historial-precios');
+    const rows = (d && d.historial) || [];
+    hist.innerHTML = rows.length
+      ? `<table><thead><tr><th>Fecha</th><th>Modalidad</th><th>Antes</th><th>Ahora</th></tr></thead><tbody>${
+          rows.map(h=>`<tr><td>${h.fecha}</td><td>${h.modalidad}</td><td>${fmtPeso(h.anterior)}</td><td><strong>${fmtPeso(h.nuevo)}</strong></td></tr>`).join('')
+        }</tbody></table>`
+      : '<div style="font-size:.8rem;color:var(--g3)">Aún no hay cambios de precio registrados.</div>';
+  } catch(e){
+    hist.innerHTML = '<div style="font-size:.8rem;color:#dc2626">No se pudo cargar el historial.</div>';
   }
 }
 
@@ -1210,6 +1286,7 @@ async function loadAll(){
         email:  b.email,
         hora:   t.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',timeZone:'America/Santiago'}),
         videoUrl: b.videoUrl||'',
+        modalidad: b.modalidad||'virtual',
       });
     }
   }
@@ -1219,7 +1296,7 @@ async function loadAll(){
   const banner = document.getElementById('today-banner');
   if(banner){
     if(todayBks.length){
-      const names = todayBks.map(b=>b.nombre).join(', ');
+      const names = todayBks.map(b=>`${b.nombre} (${b.modalidad==='presencial'?'presencial':'virtual'})`).join(', ');
       document.getElementById('today-banner-title').textContent = `${todayBks.length === 1 ? 'Tienes 1 cita' : `Tienes ${todayBks.length} citas`} hoy`;
       document.getElementById('today-banner-sub').textContent   = names;
       document.getElementById('today-banner-count').textContent = todayBks.length;
@@ -1507,6 +1584,14 @@ function parseBookingId(notas){
   const m = notas.match(/Booking ID:\s*(\d+)/);
   return m ? m[1] : null;
 }
+function notasPresencial(notas){
+  return /Modalidad:\s*Presencial/i.test(notas||'');
+}
+function modalidadChip(modalidad){
+  return modalidad==='presencial'
+    ? '<span class="mod-chip mod-presencial">🏥 Presencial</span>'
+    : '<span class="mod-chip mod-virtual">📹 Online</span>';
+}
 function renderRecentLeads(leads){
   const el = document.getElementById('recent-leads');
   if(!leads.length){ el.innerHTML='<div class="empty"><div class="empty-ico">📭</div><p>Sin leads</p></div>'; return; }
@@ -1519,7 +1604,9 @@ function renderRecentLeads(leads){
         const tel   = l.telefono
           ? `<a href="tel:${l.telefono}" style="color:var(--p2);font-size:.72rem;text-decoration:none;white-space:nowrap">${l.telefono}</a>`
           : '<span style="color:var(--g4);font-size:.72rem">—</span>';
-        const sala  = video
+        const sala  = notasPresencial(l.notas)
+          ? modalidadChip('presencial')
+          : video
           ? `<a href="${video}" target="_blank" title="Abrir sala virtual" style="display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;background:var(--p5);border-radius:6px;text-decoration:none;font-size:.85rem">📹</a>`
           : '<span style="color:var(--g4);font-size:.72rem">—</span>';
         return `<tr>
@@ -1599,6 +1686,7 @@ function renderLeadsTable(leads){
              </div>`
           : `<button class="ficha-row-btn" onclick="openCrearSala(${JSON.stringify(l)})">📹 Crear sala</button>`;
       }
+      if(!salaActiva && notasPresencial(l.notas)) salaCell = modalidadChip('presencial');
       rows.push(`<tr>
         <td style="color:var(--g3);font-size:.72rem;font-weight:700">${counter}</td>
         <td class="td-name">${l.nombre||'—'}</td>
@@ -1721,7 +1809,7 @@ async function loadBookings(){
   }
   window.__lastBookings = bks;
   el.innerHTML = '<div class="tbl-wrap"><table><thead><tr>'
-    + '<th>#</th><th>Paciente</th><th>Email</th><th>Fecha</th><th>Hora</th><th>Estado</th><th>Sesión</th><th>Ficha</th>'
+    + '<th>#</th><th>Paciente</th><th>Email</th><th>Fecha</th><th>Hora</th><th>Modalidad</th><th>Estado</th><th>Sesión</th><th>Ficha</th>'
     + '</tr></thead><tbody>'
     + bks.map((b,i)=>{
         const start = new Date(b.start);
@@ -1747,6 +1835,7 @@ async function loadBookings(){
           <td style="font-size:.78rem">${b.email||'—'}</td>
           <td style="font-size:.78rem;white-space:nowrap">${fecha}</td>
           <td style="font-size:.78rem;font-weight:700">${hora}</td>
+          <td>${modalidadChip(b.modalidad)}</td>
           <td><span class="badge ${stCls}">${stLbl}</span></td>
           <td><div class="row-actions">${salaBtn}${cerrarBtn}</div></td>
           <td>${fichaBtn}</td>
@@ -1791,7 +1880,7 @@ async function loadUpcomingBookings(){
       </div>
       <div class="booking-info">
         <div class="booking-name">${b.nombre||'Paciente'}</div>
-        <div class="booking-meta">${dow} · ${hora} · Consulta Virtual</div>
+        <div class="booking-meta">${dow} · ${hora} · ${modalidadChip(b.modalidad)}</div>
       </div>
       <div class="booking-actions">
         <span class="booking-badge">${hora}</span>
@@ -1957,6 +2046,7 @@ async function loadDisponibilidad(){
       nombre: b.nombre, email: b.email,
       hora: t.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit',timeZone:'America/Santiago'}),
       videoUrl: b.videoUrl||'',
+      modalidad: b.modalidad||'virtual',
     });
   }
   await applyScheduleAutoCorrections();
@@ -3625,7 +3715,7 @@ function f2Hero(f){
   return chips.length?'<div class="fc-hero">'+chips.join('')+'</div>':'';
 }
 function hCab(f,cita){
-  const tipo=(ctx.b&&ctx.b.videoUrl)?'Videollamada':'Consulta';
+  const tipo=((ctx.b&&ctx.b.modalidad==='presencial')||notasPresencial(ctx.lead&&ctx.lead.notas))?'Presencial':(ctx.b&&ctx.b.videoUrl)?'Videollamada':'Consulta';
   const motivo=(ctx.b&&ctx.b.objetivo)||f.objetivo||'Consulta nutricional';
   const sala=(ctx.b&&ctx.b.videoUrl)?`<a href="${esc(ctx.b.videoUrl)}" target="_blank" rel="noopener" class="btn-pri" style="text-decoration:none;display:flex;align-items:center;justify-content:center">Abrir sala</a>`:'';
   const tel=((ctx.b&&ctx.b.telefono)||(ctx.lead&&ctx.lead.telefono)||'');
