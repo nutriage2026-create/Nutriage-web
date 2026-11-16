@@ -590,6 +590,29 @@ tr:hover td{background:var(--g5)}
   .kpi-grid-3{grid-template-columns:repeat(2,1fr)}
   .grid-2{grid-template-columns:1fr}
 }
+/* ── HERRAMIENTAS ── */
+.tool-bar{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.8rem}
+.tool-bar h2{font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--p1);margin:0;flex:1;min-width:180px}
+.tool-btn{background:var(--wh);border:1px solid var(--g4);border-radius:8px;padding:.45rem .8rem;font-size:.8rem;font-weight:700;color:var(--p1);cursor:pointer;text-decoration:none;font-family:inherit}
+.tool-btn:hover{background:#f3eef8}
+.tool-btn.pri{background:#4a8c54;border-color:#4a8c54;color:#fff}
+.tool-btn.del{color:#b3261e}
+.tool-frame{width:100%;height:calc(100vh - 170px);min-height:520px;border:1px solid var(--g4);border-radius:var(--rl);background:#fff}
+.tool-hint{font-size:.76rem;color:var(--g3);margin-top:.5rem}
+.tool-list{display:flex;flex-direction:column}
+.tool-row{display:flex;align-items:center;gap:.6rem;padding:.8rem 1.2rem;border-bottom:1px solid var(--g4);flex-wrap:wrap}
+.tool-row:last-child{border-bottom:none}
+.tool-row-ico{font-size:1.4rem;width:2rem;text-align:center}
+.tool-row-main{flex:1;min-width:160px}
+.tool-row-name{font-weight:800;font-size:.88rem;color:var(--g1)}
+.tool-row-url{font-size:.74rem;color:var(--g3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:420px}
+.tool-tag{font-size:.68rem;font-weight:800;color:#4a8c54;background:#eaf4ec;border-radius:20px;padding:.15rem .55rem}
+.tool-form{display:grid;grid-template-columns:70px 1fr 2fr auto;gap:.6rem;align-items:end}
+.tool-form label{display:block;font-size:.72rem;font-weight:800;color:var(--g2);margin-bottom:.25rem}
+.tool-form input{width:100%;box-sizing:border-box;border:1px solid var(--g4);border-radius:8px;padding:.5rem .6rem;font-family:inherit;font-size:.85rem}
+@media(max-width:700px){.tool-form{grid-template-columns:70px 1fr}.tool-form .tf-url,.tool-form .tf-btn{grid-column:1/-1}}
+.sb-item.sb-add{opacity:.75;font-size:.8rem}
+
 @media(max-width:900px){
   :root{--sidebar-w:200px}
   .kpi-grid{grid-template-columns:1fr 1fr}
@@ -646,6 +669,12 @@ tr:hover td{background:var(--g5)}
     </button>
     <button class="sb-item" onclick="showSection('disponibilidad',this)">
       <span class="ico">🕐</span> Disponibilidad
+    </button>
+
+    <div class="sb-section">Herramientas</div>
+    <div id="sb-tools"></div>
+    <button class="sb-item sb-add" onclick="showSection('herramientas',this)">
+      <span class="ico">➕</span> Agregar herramienta
     </button>
 
     <div class="sb-notify" id="sb-notify-box">
@@ -991,6 +1020,40 @@ tr:hover td{background:var(--g5)}
         </div>
       </div>
 
+      <!-- ══ HERRAMIENTA (visor) ════════════════════════════════════ -->
+      <div class="section" id="section-herramienta">
+        <div class="tool-bar">
+          <h2 id="tool-view-title">Herramienta</h2>
+          <a class="tool-btn" id="tool-view-open" href="#" target="_blank" rel="noopener">↗ Abrir en pestaña nueva</a>
+        </div>
+        <iframe class="tool-frame" id="tool-view-frame" title="Herramienta" src="about:blank"></iframe>
+        <div class="tool-hint" id="tool-view-hint"></div>
+      </div>
+
+      <!-- ══ HERRAMIENTAS (administrar) ═════════════════════════════ -->
+      <div class="section" id="section-herramientas">
+        <div class="section-header">
+          <h2>Mis herramientas</h2>
+          <p>Agrega calculadoras, tablas o páginas que usas en consulta. Aparecen en el menú lateral.</p>
+        </div>
+        <div class="card" style="margin-bottom:1rem">
+          <div class="card-head"><h3><span class="ico">➕</span> Agregar herramienta</h3></div>
+          <div class="card-body">
+            <div class="tool-form">
+              <div><label for="tf-icono">Ícono</label><input id="tf-icono" maxlength="4" placeholder="🔧"></div>
+              <div><label for="tf-nombre">Nombre</label><input id="tf-nombre" maxlength="40" placeholder="Ej: Tabla IMC"></div>
+              <div class="tf-url"><label for="tf-url">Link</label><input id="tf-url" maxlength="500" placeholder="https://..." onkeydown="if(event.key==='Enter')addTool()"></div>
+              <div class="tf-btn"><button class="tool-btn pri" id="tf-save" onclick="addTool()">Agregar</button></div>
+            </div>
+            <div class="tool-hint">Algunas páginas no se dejan mostrar dentro del panel; en ese caso usa "Abrir en pestaña nueva".</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3><span class="ico">🧰</span> En tu menú</h3></div>
+          <div class="card-body np"><div class="tool-list" id="tool-list"></div></div>
+        </div>
+      </div>
+
     </div><!-- /content -->
   </div><!-- /main -->
 </div><!-- /dashboard -->
@@ -1062,7 +1125,7 @@ async function doLogin(){
 function enterDashboard(){
   document.getElementById('login-screen').style.display='none';
   document.getElementById('dashboard').classList.add('on');
-  setDate(); loadAll();
+  setDate(); loadAll(); loadTools();
 }
 
 function logout(){
@@ -1083,7 +1146,7 @@ async function tryRestoreSession(){
 }
 
 // ── NAVIGATION ──────────────────────────────────────────────────
-const titles = {overview:'Panel Principal',leads:'CRM · Leads',citas:'Citas',disponibilidad:'Disponibilidad',salas:'Salas creadas',historial:'Historial IA'};
+const titles = {overview:'Panel Principal',leads:'CRM · Leads',citas:'Citas',disponibilidad:'Disponibilidad',salas:'Salas creadas',historial:'Historial IA',herramientas:'Herramientas',herramienta:'Herramienta'};
 function showSection(id, btn){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('on'));
   document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('on'));
@@ -1095,6 +1158,7 @@ function showSection(id, btn){
   if(id==='citas') loadBookings();
   if(id==='disponibilidad') loadDisponibilidad();
   if(id==='salas') renderSalasLibresSection();
+  if(id==='herramientas') renderToolList();
 }
 function setDate(){
   const d = new Date();
@@ -1149,6 +1213,130 @@ async function apiPatch(path, body){
   try { data = await r.json(); } catch(e){}
   if(!r.ok){ throw new Error((data && data.error) || ('HTTP '+r.status)); }
   return data;
+}
+
+async function apiPut(path, body){
+  const r = await fetch(API+path, {
+    method: 'PUT',
+    headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify(body || {}),
+  });
+  if(r.status === 401){ logout(); throw new Error('Sesión expirada'); }
+  let data = null;
+  try { data = await r.json(); } catch(e){}
+  if(!r.ok){ throw new Error((data && data.error) || ('HTTP '+r.status)); }
+  return data;
+}
+
+// ── HERRAMIENTAS ────────────────────────────────────────────────
+const TOOLS_FIJAS = [
+  { icono:'🧮', nombre:'Calculadora R24', path:'/herramientas/r24', desc:'Recordatorio de 24 h: kcal, proteínas, CHO, grasas y fibra', fija:true },
+];
+let toolsCustom = [];
+let toolActual = null;
+
+function toolUrl(t){ return t.path ? API + t.path : t.url; }
+function toolEsc(s){
+  return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function allTools(){ return TOOLS_FIJAS.concat(toolsCustom); }
+
+async function loadTools(){
+  renderToolsSidebar();
+  const d = await apiFetch('/config/herramientas');
+  if(d && Array.isArray(d.herramientas)) toolsCustom = d.herramientas;
+  renderToolsSidebar();
+  if(document.getElementById('section-herramientas').classList.contains('on')) renderToolList();
+}
+
+function renderToolsSidebar(){
+  const box = document.getElementById('sb-tools');
+  const activo = box.querySelector('.sb-item.on');
+  const idxActivo = activo ? activo.dataset.tool : null;
+  box.innerHTML = allTools().map((t,i)=>
+    `<button class="sb-item${String(i)===idxActivo?' on':''}" data-tool="${i}" onclick="openTool(${i})"><span class="ico">${toolEsc(t.icono||'🔧')}</span> ${toolEsc(t.nombre)}</button>`
+  ).join('');
+}
+
+function openTool(i){
+  const t = allTools()[i];
+  if(!t) return;
+  showSection('herramienta', document.querySelector('#sb-tools [data-tool="'+i+'"]'));
+  document.getElementById('topbar-title').textContent = t.nombre;
+  document.getElementById('tool-view-title').textContent = (t.icono||'🔧') + ' ' + t.nombre;
+  const url = toolUrl(t);
+  document.getElementById('tool-view-open').href = url;
+  document.getElementById('tool-view-hint').textContent = t.fija ? '' :
+    'Si la página aparece en blanco, ese sitio no permite mostrarse dentro del panel: usa "Abrir en pestaña nueva".';
+  const fr = document.getElementById('tool-view-frame');
+  if(toolActual !== url){ fr.src = url; toolActual = url; }
+}
+
+function renderToolList(){
+  const box = document.getElementById('tool-list');
+  box.innerHTML = allTools().map((t,i)=>{
+    const ci = i - TOOLS_FIJAS.length;
+    const acciones = t.fija
+      ? '<span class="tool-tag">Incluida</span>'
+      : `<button class="tool-btn" onclick="moveTool(${ci},-1)" title="Subir">↑</button>
+         <button class="tool-btn" onclick="moveTool(${ci},1)" title="Bajar">↓</button>
+         <button class="tool-btn del" onclick="removeTool(${ci})">🗑 Quitar</button>`;
+    return `<div class="tool-row">
+      <div class="tool-row-ico">${toolEsc(t.icono||'🔧')}</div>
+      <div class="tool-row-main">
+        <div class="tool-row-name">${toolEsc(t.nombre)}</div>
+        <div class="tool-row-url">${toolEsc(t.fija ? t.desc : t.url)}</div>
+      </div>
+      <button class="tool-btn" onclick="openTool(${i})">Abrir</button>
+      ${acciones}
+    </div>`;
+  }).join('');
+}
+
+async function saveTools(nueva, msgOk){
+  const anterior = toolsCustom;
+  toolsCustom = nueva;
+  renderToolsSidebar(); renderToolList();
+  try{
+    const d = await apiPut('/config/herramientas', { herramientas: nueva });
+    toolsCustom = d.herramientas;
+    renderToolsSidebar(); renderToolList();
+    if(msgOk) showToast(msgOk, 'success');
+    return true;
+  } catch(e){
+    toolsCustom = anterior;
+    renderToolsSidebar(); renderToolList();
+    showToast('No se pudo guardar: ' + e.message, 'error', 5000);
+    return false;
+  }
+}
+
+async function addTool(){
+  const icono = document.getElementById('tf-icono').value.trim() || '🔧';
+  const nombre = document.getElementById('tf-nombre').value.trim();
+  let url = document.getElementById('tf-url').value.trim();
+  if(!nombre){ showToast('Escribe un nombre para la herramienta', 'error'); return; }
+  if(!url){ showToast('Pega el link de la herramienta', 'error'); return; }
+  if(!/^https?:\/\//i.test(url)) url = 'https://' + url;
+  const btn = document.getElementById('tf-save');
+  btn.disabled = true;
+  const ok = await saveTools(toolsCustom.concat([{ icono, nombre, url }]), '✓ "' + nombre + '" agregada al menú');
+  btn.disabled = false;
+  if(ok){ ['tf-icono','tf-nombre','tf-url'].forEach(id=>document.getElementById(id).value=''); }
+}
+
+function removeTool(ci){
+  const t = toolsCustom[ci];
+  if(!t) return;
+  saveTools(toolsCustom.filter((_,k)=>k!==ci), '"' + t.nombre + '" quitada del menú');
+}
+
+function moveTool(ci, dir){
+  const j = ci + dir;
+  if(j < 0 || j >= toolsCustom.length) return;
+  const lista = toolsCustom.slice();
+  [lista[ci], lista[j]] = [lista[j], lista[ci]];
+  saveTools(lista);
 }
 
 // ── VALORES DE CONSULTA ─────────────────────────────────────────

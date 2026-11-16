@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculadora Recordatorio 24 h</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/*__CSS__*/
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Calculadora Recordatorio 24 h</h1>
+    <p>Escribe lo que comió el paciente y obtén calorías, proteínas, CHO, grasas y fibra con tu tabla de composición.</p>
+  </header>
+
+  <div class="top">
+    <section class="card" aria-labelledby="h-in">
+      <h2 id="h-in">1. Relato del paciente</h2>
+      <label class="sr" for="txt">Relato del paciente</label>
+      <textarea id="txt" spellcheck="false"></textarea>
+      <p class="hint">Separa los alimentos con comas o saltos de línea. Acepta gramos (120 g), ml y medidas caseras (taza, cucharada, cucharadita, unidad, rebanada o tajada, lámina, trozo, vaso, plato o porción habitual, bistec, presa). Inicia cada tiempo de comida con su nombre y dos puntos.</p>
+      <div class="btns">
+        <button class="primary" id="go" type="button">Calcular</button>
+        <button id="ai" type="button" hidden>Interpretar con Claude</button>
+        <button id="clear" type="button">Limpiar</button>
+      </div>
+      <p class="msg" id="msg" role="status"></p>
+      <p class="hint" id="aihint" hidden>Interpretar con Claude envía el relato a Claude para separar preparaciones (cazuela, completo, porotos con riendas) en ingredientes de tu tabla. No incluyas nombre ni RUT del paciente.</p>
+    </section>
+
+    <section class="card" aria-labelledby="h-sum">
+      <h2 id="h-sum">2. Total del día</h2>
+      <div class="tiles" id="tiles"></div>
+      <div>
+        <div class="bar" id="bar" role="img" aria-label="Distribución de macronutrientes"></div>
+        <div class="legend" id="legend" style="margin-top:6px"></div>
+      </div>
+      <div class="review" id="review"></div>
+      <div class="metas" aria-label="Requerimientos del paciente (opcional)">
+        <label for="m-k">Meta kcal<input id="m-k" type="number" min="0" inputmode="decimal" placeholder="opcional"></label>
+        <label for="m-p">Meta proteínas g<input id="m-p" type="number" min="0" inputmode="decimal" placeholder="opcional"></label>
+        <label for="m-ch">Meta CHO g<input id="m-ch" type="number" min="0" inputmode="decimal" placeholder="opcional"></label>
+        <label for="m-l">Meta grasas g<input id="m-l" type="number" min="0" inputmode="decimal" placeholder="opcional"></label>
+        <label for="m-fi">Meta fibra g<input id="m-fi" type="number" min="0" inputmode="decimal" placeholder="opcional"></label>
+      </div>
+      <p class="hint">Con metas ingresadas se muestra el % de adecuación (verde entre 90 y 110%).</p>
+    </section>
+  </div>
+
+  <section style="display:flex;flex-direction:column;gap:10px" aria-labelledby="h-det">
+    <div class="foot">
+      <h2 id="h-det">3. Detalle por alimento</h2>
+      <div class="btns">
+        <button id="add" type="button">Agregar fila</button>
+        <button id="copy" type="button">Copiar tabla para Excel</button>
+      </div>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr>
+          <th>Lo que dijo</th><th>Alimento de tu tabla</th><th>Tiempo</th><th class="n">Cant.</th><th>Medida</th><th class="n">Gramos</th>
+          <th class="n">kcal</th><th class="n">Prot g</th><th class="n">CHO g</th><th class="n">Grasa g</th><th class="n">Fibra g</th><th>Estado</th><th><span class="sr">Quitar</span></th>
+        </tr></thead>
+        <tbody id="tb"></tbody>
+      </table>
+    </div>
+    <textarea id="copyout" readonly aria-label="Tabla para copiar"></textarea>
+    <p class="hint">Puedes corregir cualquier fila: cambia el alimento, la cantidad, la medida o escribe los gramos directamente. Fibra con guion significa que tu tabla no trae el dato para ese alimento y se suma como 0.</p>
+  </section>
+
+  <details id="eqbox">
+    <summary>Mis equivalencias guardadas (<span id="eqn">0</span>)</summary>
+    <p class="hint" style="margin-top:8px">Cuando corriges los gramos de una medida casera y eliges Recordar, o confirmas una medida referencial con Fijar, queda guardada en este navegador y se usa en los próximos cálculos.</p>
+    <ul id="eqlist"></ul>
+    <div class="btns"><button id="eqcopy" type="button" class="mini">Copiar lista</button></div>
+  </details>
+
+  <details>
+    <summary>Cómo calcula y qué revisar</summary>
+    <ul>
+      <li>Los valores nutricionales salen de tu Excel (501 alimentos, por 100 g) más 44 alimentos agregados desde la Tabla de Composición Química de Alimentos Chilenos (U. de Chile, 8ª edición, 1990): preparaciones, panes, snacks salados, pescados y mariscos. Esos 44 no traen fibra dietaria (el libro informa fibra cruda) y sus CHO corresponden a extractos no nitrogenados. Se agregó además un ítem de 0 kcal para agua, té, café y endulzante.</li>
+      <li><b>Manual de Porciones de Intercambio para Chile (UDD)</b>: aporta 93 alimentos más. Las preparaciones chilenas (cazuela, charquicán, pastel de choclo, empanadas, etc.) y los ultraprocesados usan los valores por porción del manual. Los alimentos de categoría «UDD promedio de grupo» (yogurt griego, pan pita, chía, mandarina, etc.) no tienen composición propia en el manual: usan el aporte promedio de su grupo de intercambio, así que son una aproximación. Ninguno trae fibra. En puré de papas y tomaticán el manual imprime 250,8 g de CHO (errata); se usó el valor calculado desde sus porciones (32,3 y 22,3 g). Calzones rotos, picarones y sopaipillas pasadas no traen gramaje: 2 unidades = 1 porción. Queso laminado: 1 lámina = 15 g (2 láminas = 30 g).</li>
+      <li><b>Porción habitual</b>: cuando el relato dice plato, porción regular, presa o bistec, se usa la tabla de medidas prácticas del mismo libro (bistec 150 g crudo, presa de ave 100 g cocida, trozo regular de pescado 200 g, porción de legumbres 70 g en crudo). Para arroz, fideos y legumbres cocidos la porción se derivó de la porción en crudo y queda como referencial. Si el relato dice chica o grande, se usa ese tamaño cuando el libro lo trae (manzana regular 150 g, chica 100 g).</li>
+      <li>Las medidas caseras se convierten a gramos con tu documento de porciones de intercambio (Contenido nutricional de una porción en los listados de intercambio básicos, M. I. Hurtado). Ejemplos: ½ marraqueta = 50 g, ¾ taza de arroz cocido = 100 g, 1 cdta de aceite = 5 g. En carnes, 1 trozo equivale a 6x6x1 cm (50 g); en pescados, a 10x6x1 cm (80 g). En leche en polvo, 1 cucharada se toma como colmada (20 g).</li>
+      <li><b>Medida referencial</b>: esa medida no aparece en tu documento para ese alimento y se usó una equivalencia genérica (por ejemplo 1 cucharada = 15 g). Revísala y usa Fijar para dejarla como tuya.</li>
+      <li><b>Falta gramaje</b>: no hay equivalencia para esa medida y ese alimento; se usó la porción de tu tabla. Escribe los gramos reales.</li>
+      <li><b>Alimento supuesto</b>: el relato era genérico (leche, queso, carne, pan) y se eligió la opción más común. Cámbiala si no corresponde.</li>
+      <li>El % de macronutrientes usa 4, 4 y 9 kcal/g sobre el total de kcal de tu tabla; con alcohol la suma no llega a 100%.</li>
+    </ul>
+  </details>
+</div>
+<datalist id="foods"></datalist>
+
+<script id="logic">
+/*__DATA__*/
+/*__LOGIC__*/
+</script>
+
+<script>
+/*__UI__*/
+</script>
+</body>
+</html>

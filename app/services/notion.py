@@ -515,3 +515,33 @@ def get_historial_precios(limite: int = 50) -> list:
         historial.append({"fecha": fecha, "modalidad": modalidad,
                           "anterior": int(anterior), "nuevo": int(nuevo)})
     return historial
+
+
+# ── HERRAMIENTAS DEL DASHBOARD ────────────────────────────────────────────────
+# Lista de herramientas que la nutricionista agrega a su menu lateral.
+# Se guarda como JSON en la fila "Herramientas" de la DB de configuracion.
+
+def get_herramientas() -> list:
+    if not settings.NOTION_DB_CONFIG:
+        return []
+    row = _find_config_row("Herramientas")
+    if not row:
+        return []
+    rt = row.get("properties", {}).get("Texto", {}).get("rich_text") or []
+    raw = "".join(t.get("plain_text", "") for t in rt).strip()
+    if not raw:
+        return []
+    try:
+        data = json.loads(raw)
+    except ValueError:
+        return []
+    return data if isinstance(data, list) else []
+
+
+def set_herramientas(lista: list) -> list:
+    raw = json.dumps(lista, ensure_ascii=False)
+    trozos = [raw[i:i + 1900] for i in range(0, len(raw), 1900)] or [""]
+    _set_config("Herramientas", {
+        "Texto": {"rich_text": [{"text": {"content": t}} for t in trozos]},
+    })
+    return lista

@@ -1,0 +1,13 @@
+{
+  "name": "calculadora-recordatorio-24h",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Calculadora de recordatorio de 24 horas: convierte el relato del paciente en kcal, proteínas, CHO, grasas y fibra.",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test",
+    "check": "node --test && node build.mjs"
+  },
+  "engines": { "node": ">=18" }
+}

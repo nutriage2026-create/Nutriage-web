@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from app.services.notion import (
     get_valor_consulta, set_valor_consulta, get_datos_banco,
     get_valores_consulta, set_valor_modalidad, get_historial_precios,
+    get_herramientas, set_herramientas,
 )
 from app.services.auth import require_auth
 
@@ -95,5 +96,47 @@ def valor_consulta_set():
         return jsonify({"error": err}), 400
     try:
         return jsonify({"valor": set_valor_consulta(valor)})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+MAX_HERRAMIENTAS = 30
+
+
+def _limpiar_herramienta(h):
+    if not isinstance(h, dict):
+        return None
+    nombre = str(h.get("nombre") or "").strip()[:40]
+    url = str(h.get("url") or "").strip()[:500]
+    icono = str(h.get("icono") or "🔧").strip()[:4] or "🔧"
+    if not nombre or not url.startswith(("https://", "http://")):
+        return None
+    return {"nombre": nombre, "url": url, "icono": icono}
+
+
+@bp.get("/herramientas")
+@require_auth
+def herramientas_get():
+    try:
+        return jsonify({"herramientas": get_herramientas()})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 502
+
+
+@bp.put("/herramientas")
+@require_auth
+def herramientas_set():
+    """Body JSON: { "herramientas": [ {"nombre", "url", "icono"} ] }"""
+    data = request.get_json(silent=True) or {}
+    lista = data.get("herramientas")
+    if not isinstance(lista, list):
+        return jsonify({"error": "Formato invalido"}), 400
+    if len(lista) > MAX_HERRAMIENTAS:
+        return jsonify({"error": f"Maximo {MAX_HERRAMIENTAS} herramientas"}), 400
+    limpias = [h for h in (_limpiar_herramienta(x) for x in lista) if h]
+    if len(limpias) != len(lista):
+        return jsonify({"error": "Cada herramienta necesita nombre y un link que empiece con https://"}), 400
+    try:
+        return jsonify({"herramientas": set_herramientas(limpias)})
     except Exception as e:
         return jsonify({"error": str(e)}), 500

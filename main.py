@@ -56,6 +56,9 @@ def root():
             "POST /consultas/cerrar":              "Cerrar consulta + appendear bloques en lead",
             "GET  /config/valor-consulta":         "Valor vigente de la consulta",
             "PATCH /config/valor-consulta":        "Cambiar el valor de la consulta",
+            "GET  /config/herramientas":           "Herramientas del menu lateral",
+            "PUT  /config/herramientas":           "Guardar herramientas del menu lateral",
+            "GET  /herramientas/r24":              "Calculadora recordatorio 24 h",
         },
     })
 
@@ -63,6 +66,12 @@ def root():
 @app.get("/dashboard")
 def dashboard():
     path = os.path.join(os.path.dirname(__file__), "dashboard.html")
+    return send_file(path)
+
+
+@app.get("/herramientas/r24")
+def calculadora_r24():
+    path = os.path.join(os.path.dirname(__file__), "herramientas", "calculadora-r24", "dist", "index.html")
     return send_file(path)
 
 
